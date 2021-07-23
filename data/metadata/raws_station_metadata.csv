@@ -1,0 +1,586 @@
+﻿name,state,elev_ft,lat_ddmmss,lon_ddmmss,id,data,network
+Alligator Ridge,Nevada,6560,394413,1153105,,,raws
+Antelope Lake,Nevada,5460,414105,1164552,,,raws
+Argenta,Nevada,5745,403835,1164154,,,raws
+Austin,Nevada,6275,393011,1170453,,,raws
+Bailey Ranch,Nevada,5450,402610,1161000,,,raws
+Baker Creek,Nevada,7900,385845,1141439,,,raws
+Baker Flat,Nevada,6840,390007,1141303,,,raws
+Barrel Springs,Nevada,5835,415440,1195620,,,raws
+Beacon Light,Nevada,4800,403330,1164530,,,raws
+Big Bend,Nevada,1000,350707,1144136,,,raws
+Bluewing Mountain,Nevada,4570,403006,1190718,,,raws
+Brawley Peaks,Nevada,8080,381540,1185249,,,raws
+Buckhorn Ranch,Nevada,7050,381317,1141741,,,raws
+Buddy Adams,Nevada,4593,370117,1163633,,,raws
+Buffalo Creek,Nevada,2794,403455,1194724,,,raws
+Burma Spring,Nevada,4550,411307,1172401,,,raws
+Caliente,Nevada,4380,373640,1143135,,,raws
+Catnip Mountain,Nevada,5740,415512,1192942,,,raws
+Cattle Camp,Nevada,7300,385413,1144851,,,raws
+Cedar Pass,Nevada,7185,394525,1140957,,,raws
+Cherry Valley,Nevada,7622,393504,1175638,,,raws
+Christmas Tree Pass,Nevada,3450,351356,1144636,,,raws
+Coils Creek,Nevada,6800,395000,1162930,,,raws
+Combs Canyon,Nevada,6590,392253,1161030,,,raws
+Coyote Canyon,Nevada,5050,402930,1180640,,,raws
+Coyote Wash,Nevada,5720,381700,1144530,,,raws
+Crane Springs,Nevada,6400,402735,1155100,,,raws
+Currant Creek,Nevada,5580,384531,1152446,,,raws
+Dale,Nevada,6420,385438,1143800,,,raws
+Dead Camel Mountain,Nevada,4490,391549,1185636,,,raws
+Decathon Canyon,Nevada,8465,385827,1141451,,,raws
+Desatoya Mountain,Nevada,6200,391804,1173504,,,raws
+Desert NWR,Nevada,7120,363445,1150838,,,raws
+Desert Springs,Nevada,5280,394021,1194612,ndss,y,raws
+Double H,Nevada,6380,413909,1180239,,,raws
+Dry Canyon,Nevada,4900,412930,1190700,,,raws
+Ely,Nevada,6590,391732,1145010,,,raws
+Ely Portable #2 (Cedar Spring),Nevada,7131,392711,1150806,,,raws
+Emigrant Canyon,Nevada,6360,404001,1161652,,,raws
+Fish Springs,Nevada,5120,385610,1193907,nfis,y,raws
+Flat Spring,Nevada,7701,395059,1163329,,,raws
+Fox Mountain,Nevada,6890,410022,1193405,,,raws
+Galena,Nevada,5000,392254,1194854,ngal,y,raws
+Garden Valley,Nevada,5230,381032,1152425,,,raws
+Immigration Wash,Nevada,6230,375517,1140935,,,raws
+Incline Village (RAWS),Nevada,6828,391504,1195801,,,raws
+Independence Valley,Nevada,5720,411924,1160712,,,raws
+Jack Wright,Nevada,5760,384607,1192645,,,raws
+Jarbidge East Fork - WQ,Nevada,6000,415511,1151950,,,raws
+Jarbidge West Fork - WQ,Nevada,6000,415351,1152536,,,raws
+Juniper Springs,Nevada,5348,410455,1194638,,,raws
+Kane Springs,Nevada,4590,371502,1144227,,,raws
+Knox,Nevada,7569,391624,1195742,nknx,y,raws
+Kyle Canyon,Nevada,7200,361600,1153600,,,raws
+Little Valley,Nevada,6310,391440,1195251,nlit,y,raws
+Long Hollow,Nevada,5820,413219,1161303,,,raws
+Lower Dixie,Nevada,5240,403930,1155113,,,raws
+Majuba,Nevada,5293,404622,1183111,,,raws
+Mather,Nevada,9268,390122,1141620,,,raws
+McGill Junction,Nevada,6270,392130,1143730,,,raws
+Morey Creek,Nevada,5500,412721,1173800,,,raws
+Mountain Springs,Nevada,5600,360150,1153100,,,raws
+Oriental Wash,Nevada,4100,371407,1172947,,,raws
+Pahranagat,Nevada,3320,371620,1150701,,,raws
+Pahrump,Nevada,2600,360959,1160606,,,raws
+Palisade,Nevada,6205,403729,1161343,,,raws
+Pancake,Nevada,5200,381813,1161133,,,raws
+Paris,Nevada,6341,400225,1145810,,,raws
+Pole Creek,Nevada,8502,415236,1151529,,,raws
+Quima Peak,Nevada,7984,382912,1170542,,,raws
+Red Butte,Nevada,5050,395900,1171900,,,raws
+Red Point,Nevada,6029,412905,1144735,,,raws
+Red Rock,Nevada,3760,360807,1152538,,,raws
+Rock Spring Creek,Nevada,5400,413835,1142615,,,raws
+Royston Hills,Nevada,5100,381547,1173058,,,raws
+Ruby Lake NWR,Nevada,5970,401023,1152908,,,raws
+Ruby Valley,Nevada,6900,404337,1151444,,,raws
+San Juan,Nevada,7360,390600,1171630,,,raws
+Seven Mile,Nevada,7725,390359,1161852,,,raws
+Siard,Nevada,4600,402340,1173730,,,raws
+Silver,Nevada,6500,383748,1194159,,,raws
+Smith Spring,Nevada,7300,392847,1145923,,,raws
+Spring Gulch,Nevada,5470,403535,1141210,,,raws
+Spring Valley  (Ely #1),Nevada,6890,395450,1142959,,,raws
+Spruce Mountain,Nevada,6100,402625,1144840,,,raws
+Stag Mountain,Nevada,6790,413104,1152334,,,raws
+Stillwater NWR,Nevada,3800,393146,1183108,,,raws
+Texas SpringS,Nevada,5760,414806,1182703,,,raws
+Timber Mtn,Nevada,6500,391521,1145218,,,raws
+Toquop Wash,Nevada,2446,365448,1141142,,,raws
+Upper Dixie,Nevada,5751,402635,1155520,,,raws
+Washington,Nevada,7160,390900,1171530,,,raws
+Yucca Gap,Nevada,3180,362612,1151953,,,raws
+Acton,California,2600,342645,1181200,,,raws
+Alder Point,California,923,401112,1233525,,,raws
+Alder Springs,California,4300,393905,1224325,,,raws
+Alpine,California,2041,325001,1164421,,,raws
+Altamont,California,1436,374135,1213634,,,raws
+Ammo Dump,California,1068,332253,1171708,,,raws
+Anacapa Island,California,277,340057,1192135,,,raws
+Angelus Hill,California,4028,334829,1165118,,,raws
+Anza,California,3920,333318,1164023,,,raws
+Apple Valley,California,3162,343533,1171006,,,raws
+Arbuckle Basin,California,1900,402354,1225000,,,raws
+Arroyo Grande,California,1048,351045,1202331,,,raws
+Arroyo Seco,California,980,361348,1212930,,,raws
+Ash Creek,California,3200,411637,1215846,,,raws
+Ash Mountain,California,1730,362929,1184931,,,raws
+Ash Valley,California,5100,410307,1204110,,,raws
+Atlas Peak,California,1934,382829,1221553,,,raws
+Backbone,California,4700,405321,1230832,,,raws
+Baker,California,700,401644,1222913,,,raws
+Bald Mountain PAL,California,5670,380819,1200531,,,raws
+Bald Mtn Loc,California,4680,385420,1204150,,,raws
+Bangor,California,803,392351,1212310,,,raws
+Banner Queen,California,3700,330206,1163151,,,raws
+Banner Road,California,2803,381704,1202923,,,raws
+Barnaby,California,1240,380141,1224208,,,raws
+Baron,California,6248,385115,1200127,cbrn,y,raws
+Barrett,California,2395,324003,1164158,,,raws
+Batterson,California,3160,371355,1193030,,,raws
+Bear Flat,California,6200,411742,1201848,,,raws
+Bear Peak,California,8228,355303,1180306,,,raws
+Bear Valley,California,4000,350823,1183730,,,raws
+Beaumont,California,2604,335550,1165700,,,raws
+Beaver Camp Loc,California,5000,382918,1201930,,,raws
+Beckwourth,California,5800,395618,1203336,,,raws
+Bell Canyon,California,700,333230,1173530,,,raws
+Ben Bolt,California,905,383527,1205601,,,raws
+Ben Lomond,California,2630,370754,1221012,,,raws
+Benton,California,5450,375035,1182840,,,raws
+Bernadette,California,4406,333835,1164643,,,raws
+Beverly Hills,California,1260,340730,1182444,,,raws
+Big Bar,California,1500,404400,1231400,,,raws
+Big Hill,California,3570,410551,1233809,,,raws
+Big Pine Flat,California,6861,341910,1170047,,,raws
+Big Pines,California,6917,342244,1174131,,,raws
+Big Rock,California,1500,380222,1223412,,,raws
+Big Sur,California,450,361408,1214706,,,raws
+Bird Springs Pass,California,7466,353209,1180825,,,raws
+Black Diamond,California,1600,375700,1215304,,,raws
+Blackrock,California,8200,360535,1181537,,,raws
+Blacks Mountain,California,5728,404328,1211044,,,raws
+Blacks Mtn - PSW,California,6050,404353,1210706,,,raws
+Blue Door,California,5615,410317,1202015,,,raws
+Blue Max,California,5350,354235,1175819,,,raws
+Blue Mountain,California,5740,414947,1205147,,,raws
+Blue Ridge,California,4000,405321,1230832,,,raws
+Blue Ridge (KNF),California,5956,411610,1231115,,,raws
+Bogard R.S.,California,5650,403553,1210459,,,raws
+Bolam,California,4453,413203,1221231,,,raws
+Boonville,California,644,385915,1232055,,,raws
+Boron,California,2893,350436,1173506,,,raws
+Boulevard,California,3267,323944,1161618,,,raws
+Bouquet Reservoi,California,3360,343453,1182414,,,raws
+Bradley,California,537,355152,1204811,,,raws
+Branch Mountain,California,3770,351120,1200500,,,raws
+Brazie Ranch,California,3000,414107,1223539,,,raws
+Breckenridge,California,7501,352702,1183502,,,raws
+Bridgeport,California,6480,381619,1191721,,,raws
+Bridgeport 4NW,California,6650,381619,1191721,,,raws
+Briones,California,1450,375639,1220704,,,raws
+Brooks,California,354,384418,1220841,,,raws
+Brush Mountain,California,3988,405456,1234007,,,raws
+Buck Meadows,California,3200,374924,1200551,,,raws
+Bull Flat,California,4395,402851,1200650,,,raws
+Burns Canyon,California,6000,341237,1163802,,,raws
+Burro Canyon,California,2121,341444,1175017,,,raws
+Butte Meadows,California,4960,400444,1213014,,,raws
+Buttercup,California,217,324423,1145302,,,raws
+CFA Raws,California,660,382248,1205549,,,raws
+Cabazo,California,2155,335555,1164819,,,raws
+Cahoon,California,2240,362049,1213039,,,raws
+Cahuilla,California,278,325825,1151025,,,raws
+Calaveras Road,California,1230,373311,1215038,,,raws
+Callahan,California,3136,411827,1224745,,,raws
+Callahan 2,California,3911,411800,1224928,,,raws
+Camanche,California,368,381352,1210040,,,raws
+Cameron F.S.,California,3443,324317,1162747,,,raws
+Camp 6,California,3778,414951,1235235,,,raws
+Camp 9,California,4000,342142,1182518,,,raws
+Camp Elliot,California,539,325133,1170620,,,raws
+Camp Six,California,3778,414951,1235235,,,raws
+Campo Seco,California,399,381325,1205159,,,raws
+Canby,California,4312,412603,1205204,,,raws
+Canon BAER,California,7400,382642,1192813,,,raws
+Carpenter Ridge,California,4812,400407,1213457,,,raws
+Carrizo,California,2490,350547,1194622,,,raws
+Case Mountain,California,6450,362439,1184833,,,raws
+Case Springs,California,2320,332642,1172505,,,raws
+Cashman,California,4520,400006,1205454,,,raws
+Casitas,California,640,342429,1192213,,,raws
+Casitas,California,620,345000,1192200,,,raws
+Catalin-Dakin Pk,California,1570,332103,1182108,,,raws
+Cathedral Canyon,California,605,334607,1162848,,,raws
+Catheys Valley,California,1200,372805,1200638,,,raws
+Cedar Grove,California,4720,364716,1183922,,,raws
+Chalks,California,1585,370939,1221800,,,raws
+Challenge,California,2557,392900,1211330,,,raws
+Cheeseboro,California,1650,341105,1184302,,,raws
+Chester,California,4525,401723,1210507,,,raws
+Chico,California,230,394243,1214644,,,raws
+Chilao,California,5450,341954,1180149,,,raws
+Chuchupate,California,4900,344830,1190045,,,raws
+Claremont,California,1645,340813,1174225,,,raws
+Clark,California,1720,335236,1171832,,,raws
+Clear Creek,California,3000,341616,1180909,,,raws
+Clover,California,5760,395210,1202255,,,raws
+Cohasset,California,1733,395218,1214608,,,raws
+Colby Mountain,California,6262,400845,1213121,,,raws
+Cold Creek,California,6350,414654,1201906,,,raws
+Cold Springs,California,6313,414632,1201958,,,raws
+Collins Baldy,California,5493,414630,1225701,,,raws
+Converse,California,5618,341139,1165447,,,raws
+Cooskie Mountain,California,2950,401525,1241558,,,raws
+Cordoza Ridge,California,2331,371006,1213142,,,raws
+Corning,California,294,395620,1221011,,,raws
+Corona,California,640,335228,1173257,,,raws
+Corona #2,California,1968,334908,1173425,,,raws
+Corralitos,California,450,365928,1214752,,,raws
+Cottage,California,6058,382046,1201345,,,raws
+County Line,California,2085,390108,1222443,,,raws
+Covington,California,4646,340312,1162003,,,raws
+Cow Mountain,California,2180,391116,1230710,,,raws
+Coyote,California,5548,395916,1202836,,,raws
+Crane Flat Lookout,California,6644,374542,1194929,,,raws
+Cransto,California,1950,334425,1165029,,,raws
+Crazy Peak,California,3970,415931,1233613,,,raws
+Crestview,California,7600,374442,1185900,,,raws
+Crystal Lake (BAER),California,5448,341905,1175030,,,raws
+D L Bliss S P,California,6942,385804,1200600,,,raws
+DWP Powerplant #1,California,3000,343556,1182704,,,raws
+Davis,California,6200,395630,1203330,,,raws
+Del Valle,California,1278,342552,1184058,,,raws
+Delnorte,California,800,340033,1193915,,,raws
+Delonagha,California,3120,353412,1183700,,,raws
+Democrat,California,2356,353154,1183749,,,raws
+Descanso,California,3480,325125,1163720,,,raws
+Devils Garden,California,5022,413148,1204017,,,raws
+Devils Post Pile,California,7560,373748,1190536,,,raws
+Devore,California,2057,341316,1172416,,,raws
+Dexter,California,7982,375020,1184618,,,raws
+Diablo Grande,California,1850,371945,1211738,,,raws
+Dinkey,California,5668,370359,1190222,,,raws
+Dog Valley,California,5976,393343,1200252,cdog,y,raws
+Dorris Ranch,California,2025,391813,1210702,,,raws
+Double Dome,California,7500,382011,1195320,,,raws
+Doublehead,California,4000,413730,1210404,,,raws
+Doyle,California,4240,400120,1200620,,,raws
+Duncan,California,7100,390838,1203032,cdun,y,raws
+Dutch-Indy,California,2310,413838,1232639,,,raws
+Eagle Peak,California,3713,395540,1223925,,,raws
+Eel River,California,1500,395000,1230500,,,raws
+Eel River Camp,California,446,400818,1234925,,,raws
+El Cariso,California,3038,333850,1172440,,,raws
+El Mirage,California,2880,343804,1173301,,,raws
+El Portal,California,2050,374032,1194710,,,raws
+Esperanza,California,2559,381434,1203054,,,raws
+Eureka Valley,California,2975,371035,1174719,,,raws
+Fancher Creek,California,920,365302,1192757,,,raws
+Fawnskin,California,6900,341558,1165356,,,raws
+Fence Meadow,California,5048,365741,1191030,,,raws
+Figueroa,California,3200,344359,1200024,,,raws
+Fish Creek Mtn,California,760,325925,1160401,,,raws
+Fish Slough,California,4500,372842,1182428,,,raws
+Five Cent,California,2613,404504,1225504,,,raws
+Five Mile,California,4150,355218,1175506,,,raws
+Foresthill,California,4355,390529,1204354,cfor,y,raws
+Fort Hunter Liggett,California,1100,360042,1211430,,,raws
+Fountain Springs,California,210,355332,1185454,,,raws
+Fremont Canyon,California,1781,334829,1174240,,,raws
+Friend Mountain,California,4000,403018,1232030,,,raws
+Gasquet,California,500,415045,1235845,,,raws
+Gasquet 2,California,433,412617,1235643,,,raws
+Gaylor Meadow,California,9270,375206,1191906,,,raws
+Glen Annie,California,760,342824,1195210,,,raws
+Goose Valley,California,1530,330425,1165045,,,raws
+Gordon,California,6200,404531,1205346,,,raws
+Granite Mountain,California,4720,343208,1170133,,,raws
+Grapevine Peak,California,4647,345406,1185412,,,raws
+Grass Mountain,California,4626,343827,1182451,,,raws
+Grasshopper,California,6158,404654,1204704,,,raws
+Green Spring,California,1020,374959,1203000,,,raws
+Grizzly Flat,California,3740,383711,1203341,,,raws
+Happy Camp Micro,California,1465,414736,1232236,,,raws
+Harper,California,2750,350524,1172659,,,raws
+Hart Flat,California,2685,351504,1183601,,,raws
+Hastings,California,1885,362319,1213306,,,raws
+Hat Mountain,California,8000,403006,1212521,,,raws
+Hawkeye,California,2000,384654,1225501,,,raws
+Hawkins,California,7832,341841,1174834,,,raws
+Hayfork,California,2323,403300,1230954,,,raws
+Heaps Peak,California,6350,341410,1170821,,,raws
+Hell Hole,California,5240,390418,1202518,chel,y,raws
+Henninger Flats,California,2800,341142,1180536,,,raws
+Hernandez,California,3733,362257,1205121,,,raws
+Hidden Valley,California,4452,402631,1203737,,,raws
+High Glade Lookout,California,4840,391230,1224830,,,raws
+High Sierra,California,7403,371853,1190218,,,raws
+Highland Springs,California,2233,335242,1165711,,,raws
+Hollister,California,404,365032,1212144,,,raws
+Homewood,California,7121,390501,1201016,chom,y,raws
+Hoopa,California,375,410252,1234017,,,raws
+Hopland,California,2682,390151,1230450,,,raws
+Horse,California,3555,341219,1174841,,,raws
+Horse Lake,California,5100,403750,1203010,,,raws
+Horse Thief Springs,California,5000,354614,1155433,,,raws
+Humbolt Bay,California,10,404601,1241310,,,raws
+Humbug Summit,California,6688,400631,1212260,,,raws
+Hunter Mountain,California,6880,363345,1172825,,,raws
+Hurley,California,1201,370055,1193404,,,raws
+Indian Mountain,California,5519,334636,1164745,,,raws
+Indian Well,California,4770,414430,1213218,,,raws
+Indian Wells Canyon,California,4000,354106,1175322,,,raws
+Jarbo Gap,California,2490,394409,1212920,,,raws
+Jawbone,California,4300,351741,1181335,,,raws
+Jerseydale,California,3900,373237,1195019,,,raws
+Johnsondale,California,4700,355818,1183242,,,raws
+Jordan Creek,California,4400,394700,1212200,,,raws
+Juanita Lake,California,5400,414710,1220020,,,raws
+Julian,California,4240,330433,1163527,,,raws
+Juniper Creek,California,4372,411956,1202821,,,raws
+Juniper Flat,California,2120,334641,1170506,,,raws
+Keenwild,California,4920,334000,1164600,,,raws
+Kernville,California,2720,354518,1182500,,,raws
+Kettleman Hills,California,810,360200,1200325,,,raws
+Klamath Basin NWR,California,4040,415638,1213353,,,raws
+Klamath NWR,California,4531,425712,1213455,,,raws
+Kneeland,California,2737,404312,1235537,,,raws
+Knoxville Creek,California,2200,385143,1222502,,,raws
+Konocti,California,2163,385443,1224223,,,raws
+La Honda,California,872,371819,1221518,,,raws
+La Panza,California,1630,352252,1201115,,,raws
+Ladder Butte,California,5750,404826,1211748,,,raws
+Lake County,California,1390,390156,1225520,,,raws
+Lake Mathews,California,1516,334901,1172749,,,raws
+Lake Palmdale,California,2980,343214,1180605,,,raws
+Las Flores,California,100,331720,1172620,,,raws
+Las Tablas,California,994,353923,1205527,,,raws
+Las Trampsa,California,1760,375002,1220401,,,raws
+Lassen Lodge,California,4159,402039,1214249,,,raws
+Laufman,California,5800,400830,1202112,,,raws
+Laural Mountain,California,4390,352842,1174156,,,raws
+Laytonville,California,1820,394208,1232906,,,raws
+Leo Carrillo,California,50,340244,1185609,,,raws
+Lincoln,California,200,385257,1211606,,,raws
+Little Tujunga,California,1390,341737,1182139,,,raws
+Livermore,California,800,374243,1214849,,,raws
+Livermore F.D.,California,314,374133,1215521,,,raws
+Los Altos,California,645,372129,1220850,,,raws
+Los Banos,California,350,370317,1210311,,,raws
+Los Gatos,California,2000,371210,1215634,,,raws
+Los Prietos,California,1020,343209,1194700,,,raws
+Los Vaqueros,California,1100,374718,1214405,,,raws
+Los Vaqueros,California,155,374955,1214215,,,raws
+Lost Horse,California,4200,340104,1161116,,,raws
+Lowden,California,3120,404122,1224953,,,raws
+Lower Klamath,California,4098,415957,1214201,,,raws
+Lundylk,California,7055,380217,1191012,,,raws
+Lynch Canyon,California,3141,353642,1182418,,,raws
+Lyons Valley,California,3200,390733,1230425,,,raws
+Lytle Creek,California,2792,341402,1172849,,,raws
+Mad River,California,2775,402748,1233126,,,raws
+Malibu Hills,California,1575,340330,1183800,,,raws
+Mallory Ridge,California,2040,374902,1214644,,,raws
+Manzanita Lake,California,5660,403224,1213449,,,raws
+Maple Creek,California,1680,404747,1235612,,,raws
+Mariposa,California,2231,373015,1195913,,,raws
+Mariposa Grove,California,6400,373046,1193617,,,raws
+Markleeville,California,5501,384100,1194600,cmrk,y,raws
+Marquez,California,2571,362135,1204623,,,raws
+Mateo Ridge,California,810,332456,1173129,,,raws
+McGuires,California,593,392110,1233604,,,raws
+Means Lake,California,2900,342326,1163101,,,raws
+Mendocino Pass,California,5420,394827,1225642,,,raws
+Merced River,California,2600,373910,1200518,,,raws
+Metcalf Gap,California,3077,372434,1194605,,,raws
+Meyers,California,6310,385056,1200105,,,raws
+Miami,California,4334,372509,1194443,,,raws
+Mid Hills,California,5413,350723,1152441,,,raws
+Middle Peak,California,2490,375551,1223527,,,raws
+Milford Micro,California,5800,400800,1202100,,,raws
+Milk Ranch,California,6225,362912,1184648,,,raws
+Mill Creek (ANF),California,5021,342325,1180457,,,raws
+Mill Creek (BDF),California,2950,340501,1170205,,,raws
+Milo,California,1923,361353,1185208,,,raws
+Minarets,California,5340,372426,1192044,,,raws
+Miramar East,California,900,325232,1170334,,,raws
+Mission Valley,California,300,324648,1171200,,,raws
+Modoc NWR,California,4380,412732,1202113,,,raws
+Mohawk,California,5122,394646,1203541,,,raws
+Mojave River Sink,California,950,350311,1160446,,,raws
+Montecito #2,California,372,342642,1193734,,,raws
+Mormon Rock,California,3300,341903,1173007,,,raws
+Mount Elizabeth,California,4933,380347,1201449,,,raws
+Mount Tom,California,9018,372234,1191042,,,raws
+Mount Zion,California,2960,382322,1203904,,,raws
+Mountain Rest,California,4100,370316,1192216,,,raws
+Mountain Springs Grade,California,2044,324029,1160540,,,raws
+Mt. Diablo,California,3849,375254,1215451,,,raws
+Mt. Laguna,California,5760,325247,1162513,,,raws
+Mt. San Jacinto,California,8616,334855,1163831,,,raws
+Mt. Shasta,California,3500,411202,1221142,,,raws
+Mt. Washington,California,920,340615,1181254,,,raws
+Mule Mountain,California,2044,403409,1223011,,,raws
+Newhall Pass,California,2135,342013,1183113,,,raws
+North Fork,California,2720,371359,1193017,,,raws
+Novato Fire-Robinhood,California,482,380645,1223259,,,raws
+OX Ranch,California,4324,351208,1151154,,,raws
+Oak Bottom,California,1326,403902,1223620,,,raws
+Oak Creek,California,4900,365037,1181556,,,raws
+Oak Grove,California,2752,332336,1164742,,,raws
+Oak Knoll,California,1940,415019,1225100,,,raws
+Oak Mountain,California,1700,410023,1215900,,,raws
+Oak Opening,California,3240,361031,1184206,,,raws
+Oakland North,California,1403,375154,1221315,,,raws
+Oakland South,California,1095,374710,1220841,,,raws
+Ojai,California,765,342654,1191349,,,raws
+Olema Valley,California,37,380233,1224745,,,raws
+Opal Mountain,California,3240,350915,1171032,,,raws
+Openshaw,California,268,393523,1213807,,,raws
+Otay Mountain,California,3283,323603,1165028,,,raws
+Owens Camp Loc,California,5240,384400,1201442,cowe,y,raws
+Owens Valley,California,4640,372324,1183302,,,raws
+Ozena,California,3670,344055,1192114,,,raws
+Pala,California,455,332140,1170621,,,raws
+Palomar,California,5530,332130,1165202,,,raws
+Panamint,California,6880,360713,1170516,,,raws
+Panoche Road,California,2032,364337,1204557,,,raws
+Panther Springs,California,4535,401431,1214633,,,raws
+Park Ridge,California,7540,364327,1185633,,,raws
+Parkfield,California,1535,355356,1202555,,,raws
+Patty Mocus,California,3500,401742,1225200,,,raws
+Peppermint,California,7385,360424,1183229,,,raws
+Picacho Wash,California,840,325700,1144356,,,raws
+Pierce,California,5700,401446,1203832,,,raws
+Pike County Lookout,California,3714,392830,1211209,,,raws
+Pilot Hill,California,1200,384957,1210031,,,raws
+Pinecrest 2,California,5700,381110,1200038,,,raws
+Pinehurst,California,4060,364107,1190000,,,raws
+Pinnacles,California,1322,362815,1210850,,,raws
+Pinyon,California,4060,333440,1162714,,,raws
+Piru,California,614,342416,1184836,,,raws
+Piutes,California,6200,352554,1181947,,,raws
+Poppet Flats,California,3823,335123,1165137,,,raws
+Poppy Par,California,2760,344357,1182300,,,raws
+Potrero,California,2345,323621,1163632,,,raws
+Poverty,California,2066,372635,1214614,,,raws
+Pulgas,California,644,372830,1221753,,,raws
+Quartz Hill,California,4225,413557,1225601,,,raws
+Quincy Rd,California,3500,395824,1205631,,,raws
+Ranchita,California,4415,331320,1162951,,,raws
+Ranger Peak,California,5106,335022,1164913,,,raws
+Rattle Brush,California,4200,405330,1223306,,,raws
+Rattlesnake,California,8600,362425,1182518,,,raws
+Ravendale,California,5298,404351,1201859,,,raws
+Reader Ranch,California,1968,391813,1210702,,,raws
+Redding Airport,California,500,403057,1221726,,,raws
+Refugio,California,1465,343100,1200431,,,raws
+Rice Canyon,California,6950,393130,1201943,cria,y,raws
+Rice Valley,California,820,340339,1144356,,,raws
+River Kern,California,3010,354639,1182558,,,raws
+Roblar Canyon,California,915,332220,1172135,,,raws
+Rock Camp,California,4900,341717,1171245,,,raws
+Rock Creek,California,7040,373305,1184002,,,raws
+Rodeo Valley,California,2428,394005,1231916,,,raws
+Rose Peak,California,3060,373007,1214408,,,raws
+Rose Valley,California,3331,343235,1191103,,,raws
+Round Mountain,California,5258,412538,1212750,,,raws
+Rush Creek,California,4800,411740,1205150,,,raws
+Russian Ridge (CDF#3),California,2256,371945,1221251,,,raws
+Ruth,California,2732,401502,1231857,,,raws
+STF02 Portabl,California,2500,374522,1200335,,,raws
+Sacramento NWR,California,120,392502,1221057,,,raws
+Sacramento NWR QD,California,95,392646,1221102,,,raws
+Saddleback,California,6670,393815,1205155,,,raws
+Saddleback Butte,California,2590,344105,1174915,,,raws
+Sage,California,2560,333620,1165621,,,raws
+San Clemente Isl. Nursery,California,704,325844,1183310,,,raws
+San Clemente Island,California,935,325024,1182315,,,raws
+San Clemente NRO,California,700,325946,1183311,,,raws
+San Jose,California,675,372354,1214825,,,raws
+San Luis NWR,California,65,371056,1204738,,,raws
+San Marcos,California,2200,343045,1194923,,,raws
+San Marcos Pass,California,1491,342929,1194747,,,raws
+San Miguel,California,425,324106,1165825,,,raws
+San Pasqual,California,255,330529,1170044,,,raws
+San Rafael Hills,California,1770,341139,1181245,,,raws
+Santa Barbara Botanic Grdn,California,753,342721,1194220,,,raws
+Santa Barbara Island,California,176,332900,1190200,,,raws
+Santa Cruz Island,California,250,335945,1194320,,,raws
+Santa Fe Dam,California,500,340715,1175645,,,raws
+Santa Rita,California,5000,362052,1203552,,,raws
+Santa Rosa,California,576,382843,1224243,,,raws
+Santa Rosa Island,California,1298,335840,1200440,,,raws
+Santa Rosa Plateau,California,1980,333143,1171350,,,raws
+Santa Ysabel,California,2920,330639,1164016,,,raws
+Saratoga Spring,California,198,354050,1162520,,,raws
+Saugus,California,1450,342530,1183130,,,raws
+Sawyers Bar,California,2192,411801,1230756,,,raws
+School House,California,2640,410818,1235420,,,raws
+Scorpion,California,4400,410642,1224148,,,raws
+Secret Town,California,2826,391101,1205305,,,raws
+Seed Orchard,California,4100,390500,1204400,,,raws
+Shadequarter,California,4069,363402,1185720,,,raws
+Shaver,California,5746,370806,1191522,,,raws
+Ship Mtn.,California,5300,414409,1234730,,,raws
+Simi Valley,California,914,341728,1184852,,,raws
+Sims,California,2400,410430,1222224,,,raws
+Slate Creek,California,4170,412028,1233932,,,raws
+Slater Butte,California,4670,415131,1232109,,,raws
+Smith Peak,California,3870,374802,1200603,,,raws
+Soda Creek,California,1773,392530,1225838,,,raws
+Soldier Mountain,California,3710,405533,1213508,,,raws
+Somes Bar,California,920,412324,1232945,,,raws
+Spring Valley,California,1075,373345,1222611,,,raws
+Squaw Lake,California,300,325430,1142940,,,raws
+Squaw Springs,California,3620,352212,1173406,,,raws
+Stampede,California,6867,392900,1200430,csta,y,raws
+Steely Fork,California,4006,383734,1203140,,,raws
+Stonyford,California,1200,392201,1223430,,,raws
+Sugarloaf,California,8120,364336,1184030,,,raws
+Sugarloaf (ENF),California,5653,384702,1201839,ckyb,y,raws
+Sugarloaf (SHF),California,4200,405500,1222618,,,raws
+Summit Camp,California,3600,382924,1201718,,,raws
+Sunset,California,5553,341235,1174127,,,raws
+Surprise Valley,California,4549,413713,1200924,,,raws
+Swain Mountain,California,6099,402643,1210615,,,raws
+Sweetwater,California,2150,372348,1212906,,,raws
+Talega,California,1203,332841,1172909,,,raws
+Talega Ridge,California,1215,332839,1172911,,,raws
+Tanbark,California,2600,341225,1174538,,,raws
+Target Range,California,918,332220,1172132,,,raws
+Temescal,California,1060,342900,1183600,,,raws
+Temescal #2 (CNF),California,1486,334522,1172948,,,raws
+Temescal (CNF),California,1125,334545,1172858,,,raws
+Temescal (LPF),California,1140,342850,1184520,,,raws
+Tepusquet,California,3200,345512,1201052,,,raws
+Thomes Creek,California,1040,395152,1223635,,,raws
+Thousand Oaks,California,"795,","41236,",185212,,,raws
+Timber Mountain,California,4960,413746,1211753,,,raws
+Tonner Canyon,California,1340,335651,1174920,,,raws
+Topanga,California,1600,340810,1183622,,,raws
+Trench 1,California,6800,380941,1185440,,,raws
+Trimmer,California,1540,365440,1191818,,,raws
+Trinity Camp,California,3308,404711,1224816,,,raws
+Truckee Airport,California,5890,391900,1200800,,,raws
+Twisselman,California,3232,352145,1194924,,,raws
+UHL / Hot Springs,California,3720,355320,1183800,,,raws
+Underwood,California,2600,404319,1232943,,,raws
+Valley Center,California,1483,331414,1170031,,,raws
+Valyermo,California,3780,342644,1175104,,,raws
+Van Bremmer,California,4928,413835,1214738,,,raws
+Vandenberg,California,1050,344531,1202910,,,raws
+Vista Grande,California,4700,335015,1164830,,,raws
+Walker,California,5440,383355,1192733,,,raws
+Walker Pass,California,5572,353953,1180325,,,raws
+Walker Passe,California,5217,353945,1180132,,,raws
+Warm Springs,California,4930,343545,1183443,,,raws
+Wawona,California,4052,373224,1193906,,,raws
+Weaverville,California,2100,404406,1225636,,,raws
+Weed Airport,California,2930,412844,1222714,,,raws
+Westside,California,1291,411324,1240309,,,raws
+Westwood,California,5800,401824,1205400,,,raws
+Whiskeytown HQ#2,California,1360,403638,1223138,,,raws
+Whitaker Peak,California,4120,343407,1184425,,,raws
+White Cloud,California,4320,391900,1205015,cwhc,y,raws
+White Horse,California,3400,393100,1213500,,,raws
+White Water,California,2546,335657,1163926,,,raws
+White Wolf,California,8025,375104,1193900,,,raws
+Whitmore,California,2417,403710,1215358,,,raws
+Whittier Hills,California,950,335902,1180036,,,raws
+Wiley Ridge,California,1645,342218,1185027,,,raws
+Wilson Canyon,California,3075,335834,1155942,,,raws
+Wire Mountain,California,245,331408,1172205,,,raws
+Wofford Heights,California,3150,354318,1182956,,,raws
+Wolverton,California,5240,362642,1184212,,,raws
+Wood Canyon,California,4741,340032,1164920,,,raws
+Woodacre,California,1400,375926,1223841,,,raws
+Woody,California,1591,354222,1184957,,,raws
+Yolla Bolla,California,6757,402018,1230354,,,raws
+Yucca Valley,California,3260,340724,1162428,,,raws
+Yurok,California,495,411723,1235127,,,raws
+Tahoe Donner,California,7403,392018,1201624,ctdn,y,raws
+Skyland,Nevada,6539,390123,1195627,nsky,y,raws

@@ -1,5 +1,5 @@
 # Script for downloading data from the HADS network
-# HADS van be downloaded programmatically using URL builder below
+# HADS can be downloaded programmatically using URL builder below
 
 # This script is currently (2021-07-22) set up to download a selection of:
 # COOP and DCP stations in Nevada and California near Lake Tahoe

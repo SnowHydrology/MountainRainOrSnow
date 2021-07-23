@@ -40,3 +40,6 @@ vignettes/*.pdf
 
 # DS_Store
 .DS_Store
+
+# Preprocessed data
+data/NOSHARE/

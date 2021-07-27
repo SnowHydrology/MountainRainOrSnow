@@ -63,12 +63,26 @@ obs <- obs %>%
                               TRUE ~ "Pass"),
          dist_flag = case_when(avg_dist >= dist_thresh ~ "TooFar",
                                TRUE ~ "Pass"))
+
+################################################################################
+# Check for duplicate time stamps
+
+# Group by observer and datetime, then count with n() function
+# Values > 1 mean one observer submitted multiple reports at same time
+obs <- obs %>% 
+  group_by(observer, datetime) %>% 
+  mutate(observer_count = n(),
+         dupe_flag = case_when(observer_count > 1 ~ "Dupe",
+                               TRUE ~ "Pass"),
+         observer_count = NULL) %>% 
+  ungroup()
+
 ################################################################################
 # Export data
 
 # Export complete data to NOSHARE
-obs <- 
-  saveRDS("data/NOSHARE/mros_cit_sci_obs_processed_with_tair_QCflags.RDS")
+saveRDS(object = obs,
+        file = "data/NOSHARE/mros_cit_sci_obs_processed_with_tair_QCflags.RDS")
 
 # Remove usernames and trim geolocation to two decimal places
 # And export

@@ -3,10 +3,7 @@
 # 1) Check nearby airports for precipitation
 # 2) Check air temperature
 # 3) Check distance from temperature observations
-
-# PRECIP Y OR N
-# AIR TEMPERATURE DATA
-# DISTANCE FROM OBS
+# 4) Check whether timestamp is duplicate of report from same observer
 
 # Keith Jennings
 # 2021-07-26

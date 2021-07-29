@@ -2,8 +2,9 @@
 
 # 1) Check nearby airports for precipitation
 # 2) Check air temperature
-# 3) Check distance from temperature observations
-# 4) Check whether timestamp is duplicate of report from same observer
+# 3) Check relative humidity
+# 4) Check distance from temperature observations
+# 5) Check whether timestamp is duplicate of report from same observer
 
 # Keith Jennings
 # 2021-07-26
@@ -14,7 +15,12 @@ library(tidyverse)
 
 # Import data
 obs <- 
-  readRDS("data/NOSHARE/mros_cit_sci_obs_processed_with_tair.RDS")
+  readRDS("data/NOSHARE/mros_cit_sci_obs_processed_with_met_all.RDS")
+dist <- 
+  readRDS("data/processed/tair_model_data_full.RDS") %>% 
+  dplyr::select(id, avg_dist)
+obs <- left_join(obs, dist,
+                 by = "id")
 
 ################################################################################
 # Add airport precipitation data to observations
@@ -50,6 +56,7 @@ for(i in 1:length(obs$id)){
 tair_snow_max = 7 # max tair in °C for snow
 tair_rain_min = -1 # min tair in °C for rain
 ppt_thresh = 0
+rh_thresh = 30
 dist_thresh = 1e5 # maximum average distance (100 km)
 
 obs <- obs %>% 
@@ -58,6 +65,8 @@ obs <- obs %>%
                                TRUE ~ "Pass"),
          ppt_flag = case_when(ppt_airport == ppt_thresh ~ "NoPrecip",
                               TRUE ~ "Pass"),
+         rh_flag = case_when(rh < rh_thresh ~ "LowRH",
+                             TRUE ~ "Pass"),
          dist_flag = case_when(avg_dist >= dist_thresh ~ "TooFar",
                                TRUE ~ "Pass"))
 

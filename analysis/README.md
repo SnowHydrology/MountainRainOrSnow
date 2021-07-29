@@ -72,14 +72,15 @@ bulb temperature.
 
 # Step 4: Quality Control of Citizen Science Observations
 
-Next, we flag observations based on four criteria:
+Next, we flag observations based on five criteria:
 
 1.  Whether precipitation was recorded that day at the nearby NCDC LCD
     met stations.
 2.  The estimated air temperature relative to realistic values for rain
     and snow.
-3.  Average distance from the met stations.
-4.  If the timestamp was a duplicate of an observation from the same
+3.  The relative humidity at the observation point
+4.  Average distance from the met stations.
+5.  If the timestamp was a duplicate of an observation from the same
     observer.
 
 We then output the processed, quality controlled observations to a

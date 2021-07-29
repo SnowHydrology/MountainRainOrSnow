@@ -49,12 +49,13 @@ Future versions of the code will model additional meteorological variables, such
 
 # Step 4: Quality Control of Citizen Science Observations
 
-Next, we flag observations based on four criteria:
+Next, we flag observations based on five criteria:
 
 1. Whether precipitation was recorded that day at the nearby NCDC LCD met stations.
 2. The estimated air temperature relative to realistic values for rain and snow.
-3. Average distance from the met stations.
-4. If the timestamp was a duplicate of an observation from the same observer.
+3. The relative humidity at the observation point
+4. Average distance from the met stations.
+5. If the timestamp was a duplicate of an observation from the same observer.
 
 We then output the processed, quality controlled observations to a shareable data file: `data/processed/mros_obs_processed_2020_2021.RDS`
 
@@ -125,6 +126,6 @@ ggplot(obs2021pass, aes(elev * 3.28, fill = phase)) +
   facet_wrap(~phase) + 
   coord_flip() + 
   phase_fill_scale +
-  labs(x = "Number of Observations", 
-       y = "Elevation (ft.)")
+  labs(y = "Number of Observations", 
+       x = "Elevation (ft.)")
 ```

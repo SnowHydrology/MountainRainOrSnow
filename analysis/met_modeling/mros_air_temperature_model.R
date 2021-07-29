@@ -296,14 +296,16 @@ mean(tair_validation$tair_nearest_lapse_var - tair_validation$tair, na.rm = T )
 # Rename tair_idw_lapse_var to tair
 # This is the air temp estimate we'll use moving forward
 obs <- left_join(obs,
-                 rain_snow,
-                 by = "id") %>% 
-  rename(tair = tair_idw_lapse_var)
-
+                 dplyr::select(rain_snow, id, tair = tair_idw_lapse_var),
+                 by = "id") 
 
 # Export the observations with air temperature
 saveRDS(object = obs,
         file = "data/NOSHARE/mros_cit_sci_obs_processed_with_tair.RDS") 
+
+# Export full model data
+saveRDS(object = rain_snow,
+        file = "data/processed/tair_model_data_full.RDS")
 
 # Export the model validation data
 saveRDS(object = tair_validation,

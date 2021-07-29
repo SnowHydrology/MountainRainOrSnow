@@ -78,7 +78,7 @@ obs <- readRDS("../data/processed/mros_obs_processed_2020_2021.RDS")
 obs <- obs %>% mutate(phase = factor(phase, levels = c("Rain", "Mixed", "Snow")))
 ```
 
-Within the `obs` file we have a total of `r length(obs$phase)` observations submitted between `r min(obs$date)` and `r max(obs$date)` in the Lake Tahoe area. Of these `r length(obs$phase)` observations, `r length(filter(obs, tair_flag == "Pass" & ppt_flag == "Pass" & dist_flag == "Pass" & dupe_flag == "Pass")$phase)` passed all of the quality control checks (this is `r round(length(filter(obs, tair_flag == "Pass" & ppt_flag == "Pass" & dist_flag == "Pass" & dupe_flag == "Pass")$phase)/length(obs$phase) * 100, digits = 1)`% of the database).
+Within the `obs` file we have a total of `r length(obs$phase)` observations submitted between `r min(obs$date)` and `r max(obs$date)` in the Lake Tahoe area. Of these `r length(obs$phase)` observations, `r length(filter(obs, tair_flag == "Pass" & ppt_flag == "Pass" & rh_flag == "Pass" & dist_flag == "Pass" & dupe_flag == "Pass")$phase)` passed all of the quality control checks (this is `r round(length(filter(obs, tair_flag == "Pass" & ppt_flag == "Pass" & rh_flag == "Pass" & dist_flag == "Pass" & dupe_flag == "Pass")$phase)/length(obs$phase) * 100, digits = 1)`% of the database).
 
 For the rest of document, we'll evaluate data from the 2021 sampling season only (2020-10-01 through `r max(obs$date)`).
 
@@ -86,7 +86,7 @@ For the rest of document, we'll evaluate data from the 2021 sampling season only
 obs2021 <- filter(obs, date >= as.Date("2020-10-01"))
 ```
 
-In this second year of the project, we recorded `r length(obs2021$phase)` observations, `r round(length(filter(obs2021, tair_flag == "Pass" & ppt_flag == "Pass" & dist_flag == "Pass" & dupe_flag == "Pass")$phase)/length(obs2021$phase) * 100, digits = 1)`% of which passed the QC checks. 
+In this second year of the project, we recorded `r length(obs2021$phase)` observations, `r round(length(filter(obs2021, tair_flag == "Pass" & ppt_flag == "Pass" & rh_flag == "Pass" & dist_flag == "Pass" & dupe_flag == "Pass")$phase)/length(obs2021$phase) * 100, digits = 1)`% of which passed the QC checks. 
 
 We can filter the dataset to the passing observations only and examine precipitation phase patterns by elevation.
 
@@ -94,6 +94,7 @@ We can filter the dataset to the passing observations only and examine precipita
 # Filter to passing obs
 obs2021pass <- filter(obs2021, tair_flag == "Pass" & 
                         ppt_flag == "Pass" & 
+                        rh_flag == "Pass" &
                         dist_flag == "Pass" & 
                         dupe_flag == "Pass")
 

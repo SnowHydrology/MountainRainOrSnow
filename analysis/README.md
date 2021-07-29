@@ -108,8 +108,8 @@ obs <- obs %>% mutate(phase = factor(phase, levels = c("Rain", "Mixed", "Snow"))
 
 Within the `obs` file we have a total of 2495 observations submitted
 between 2020-01-08 and 2021-05-23 in the Lake Tahoe area. Of these 2495
-observations, 2214 passed all of the quality control checks (this is
-88.7% of the database).
+observations, 2211 passed all of the quality control checks (this is
+88.6% of the database).
 
 For the rest of document, we’ll evaluate data from the 2021 sampling
 season only (2020-10-01 through 2021-05-23).
@@ -128,6 +128,7 @@ precipitation phase patterns by elevation.
 # Filter to passing obs
 obs2021pass <- filter(obs2021, tair_flag == "Pass" & 
                         ppt_flag == "Pass" & 
+                        rh_flag == "Pass" &
                         dist_flag == "Pass" & 
                         dupe_flag == "Pass")
 

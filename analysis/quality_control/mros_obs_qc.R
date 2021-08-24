@@ -53,8 +53,8 @@ for(i in 1:length(obs$id)){
 
 ################################################################################
 # Add data flags
-tair_snow_max = 7 # max tair in °C for snow
-tair_rain_min = -1 # min tair in °C for rain
+tair_snow_max = 10 # max tair in °C for snow
+tair_rain_min = -5 # min tair in °C for rain
 ppt_thresh = 0
 rh_thresh = 30
 dist_thresh = 1e5 # maximum average distance (100 km)

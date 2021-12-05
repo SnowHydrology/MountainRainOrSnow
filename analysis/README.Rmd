@@ -80,6 +80,8 @@ obs <- obs %>% mutate(phase = factor(phase, levels = c("Rain", "Mixed", "Snow"))
 
 Within the `obs` file we have a total of `r length(obs$phase)` observations submitted between `r min(obs$date)` and `r max(obs$date)` in the Lake Tahoe area. Of these `r length(obs$phase)` observations, `r length(filter(obs, tair_flag == "Pass" & ppt_flag == "Pass" & rh_flag == "Pass" & dist_flag == "Pass" & dupe_flag == "Pass")$phase)` passed all of the quality control checks (this is `r round(length(filter(obs, tair_flag == "Pass" & ppt_flag == "Pass" & rh_flag == "Pass" & dist_flag == "Pass" & dupe_flag == "Pass")$phase)/length(obs$phase) * 100, digits = 1)`% of the database).
 
+
+
 For the rest of document, we'll evaluate data from the 2021 sampling season only (2020-10-01 through `r max(obs$date)`).
 
 ```{r message = FALSE}

@@ -1,0 +1,30 @@
+---
+title: "Meteorological Data Analysis"
+author: "Keith Jennings"
+date: "10/18/2021"
+output: github_document
+---
+
+This directory includes the scripts for modeling air temperature, wet bulb temperature, and relative humidity.
+
+# Station info
+
+Import the meteorological data and associated metadata.
+
+```{r message = FALSE}
+# Load the tidyverse
+library(tidyverse)
+
+# Use cowplot for plot formatting and import plot styles
+library(cowplot); theme_set(theme_cowplot())
+source("../functions/mros_plot_formats.R")
+
+met_all <- readRDS("../../data/processed/met_all_NV_CA_2020_2021.RDS")
+met_meta <- read.csv("../../data/metadata/all_metadata_valid.csv") %>% 
+  mutate(network_agg = case_when(!network %in% c("snotel", "raws","airports") ~ "hads",
+                                 TRUE ~ network))
+```
+In total, we had data from `r length(unique(met_meta$network_agg))` networks. The `r unique(met_meta$network_agg)[1]` network had `r length(filter(met_meta, network_agg == unique(met_meta$network_agg)[1])$id)` stations, the `r unique(met_meta$network_agg)[2]` network had `r length(filter(met_meta, network_agg == unique(met_meta$network_agg)[2])$id)` stations, the `r unique(met_meta$network_agg)[3]` network had `r length(filter(met_meta, network_agg == unique(met_meta$network_agg)[3])$id)` stations, and the `r unique(met_meta$network_agg)[4]` network had `r length(filter(met_meta, network_agg == unique(met_meta$network_agg)[4])$id)` stations. These stations ranged in elevation from `r min(met_meta$elev)` m to `r max(met_meta$elev)` m.
+
+Next, calculate the number of stations with valid data for the other variables:
+

@@ -108,8 +108,8 @@ obs <- obs %>% mutate(phase = factor(phase, levels = c("Rain", "Mixed", "Snow"))
 
 Within the `obs` file we have a total of 2495 observations submitted
 between 2020-01-08 and 2021-05-23 in the Lake Tahoe area. Of these 2495
-observations, 2211 passed all of the quality control checks (this is
-88.6% of the database).
+observations, 2248 passed all of the quality control checks (this is
+90.1% of the database).
 
 For the rest of document, we’ll evaluate data from the 2021 sampling
 season only (2020-10-01 through 2021-05-23).
@@ -118,7 +118,7 @@ season only (2020-10-01 through 2021-05-23).
 obs2021 <- filter(obs, date >= as.Date("2020-10-01"))
 ```
 
-In this second year of the project, we recorded 1464 observations, 86.5%
+In this second year of the project, we recorded 1464 observations, 88.5%
 of which passed the QC checks.
 
 We can filter the dataset to the passing observations only and examine

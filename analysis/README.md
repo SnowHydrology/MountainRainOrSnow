@@ -111,37 +111,195 @@ between 2020-01-08 and 2021-05-23 in the Lake Tahoe area. Of these 2495
 observations, 2248 passed all of the quality control checks (this is
 90.1% of the database).
 
-For the rest of document, we’ll evaluate data from the 2021 sampling
-season only (2020-10-01 through 2021-05-23).
-
-``` r
-obs2021 <- filter(obs, date >= as.Date("2020-10-01"))
-```
-
-In this second year of the project, we recorded 1464 observations, 88.5%
-of which passed the QC checks.
-
-We can filter the dataset to the passing observations only and examine
-precipitation phase patterns by elevation.
+For the rest of document, we’ll evaluate only data that passed the QC
+checks. We’ll also add elevation bins for additional analyses
 
 ``` r
 # Filter to passing obs
-obs2021pass <- filter(obs2021, tair_flag == "Pass" & 
+obsPass <- filter(obs, tair_flag == "Pass" & 
                         ppt_flag == "Pass" & 
                         rh_flag == "Pass" &
                         dist_flag == "Pass" & 
                         dupe_flag == "Pass")
 
 # Add elevation info
-obs2021pass <- obs2021pass %>% 
+obsPass <- obsPass %>% 
    mutate(elev_bin = cut_width(elev, width = 500))
 ```
 
+## Observations by elevation
+
+We received precipitation reports in the study area between 771 m and
+2680 m, with mean and median report elevations of 1742 m and 1844 m,
+respectively. In total, there were 1438, 472, 338, snow, rain, and mixed
+observations.
+
 The elevational breakdown of precipitation phase looks like this:
 
-![](README_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-3-1.png)<!-- -->
 
 Similarly, we can look at the number of reports per precipitation phase
 by elevation:
 
-![](README_files/figure-gfm/unnamed-chunk-5-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
+
+## Rain-snow partitioning
+
+Using the observations and modeled meteorological data, we can compute
+snowfall probability curves and 50% snowfall probability temperatures,
+the latter of which are used as thresholds in models to split solid and
+liquid precipitation. We provide a methods overview here and the full
+code can be found in `mros_obs_analysis.R`. In short, we bin air
+temperature in 1°C increments from -10°C to 20°C and wet bulb
+temperature in 1°C increments from -12°C to 16°C. We then compute the
+probability of snowfall occurring in each air and wet bulb temperature
+bin. Those data are next fit with a hyperbolic tangent as in Dai (2008)
+and Jennings et al. (2018) to create snowfall probability curves. The
+50% snowfall probability air and wet bulb temperature thresholds are
+where the fitted curves pass the 50% mark.
+
+Let’s import the data.
+
+``` r
+# Import data
+rs_p <- readRDS("../data/processed/mros_obs_rs_partitioning_2020_2021.RDS")
+```
+
+We can then look at the air temperature snowfall probability plot:
+
+![](README_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
+
+The wet bulb temperature snowfall probability plot:
+
+![](README_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
+
+And the two of them combined:
+
+![](README_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
+
+We notice the 50% threshold is a fair bit higher for air temperature
+verus wet bulb temperature, which is expected because the former is
+always warmer than the latter when relative humidity is less than 100%.
+We also see a fair bit more noise in the curve for air temperature
+between approximately 25% and 50%.
+
+| phase | mean\_rh | temp     |
+| :---- | -------: | :------- |
+| Rain  | 79.73312 | air      |
+| Mixed | 72.74908 | air      |
+| Snow  | 65.55655 | air      |
+| Rain  | 82.74519 | wet bulb |
+| Mixed | 77.43236 | wet bulb |
+| Snow  | 69.99865 | wet bulb |
+
+## 
+
+![](README_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
+
+![](README_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
+
+![](README_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->
+
+![](README_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->
+
+## GPM IMERG comparison
+
+``` r
+# Import data
+gpm <- readRDS("../data/processed/mros_gpm_processed_2020_2021.RDS")
+
+# Join the data
+obsGPM <- left_join(obsPass,
+                    gpm,
+                    by = "id")
+
+###############################################################################
+# Summarize correct observations by temp bin
+
+# Make wider bins for analysis
+tair_max = 14
+tair_min = -7
+tair_bin_width = 1
+obsGPM$tair_bin2 <- cut(obsGPM$tair, 
+                     breaks = seq(tair_min, 
+                                  tair_max, 
+                                  by = tair_bin_width))
+
+
+# Add numeric version of each bin
+tair_cuts_to_number2 <- data.frame("tair_bin2" = levels(obsGPM$tair_bin2),
+                                   "tair_bin_num2" = seq(tair_min + (0.5 * tair_bin_width),
+                                                         tair_max - (0.5 * tair_bin_width), 
+                                                         by = tair_bin_width))
+
+# Join
+obsGPM <- left_join(obsGPM, tair_cuts_to_number2, by = "tair_bin2")
+
+
+# Add GPM probability thresholds for rain, snow, mixed
+prob_thresh_upper_rain = 100
+prob_thresh_lower_rain = 50
+prob_thresh_upper_snow = 50
+prob_thresh_lower_snow = 0
+prob_thresh_upper_mixed = prob_thresh_lower_rain
+prob_thresh_lower_mixed = prob_thresh_upper_snow
+
+# Denote whether phase designation was correct or not
+obsGPM$phase2 <- as.character(obsGPM$phase)
+obsGPM <- obsGPM %>% 
+  mutate(phase_noMIXED = case_when(phase2 == "Mixed" ~ "Rain",
+                                   TRUE ~ phase2),
+         gpm_phase = case_when(gpm_prob <= prob_thresh_upper_snow &
+                                 gpm_prob >= prob_thresh_lower_snow ~ "Snow",
+                               gpm_prob <= prob_thresh_upper_rain &
+                                 gpm_prob >= prob_thresh_lower_rain ~ "Rain",
+                               gpm_prob < prob_thresh_upper_mixed &
+                                 gpm_prob > prob_thresh_lower_mixed~ "Mixed"),
+         gpm_score = case_when(gpm_phase == phase2 ~ 1,
+                               gpm_phase != phase2 ~ 0),
+         gpm_score_noMIXED = case_when(gpm_phase == phase_noMIXED ~ 1,
+                                       gpm_phase != phase_noMIXED ~ 0))
+
+# Summarize by tair bin
+gpm_summary_noMIXED <- obsGPM %>% 
+  filter(!is.na(gpm_score_noMIXED)) %>% 
+  group_by(tair_bin_num2) %>% 
+  summarize(n_obs = length(gpm_score_noMIXED), 
+            gpm_perf_pct = (sum(gpm_score_noMIXED) / n_obs) * 100,
+            snow_pct_obs = (sum(phase == "Snow") / n_obs) * 100,
+            snow_pct_gpm = (sum(gpm_phase == "Snow") / n_obs) * 100)
+```
+
+Then plot the analyzed results:
+
+![](README_files/figure-gfm/unnamed-chunk-15-1.png)<!-- -->
+
+## Rain-snow line comparison
+
+Import the data
+
+``` r
+library(lubridate) # for datetime handling
+
+# Import data
+gpm <- readRDS("../data/processed/gpm_rain_snow_line_2020_2021.RDS") %>% 
+  mutate(datetime = with_tz(datetime, "Etc/Gmt+8")) # convert to PST
+flr <- read.csv("../data/processed/CFF_2019_2021.csv", na.strings = " NaN") %>% 
+  mutate(datetime = with_tz(as.POSIXct(paste0(year, "-", month, "-", day, " ", hour),
+                               format = "%Y-%m-%d %H",
+                               tz = "GMT"),
+                            "Etc/Gmt+8"), # convert to PST
+         rain_snow_line = BBH * 1000) # convert from km to m
+obs <- readRDS("../data/processed/mros_obs_rain_snow_line_2020-2021.RDS") %>% 
+  mutate(datetime_min = as.POSIXct(paste0(date, " 08:00"), 
+                                   tz = "Etc/Gmt+8"),
+         datetime_max = as.POSIXct(paste0(date, " 20:00"), 
+                                   tz = "Etc/Gmt+8"))
+
+# Join data
+all <- left_join(gpm, flr, by = "datetime")
+```
+
+Plot an event:
+
+![](README_files/figure-gfm/unnamed-chunk-17-1.png)<!-- -->

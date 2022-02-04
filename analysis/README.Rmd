@@ -80,55 +80,306 @@ obs <- obs %>% mutate(phase = factor(phase, levels = c("Rain", "Mixed", "Snow"))
 
 Within the `obs` file we have a total of `r length(obs$phase)` observations submitted between `r min(obs$date)` and `r max(obs$date)` in the Lake Tahoe area. Of these `r length(obs$phase)` observations, `r length(filter(obs, tair_flag == "Pass" & ppt_flag == "Pass" & rh_flag == "Pass" & dist_flag == "Pass" & dupe_flag == "Pass")$phase)` passed all of the quality control checks (this is `r round(length(filter(obs, tair_flag == "Pass" & ppt_flag == "Pass" & rh_flag == "Pass" & dist_flag == "Pass" & dupe_flag == "Pass")$phase)/length(obs$phase) * 100, digits = 1)`% of the database).
 
-
-
-For the rest of document, we'll evaluate data from the 2021 sampling season only (2020-10-01 through `r max(obs$date)`).
-
-```{r message = FALSE}
-obs2021 <- filter(obs, date >= as.Date("2020-10-01"))
-```
-
-In this second year of the project, we recorded `r length(obs2021$phase)` observations, `r round(length(filter(obs2021, tair_flag == "Pass" & ppt_flag == "Pass" & rh_flag == "Pass" & dist_flag == "Pass" & dupe_flag == "Pass")$phase)/length(obs2021$phase) * 100, digits = 1)`% of which passed the QC checks. 
-
-We can filter the dataset to the passing observations only and examine precipitation phase patterns by elevation.
+For the rest of document, we'll evaluate only data that passed the QC checks. We'll also add elevation bins for additional analyses
 
 ```{r message = FALSE}
 # Filter to passing obs
-obs2021pass <- filter(obs2021, tair_flag == "Pass" & 
+obsPass <- filter(obs, tair_flag == "Pass" & 
                         ppt_flag == "Pass" & 
                         rh_flag == "Pass" &
                         dist_flag == "Pass" & 
                         dupe_flag == "Pass")
 
 # Add elevation info
-obs2021pass <- obs2021pass %>% 
+obsPass <- obsPass %>% 
    mutate(elev_bin = cut_width(elev, width = 500))
 ```
+
+## Observations by elevation
+
+We received precipitation reports in the study area between `r min(obsPass$elev)` m and `r max(obsPass$elev)` m, with mean and median report elevations of `r round(mean(obsPass$elev), digits = 0)` m and `r round(median(obsPass$elev), digits = 0)` m, respectively. In total, there were `r length(filter(obsPass, phase == "Snow")$phase)`, `r length(filter(obsPass, phase == "Rain")$phase)`, `r length(filter(obsPass, phase == "Mixed")$phase)`, snow, rain, and mixed observations. 
 
 The elevational breakdown of precipitation phase looks like this:
 
 ```{r echo = FALSE}
-ggplot(obs2021pass, aes(elev_bin, fill = phase)) +
+ggplot(obsPass, aes(elev_bin, fill = phase)) +
   geom_bar(position = "fill", color = "black") +
   phase_fill_scale +
-  labs(x = "Elevation Bin (ft.)",
+  labs(x = "Elevation Bin (m)",
        y = "Type Proportion (%)") +
   scale_y_continuous(breaks = seq(0, 1, by = 0.25),
                      labels = c("0", "25", "50", "75", "100")) +
-  scale_x_discrete(labels = c("< 4100",
-                              "4100 - 5740",
-                              "5740 - 7380",
-                              "> 7380"))
+  scale_x_discrete(labels = c("< 1250",
+                              "1250 - 1750",
+                              "1750 - 2250",
+                              "> 2250"))
 ```
 
 Similarly, we can look at the number of reports per precipitation phase by elevation:
 
-```{r echo = FALSE, warning = FALSE, message = FALSE}
-ggplot(obs2021pass, aes(elev * 3.28, fill = phase)) + 
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.dim= c(6,6)}
+ggplot(obsPass, aes(elev, fill = phase)) + 
   geom_histogram(color = "black") + 
   facet_wrap(~phase) + 
   coord_flip() + 
   phase_fill_scale +
   labs(y = "Number of Observations", 
-       x = "Elevation (ft.)")
+       x = "Elevation (m)") +
+  theme(strip.background = element_rect(fill = "white", color = "black"),
+        legend.position = "none")
+```
+
+## Rain-snow partitioning
+
+Using the observations and modeled meteorological data, we can compute snowfall probability curves and 50% snowfall probability temperatures, the latter of which are used as thresholds in models to split solid and liquid precipitation. We provide a methods overview here and the full code can be found in `mros_obs_analysis.R`. In short, we bin air temperature in 1°C increments from -10°C to 20°C and wet bulb temperature in 1°C increments from -12°C to 16°C. We then compute the probability of snowfall occurring in each air and wet bulb temperature bin. Those data are next fit with a hyperbolic tangent as in Dai (2008) and Jennings et al. (2018) to create snowfall probability curves. The 50% snowfall probability air and wet bulb temperature thresholds are where the fitted curves pass the 50% mark.
+
+Let's import the data.
+
+```{r message = FALSE}
+
+# Import data
+rs_p <- readRDS("../data/processed/mros_obs_rs_partitioning_2020_2021.RDS")
+
+```
+
+We can then look at the air temperature snowfall probability plot:
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.dim= c(6,4)}
+ggplot(rs_p[["snow_pred_tair"]], aes(tair_bin_num, snow_prob_pred * 100)) + 
+  geom_line(lwd = 1) + 
+  geom_hline(yintercept = 50, color = "gray", lty = "dashed", lwd = 1) +
+  geom_line(data = rs_p[["snow_prob_tair"]], aes(tair_bin_num, snow_prob * 100), 
+             color = "darkgreen", lwd = 1) +
+  labs(x = expression("Air Temperature ("*degree*C*")"),
+       y = "Snowfall Probability (%)") +
+  annotate(geom = "text", x = -8, y = 25, label = "Fitted curve", hjust = 0) +
+  annotate(geom = "text", x = -8, y = 15, label = "Probability by bin", color = "darkgreen", hjust = 0) +
+  annotate(geom = "text", x = 10, y = 50, label = paste0("50% probability = ", round(rs_p[["temp50_tair"]], digits = 1), "°C"), 
+           color = "gray27", hjust = 0, vjust = -.5)
+```
+
+The wet bulb temperature snowfall probability plot:
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.dim= c(6,4)}
+ggplot(rs_p[["snow_pred_twet"]], aes(twet_bin_num, snow_prob_pred * 100)) + 
+  geom_line(lwd = 1) + 
+  geom_hline(yintercept = 50, color = "gray", lty = "dashed", lwd = 1) +
+  geom_line(data = rs_p[["snow_prob_twet"]], aes(twet_bin_num, snow_prob * 100), 
+             color = "aquamarine3", lwd = 1) +
+  labs(x = expression("Wet Bulb Temperature ("*degree*C*")"),
+       y = "Snowfall Probability (%)") +
+  annotate(geom = "text", x = -10, y = 25, label = "Fitted curve", hjust = 0) +
+  annotate(geom = "text", x = -10, y = 15, label = "Probability by bin", color = "aquamarine3", hjust = 0) +
+  annotate(geom = "text", x = 6, y = 50, label = paste0("50% probability = ", round(rs_p[["temp50_twet"]], digits = 1), "°C"), 
+           color = "gray27", hjust = 0, vjust = -.5)
+```
+
+And the two of them combined:
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.dim= c(6,4)}
+ggplot() + 
+  geom_hline(yintercept = 50, color = "gray", lty = "dashed", lwd = 1) +
+  geom_line(data = rs_p[["snow_prob_tair"]], aes(tair_bin_num, snow_prob * 100), 
+             color = "darkgreen", lwd = 1) +
+  geom_line(data = rs_p[["snow_prob_twet"]], aes(twet_bin_num, snow_prob * 100), 
+             color = "aquamarine3", lwd = 1) +
+  labs(x = expression("Temperature ("*degree*C*")"),
+       y = "Snowfall Probability (%)") +
+  annotate(geom = "text", x = -10, y = 25, label = "Air temperature", color = "darkgreen", hjust = 0) +
+  annotate(geom = "text", x = -10, y = 15, label = "Wet bulb temperature", color = "aquamarine3", hjust = 0)
+```
+
+We notice the 50% threshold is a fair bit higher for air temperature verus wet bulb temperature, which is expected because the former is always warmer than the latter when relative humidity is less than 100%. We also see a fair bit more noise in the curve for air temperature between approximately 25% and 50%. 
+
+```{r echo = FALSE, warning = FALSE, message = FALSE}
+tmp <- filter(obsPass, tair >= min(filter(rs_p[["snow_prob_tair"]],snow_prob <= .50 & snow_prob >= .25)$tair_bin_num) &
+                tair <= max(filter(rs_p[["snow_prob_tair"]],snow_prob <= .50 & snow_prob >= .25)$tair_bin_num))
+rs_hum <- tmp %>% 
+  group_by(phase) %>% 
+  summarise("mean_rh" = mean(rh)) %>% 
+  mutate(temp = "air")
+tmp <- filter(obsPass, twet >= min(filter(rs_p[["snow_prob_twet"]],snow_prob <= .50 & snow_prob >= .25)$twet_bin_num, na.rm = T) &
+                twet <= max(filter(rs_p[["snow_prob_twet"]],snow_prob <= .50 & snow_prob >= .25)$twet_bin_num, na.rm = T))
+
+rs_hum <- bind_rows(
+  rs_hum,
+  tmp %>% 
+  group_by(phase) %>% 
+  summarise("mean_rh" = mean(rh)) %>% 
+  mutate(temp = "wet bulb"))
+
+knitr::kable(rs_hum)
+
+```
+
+## 
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.dim= c(6,3)}
+p <- ggplot(filter(obsPass, phase == "Snow"), aes(tair)) + geom_density(fill = "gray") +
+  labs(x = "Air Temperature (°C)", y = "Density")
+p
+# Get the density data from the plot
+# This will allow us to look at right/wrong values
+d <- ggplot_build(p)$data[[1]]
+```
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.dim= c(6,3)}
+tair_thresh = 0
+pct_incorrect = length(filter(obsPass, tair>tair_thresh & phase == "Snow")$phase) /length(filter(obsPass, phase == "Snow")$phase) * 100
+p +  geom_area(data = filter(d, x>tair_thresh), aes(x=x,y=y), fill = "darkred", alpha = 0.5) +
+  annotate(geom = "text", x = 2.5, y = 0.1, 
+           label = paste0(round(pct_incorrect, digits = 1), "% of snow misidentified"), color = "darkred",
+           hjust = 0)
+```
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.dim= c(6,3)}
+tair_thresh = 2.2
+pct_incorrect = length(filter(obsPass, tair>tair_thresh & phase == "Snow")$phase) /length(filter(obsPass, phase == "Snow")$phase) * 100
+p +  geom_area(data = filter(d, x>tair_thresh), aes(x=x,y=y), fill = "darkred", alpha = 0.5) +
+  annotate(geom = "text", x = 2.5, y = 0.1, 
+           label = paste0(round(pct_incorrect, digits = 1), "% of snow misidentified"), color = "darkred",
+           hjust = 0)
+```
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.dim= c(6,3)}
+tair_thresh = 3.9
+pct_incorrect = length(filter(obsPass, tair>tair_thresh & phase == "Snow")$phase) /length(filter(obsPass, phase == "Snow")$phase) * 100
+p +  geom_area(data = filter(d, x>tair_thresh), aes(x=x,y=y), fill = "darkred", alpha = 0.5) +
+  annotate(geom = "text", x = 2.5, y = 0.1, 
+           label = paste0(round(pct_incorrect, digits = 1), "% of snow misidentified"), color = "darkred",
+           hjust = 0)
+```
+
+## GPM IMERG comparison
+
+```{r message = FALSE}
+
+# Import data
+gpm <- readRDS("../data/processed/mros_gpm_processed_2020_2021.RDS")
+
+# Join the data
+obsGPM <- left_join(obsPass,
+                    gpm,
+                    by = "id")
+
+###############################################################################
+# Summarize correct observations by temp bin
+
+# Make wider bins for analysis
+tair_max = 14
+tair_min = -7
+tair_bin_width = 1
+obsGPM$tair_bin2 <- cut(obsGPM$tair, 
+                     breaks = seq(tair_min, 
+                                  tair_max, 
+                                  by = tair_bin_width))
+
+
+# Add numeric version of each bin
+tair_cuts_to_number2 <- data.frame("tair_bin2" = levels(obsGPM$tair_bin2),
+                                   "tair_bin_num2" = seq(tair_min + (0.5 * tair_bin_width),
+                                                         tair_max - (0.5 * tair_bin_width), 
+                                                         by = tair_bin_width))
+
+# Join
+obsGPM <- left_join(obsGPM, tair_cuts_to_number2, by = "tair_bin2")
+
+
+# Add GPM probability thresholds for rain, snow, mixed
+prob_thresh_upper_rain = 100
+prob_thresh_lower_rain = 50
+prob_thresh_upper_snow = 50
+prob_thresh_lower_snow = 0
+prob_thresh_upper_mixed = prob_thresh_lower_rain
+prob_thresh_lower_mixed = prob_thresh_upper_snow
+
+# Denote whether phase designation was correct or not
+obsGPM$phase2 <- as.character(obsGPM$phase)
+obsGPM <- obsGPM %>% 
+  mutate(phase_noMIXED = case_when(phase2 == "Mixed" ~ "Rain",
+                                   TRUE ~ phase2),
+         gpm_phase = case_when(gpm_prob <= prob_thresh_upper_snow &
+                                 gpm_prob >= prob_thresh_lower_snow ~ "Snow",
+                               gpm_prob <= prob_thresh_upper_rain &
+                                 gpm_prob >= prob_thresh_lower_rain ~ "Rain",
+                               gpm_prob < prob_thresh_upper_mixed &
+                                 gpm_prob > prob_thresh_lower_mixed~ "Mixed"),
+         gpm_score = case_when(gpm_phase == phase2 ~ 1,
+                               gpm_phase != phase2 ~ 0),
+         gpm_score_noMIXED = case_when(gpm_phase == phase_noMIXED ~ 1,
+                                       gpm_phase != phase_noMIXED ~ 0))
+
+# Summarize by tair bin
+gpm_summary_noMIXED <- obsGPM %>% 
+  filter(!is.na(gpm_score_noMIXED)) %>% 
+  group_by(tair_bin_num2) %>% 
+  summarize(n_obs = length(gpm_score_noMIXED), 
+            gpm_perf_pct = (sum(gpm_score_noMIXED) / n_obs) * 100,
+            snow_pct_obs = (sum(phase == "Snow") / n_obs) * 100,
+            snow_pct_gpm = (sum(gpm_phase == "Snow") / n_obs) * 100)
+
+```
+
+Then plot the analyzed results:
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.dim= c(7,4.5)}
+reshape2::melt(select(gpm_summary_noMIXED, -n_obs), id.vars = "tair_bin_num2", 
+               variable.name = "metric", value.name = "pct") %>% 
+  ggplot(., aes(tair_bin_num2, pct, color = metric)) +
+  geom_line(lwd = 1) +
+  labs(x = expression("Air Temperature Bin ("*degree*C*")"),
+       y = "GPM Performance and Snow Probability (%)") + 
+  scale_color_manual(values = c("black", "darkgreen", "blue"),
+                     labels = c("GPM Success Rate", "Obs. Snow Prob.", 
+                                "GPM Snow Prob."),
+                     name = "") +
+  theme(legend.position = c(0.1, 0.2))
+```
+
+## Rain-snow line comparison
+
+Import the data
+
+```{r message = FALSE}
+
+library(lubridate) # for datetime handling
+
+# Import data
+gpm <- readRDS("../data/processed/gpm_rain_snow_line_2020_2021.RDS") %>% 
+  mutate(datetime = with_tz(datetime, "Etc/Gmt+8")) # convert to PST
+flr <- read.csv("../data/processed/CFF_2019_2021.csv", na.strings = " NaN") %>% 
+  mutate(datetime = with_tz(as.POSIXct(paste0(year, "-", month, "-", day, " ", hour),
+                               format = "%Y-%m-%d %H",
+                               tz = "GMT"),
+                            "Etc/Gmt+8"), # convert to PST
+         rain_snow_line = BBH * 1000) # convert from km to m
+obs <- readRDS("../data/processed/mros_obs_rain_snow_line_2020-2021.RDS") %>% 
+  mutate(datetime_min = as.POSIXct(paste0(date, " 08:00"), 
+                                   tz = "Etc/Gmt+8"),
+         datetime_max = as.POSIXct(paste0(date, " 20:00"), 
+                                   tz = "Etc/Gmt+8"))
+
+# Join data
+all <- left_join(gpm, flr, by = "datetime")
+
+```
+
+Plot an event:
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.dim= c(7,4.5)}
+# Plot an event
+min_datetime = as.POSIXct("2020-04-04 05:00", tz = "Etc/Gmt+8")
+max_datetime = as.POSIXct("2020-04-07 00:00", tz = "Etc/Gmt+8")
+filter(all, datetime >= min_datetime & 
+         datetime <= max_datetime) %>% 
+  ggplot() + 
+  geom_line(aes(datetime, rs_line)) + 
+  geom_point(aes(datetime, rain_snow_line), color = "red") + 
+  ylim(900, 3000) + 
+  geom_segment(data = filter(obs, datetime_min >= min_datetime &
+                               datetime_max <= max_datetime), 
+               aes(x = datetime_min, y = rs_line, xend = datetime_max, yend = rs_line), 
+               color = "purple", lwd = 1) + 
+  labs(x = "Datetime",
+       y = "Rain-Snow Line Elevation (m)")
 ```

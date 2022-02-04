@@ -140,6 +140,18 @@ ggplot(prob_twet_predict, aes(twet_bin_num, snow_prob_pred * 100)) +
        y = "Snowfall Probability (%)")
 
 ################################################################################
+#################################  Export  #####################################
+################################################################################
+rs_partition <- list(temp50_tair = temp50_tair,
+                     temp50_twet = temp50_twet,
+                     snow_prob_tair = obs_tair_summary,
+                     snow_prob_twet = obs_twet_summary,
+                     snow_pred_tair = prob_tair_predict,
+                     snow_pred_twet = prob_twet_predict)
+saveRDS(object = rs_partition, 
+        file = "data/processed/mros_obs_rs_partitioning_2020_2021.RDS")
+
+################################################################################
 ##################################  Plots  #####################################
 ################################################################################
 

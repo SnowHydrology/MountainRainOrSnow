@@ -1,4 +1,13 @@
 
+# Import obs and GPM
+obs <- readRDS("data/processed/mros_obs_processed_2020_2021.RDS") %>% 
+  filter(., tair_flag == "Pass" & 
+           ppt_flag == "Pass" & 
+           rh_flag == "Pass" &
+           dist_flag == "Pass" & 
+           dupe_flag == "Pass")
+gpm_obs <- readRDS("data/processed/mros_gpm_processed_2020_2021.RDS")
+
 # Put the GPM data into the obs dataset
 obs <- left_join(obs, 
                  gpm_obs, 

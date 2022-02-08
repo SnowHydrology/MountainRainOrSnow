@@ -8,14 +8,20 @@ We use these crowdsourced data on precipitation phase to evaluate how well hydro
 
 # Get involved
 
-We're always looking for more reports of rain, snow, and mixed precipitation. During the 2021–2022 field season we'll be focusing on gathering observations from the Sierra Nevada (California and Nevada), Cascades (Oregon and Washington), Rocky Mountains (Colorado), and Adirondacks and Appalachians of New York and New England. 
+We're always looking for more reports of rain, snow, and mixed precipitation. During the 2021–2022 field season we'll be focusing on gathering observations from the Sierra Nevada (California and Nevada), Cascades (Oregon and Washington), Rocky Mountains (Colorado), and Adirondacks and Appalachians of New York and New England. To subscribe to text message alerts with instructions on how to contribute, please subscribe using one of our regional keywords:
 
-We'll soon be launching our new website and mobile app. Links will be posted **here** once they're live!
+* For the Northeastern US, text **NorEaster** to 855-909-0798
+* For California and Nevada, text **Winter** to 855-909-0798
+* For Colorado, text **CORainSnow** to 855-909-0798
+* For Oregon, text **OregonRainORSnow** to 855-909-0798
+
+**Click [HERE](https://rainorsnow.app/home) to access the app and start submitting observations when it's precipitating!**
 
 # Learn more
 
 More information on our work can be found at the links below:
 
+* [The Mountain Rain or Snow project website](https://rainorsnow.org/home)
 * [A peer-reviewed publication on our first year of data and analysis (Arienzo et al., 2021)](https://doi.org/10.3389/feart.2021.617594)
 * [A blog post on why accurately predicting rain versus snow matters](https://blogs.egu.eu/divisions/cr/2021/02/12/rain-or-snow-answering-the-question-with-citizen-scientists/)
 * [A 2020 report on our data](https://www.dri.edu/project/tahoe-rain-or-snow/) (2021 report coming soon!)

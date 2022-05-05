@@ -62,6 +62,15 @@ obs$twet_bin <- cut(obs$twet,
                                  twet_max, 
                                  by = twet_bin_width))
 
+# Make tdew bins for analysis
+tdew_max = 12
+tdew_min = -12
+tdew_bin_width = 1
+obs$tdew_bin <- cut(obs$tdew, 
+                    breaks = seq(tdew_min, 
+                                 tdew_max, 
+                                 by = tdew_bin_width))
+
 
 
 # Add numeric version of each bin
@@ -73,10 +82,15 @@ twet_cuts_to_number <- data.frame("twet_bin" = levels(obs$twet_bin),
                                   "twet_bin_num" = seq(twet_min + (0.5 * twet_bin_width),
                                                        twet_max - (0.5 * twet_bin_width), 
                                                        by = twet_bin_width))
+tdew_cuts_to_number <- data.frame("tdew_bin" = levels(obs$tdew_bin),
+                                  "tdew_bin_num" = seq(tdew_min + (0.5 * tdew_bin_width),
+                                                       tdew_max - (0.5 * tdew_bin_width), 
+                                                       by = tdew_bin_width))
 
 # Join
 obs <- left_join(obs, tair_cuts_to_number, by = "tair_bin")
 obs <- left_join(obs, twet_cuts_to_number, by = "twet_bin")
+obs <- left_join(obs, tdew_cuts_to_number, by = "tdew_bin")
 
 
 # Summarize by tair bin
@@ -86,6 +100,10 @@ obs_tair_summary <- obs %>%
             snow_prob = (sum(phase == "Snow") / n_obs))
 obs_twet_summary <- obs %>% 
   group_by(twet_bin_num) %>% 
+  summarize(n_obs = n(), 
+            snow_prob = (sum(phase == "Snow") / n_obs))
+obs_tdew_summary <- obs %>% 
+  group_by(tdew_bin_num) %>% 
   summarize(n_obs = n(), 
             snow_prob = (sum(phase == "Snow") / n_obs))
 
@@ -100,6 +118,11 @@ prob_twet_fit <- nlsLM(snow_prob ~ #predicts snow frequency
                        #tanh is the hyperbolic tangent (gives curve shape)
                        data = obs_twet_summary, 
                        start = list(a = -45, b = 0.7, c = 1.2, d = 1))
+prob_tdew_fit <- nlsLM(snow_prob ~ #predicts snow frequency
+                         a * (tanh( b* (tdew_bin_num - c)) - d), #as a function of air temperature and 4 fitting parameters
+                       #tanh is the hyperbolic tangent (gives curve shape)
+                       data = obs_tdew_summary, 
+                       start = list(a = -45, b = 0.7, c = 1.2, d = 1))
 
 # Compute the 50% probability temperature
 temp50_tair = (0.5 * log((1 + (0.5/as.numeric(coef(prob_tair_fit)[1]) + as.numeric(coef(prob_tair_fit)[4]))) / 
@@ -110,6 +133,10 @@ temp50_twet = (0.5 * log((1 + (0.5/as.numeric(coef(prob_twet_fit)[1]) + as.numer
                            (1 - (0.5/as.numeric(coef(prob_twet_fit)[1]) + as.numeric(coef(prob_twet_fit)[4])))))/
   as.numeric(coef(prob_twet_fit)[2]) + 
   as.numeric(coef(prob_twet_fit)[3])
+temp50_tdew = (0.5 * log((1 + (0.5/as.numeric(coef(prob_tdew_fit)[1]) + as.numeric(coef(prob_tdew_fit)[4]))) / 
+                           (1 - (0.5/as.numeric(coef(prob_tdew_fit)[1]) + as.numeric(coef(prob_tdew_fit)[4])))))/
+  as.numeric(coef(prob_tdew_fit)[2]) + 
+  as.numeric(coef(prob_tdew_fit)[3])
 
 # Make a predicted dataset using prob_fit
 prob_tair_predict <- data.frame(tair_bin_num = seq(tair_min, tair_max, by = 0.5)) %>% 
@@ -119,6 +146,11 @@ prob_tair_predict <- data.frame(tair_bin_num = seq(tair_min, tair_max, by = 0.5)
                                     TRUE ~ snow_prob_pred))
 prob_twet_predict <- data.frame(twet_bin_num = seq(twet_min, twet_max, by = 0.5)) %>% 
   mutate(snow_prob_pred = predict(prob_twet_fit, newdata = .),
+         snow_prob_pred = case_when(snow_prob_pred > 1 ~ 1,
+                                    snow_prob_pred < 0 ~ 0,
+                                    TRUE ~ snow_prob_pred))
+prob_tdew_predict <- data.frame(tdew_bin_num = seq(tdew_min, tdew_max, by = 0.5)) %>% 
+  mutate(snow_prob_pred = predict(prob_tdew_fit, newdata = .),
          snow_prob_pred = case_when(snow_prob_pred > 1 ~ 1,
                                     snow_prob_pred < 0 ~ 0,
                                     TRUE ~ snow_prob_pred))
@@ -138,16 +170,26 @@ ggplot(prob_twet_predict, aes(twet_bin_num, snow_prob_pred * 100)) +
              color = "purple") +
   labs(x = expression("Wet Bulb Temperature ("*degree*C*")"),
        y = "Snowfall Probability (%)")
+ggplot(prob_tdew_predict, aes(tdew_bin_num, snow_prob_pred * 100)) + 
+  geom_line(lwd = 1) + 
+  geom_hline(yintercept = 50, color = "gray", lty = "dashed", lwd = 1) +
+  geom_point(data = obs_tdew_summary, aes(tdew_bin_num, snow_prob * 100), 
+             color = "purple") +
+  labs(x = expression("Dew Point Temperature ("*degree*C*")"),
+       y = "Snowfall Probability (%)")
 
 ################################################################################
 #################################  Export  #####################################
 ################################################################################
 rs_partition <- list(temp50_tair = temp50_tair,
                      temp50_twet = temp50_twet,
+                     temp50_tdew = temp50_tdew,
                      snow_prob_tair = obs_tair_summary,
                      snow_prob_twet = obs_twet_summary,
+                     snow_prob_tdew = obs_tdew_summary,
                      snow_pred_tair = prob_tair_predict,
-                     snow_pred_twet = prob_twet_predict)
+                     snow_pred_twet = prob_twet_predict,
+                     snow_pred_tdew = prob_tdew_predict)
 saveRDS(object = rs_partition, 
         file = "data/processed/mros_obs_rs_partitioning_2020_2021.RDS")
 

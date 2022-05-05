@@ -71,6 +71,9 @@ library(tidyverse)
 library(cowplot); theme_set(theme_cowplot())
 source("functions/mros_plot_formats.R")
 
+# Lubridate for date handling tools
+library(lubridate)
+
 # Import data
 obs <- readRDS("../data/processed/mros_obs_processed_2020_2021.RDS")
 
@@ -129,6 +132,115 @@ ggplot(obsPass, aes(elev, fill = phase)) +
         legend.position = "none")
 ```
 
+Or grouped together:
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.dim= c(6,6)}
+ggplot(obsPass, aes(elev, fill = phase)) + 
+  geom_histogram(color = "black") + 
+  coord_flip() + 
+  phase_fill_scale +
+  labs(y = "Number of Observations", 
+       x = "Elevation (m)") +
+  theme(strip.background = element_rect(fill = "white", color = "black"),
+        legend.position = c(0.8, 0.8))
+```
+
+## Observations by state and ecoregion
+
+Across the study period, we had the following geographic breakdown of observations.
+
+By state:
+
+```{r echo = FALSE, warning = FALSE, message = FALSE}
+obsPass %>% 
+  group_by(state) %>% 
+  summarise(n = n()) %>% 
+  knitr::kable()
+```
+
+By US EPA Level III Ecoregion:
+
+```{r echo = FALSE, warning = FALSE, message = FALSE}
+obsPass %>% 
+  group_by(eco_l3) %>% 
+  summarise(n = n()) %>% 
+  knitr::kable()
+```
+
+And by US EPA Level IV Ecoregion:
+
+```{r echo = FALSE, warning = FALSE, message = FALSE}
+obsPass %>% 
+  group_by(eco_l4) %>% 
+  summarise(n = n()) %>% 
+  knitr::kable()
+```
+
+## Observations by year
+
+Our *Tahoe Rain or Snow* study period comprised two water years: 2020 and 2021.
+
+```{r message = FALSE}
+# Add water year info
+obsPass <- obsPass %>% 
+   mutate(wy = ifelse(month(date) >= 10,
+                      year(date) + 1,
+                      year(date)),
+          dowy = ifelse(month(date) >= 10,
+                        yday(date) - 273,
+                        yday(date) + 92))
+
+# Compute cumulative observations per phase and water year
+obsPass <- obsPass %>% 
+  arrange(date) %>% 
+  group_by(wy, phase) %>% 
+  mutate(n_cumulative = row_number())
+```
+
+We received `r length(filter(obsPass, wy == 2020)$phase)` observations in water year 2020 and `r length(filter(obsPass, wy == 2021)$phase)` in 2021. Snow was the most frequent phase in both water years, but both rain and mixed precipitation increased in relative proportion in 2021. 
+
+```{r echo = FALSE, warning = FALSE, message = FALSE}
+obsPass %>% 
+  group_by(wy, phase) %>% 
+  summarise(n = n()) %>% 
+  ungroup() %>% 
+  group_by(wy) %>% 
+  mutate(pct = round(n / sum(n) * 100, digits = 1)) %>% 
+  knitr::kable()
+```
+
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.dim= c(6,4)}
+ggplot(obsPass, aes(dowy, n_cumulative, color = phase)) + 
+  geom_line(lwd = 1) + 
+  labs(x = "Date",
+       y = "Cumulative Observations") +
+  theme(legend.position = c(0.1, 0.9), legend.title = element_blank(),
+        strip.background = element_rect(fill = NA, color = "black")) +
+  scale_color_manual(values = c("blue", "purple", "black")) +
+  facet_wrap(~wy, ncol = 1) +
+  scale_x_continuous(breaks = c(1, 93, 183, 274), 
+                     labels = c("Oct. 1", "Jan. 1", "Apr. 1", "Jul. 1"))
+```
+## Observations by air temperature
+
+Modeled meteorological data show volunteers submitted precipitation phase reports from a minimum air temperature value of `r round(min(obsPass$tair), digits = 1)`°C to a maximum of `r round(max(obsPass$tair), digits = 1)`°C with a median value of `r round(median(obsPass$tair), digits = 1)`°C. What’s more, the vast majority of reports came from a relatively narrow air temperature range. Our data show 95% of observations corresponded to air temperatures between `r round(quantile(obsPass$tair, probs = c(0.025, 0.975))[1], digits = 1)`°C and `r round(quantile(obsPass$tair, probs = c(0.025, 0.975))[2], digits = 1)`°C. 
+
+```{r echo = FALSE, warning = FALSE, message = FALSE}
+plot_grid(
+  ggplot(obsPass, aes(tair, color = phase)) +
+    geom_density(lwd = 1)+
+    scale_color_manual(values = c("blue", "purple", "black")) +
+    labs(x = "Air Temperature (°C)", y = "Density") +
+    theme(legend.position = c(0.8,0.8), legend.title = element_blank()),
+  ggplot(obsPass, aes(twet, color = phase)) +
+    geom_density(lwd = 1)+
+    scale_color_manual(values = c("blue", "purple", "black")) +
+    labs(x = "Wet Bulb Temperature (°C)", y = "Density") +
+    theme(legend.position = "none"),
+  cols = 1, align = "vh", labels = "auto"
+)
+```
 ## Rain-snow partitioning
 
 Using the observations and modeled meteorological data, we can compute snowfall probability curves and 50% snowfall probability temperatures, the latter of which are used as thresholds in models to split solid and liquid precipitation. We provide a methods overview here and the full code can be found in `mros_obs_analysis.R`. In short, we bin air temperature in 1°C increments from -10°C to 20°C and wet bulb temperature in 1°C increments from -12°C to 16°C. We then compute the probability of snowfall occurring in each air and wet bulb temperature bin. Those data are next fit with a hyperbolic tangent as in Dai (2008) and Jennings et al. (2018) to create snowfall probability curves. The 50% snowfall probability air and wet bulb temperature thresholds are where the fitted curves pass the 50% mark.

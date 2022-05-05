@@ -99,6 +99,9 @@ library(tidyverse)
 library(cowplot); theme_set(theme_cowplot())
 source("functions/mros_plot_formats.R")
 
+# Lubridate for date handling tools
+library(lubridate)
+
 # Import data
 obs <- readRDS("../data/processed/mros_obs_processed_2020_2021.RDS")
 
@@ -143,7 +146,90 @@ by elevation:
 
 ![](README_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
 
-## Rain-snow partitioning
+Or grouped together:
+
+![](README_files/figure-gfm/unnamed-chunk-5-1.png)<!-- -->
+
+## Observations by state and ecoregion
+
+Across the study period, we had the following geographic breakdown of
+observations.
+
+By state:
+
+| state      |    n |
+| :--------- | ---: |
+| California | 1069 |
+| Nevada     | 1179 |
+
+By US EPA Level III Ecoregion:
+
+| eco\_l3                 |    n |
+| :---------------------- | ---: |
+| Central Basin and Range |  827 |
+| Sierra Nevada           | 1421 |
+
+And by US EPA Level IV Ecoregion:
+
+| eco\_l4                                            |    n |
+| :------------------------------------------------- | ---: |
+| Central Sierra Lower Montane Forests               |   41 |
+| Central Sierra Mid-Montane Forests                 |   10 |
+| Lahontan Salt Shrub Basin                          |   10 |
+| Northeastern Sierra Mixed Conifer-Pine Forests     | 1094 |
+| Northern Sierra Mid-Montane Forests                |   15 |
+| Northern Sierra Subalpine Forests                  |    9 |
+| Northern Sierra Upper Montane Forests              |  252 |
+| Sierra Nevada-Influenced Ranges                    |    6 |
+| Sierra Nevada-Influenced Semiarid Hills and Basins |  811 |
+
+## Observations by year
+
+Our *Tahoe Rain or Snow* study period comprised two water years: 2020
+and 2021.
+
+``` r
+# Add water year info
+obsPass <- obsPass %>% 
+   mutate(wy = ifelse(month(date) >= 10,
+                      year(date) + 1,
+                      year(date)),
+          dowy = ifelse(month(date) >= 10,
+                        yday(date) - 273,
+                        yday(date) + 92))
+
+# Compute cumulative observations per phase and water year
+obsPass <- obsPass %>% 
+  arrange(date) %>% 
+  group_by(wy, phase) %>% 
+  mutate(n_cumulative = row_number())
+```
+
+We received 953 observations in water year 2020 and 1295 in 2021. Snow
+was the most frequent phase in both water years, but both rain and mixed
+precipitation increased in relative proportion in 2021.
+
+|   wy | phase |   n |  pct |
+| ---: | :---- | --: | ---: |
+| 2020 | Rain  | 151 | 15.8 |
+| 2020 | Mixed | 134 | 14.1 |
+| 2020 | Snow  | 668 | 70.1 |
+| 2021 | Rain  | 321 | 24.8 |
+| 2021 | Mixed | 204 | 15.8 |
+| 2021 | Snow  | 770 | 59.5 |
+
+![](README_files/figure-gfm/unnamed-chunk-11-1.png)<!-- --> \#\#
+Observations by air temperature
+
+Modeled meteorological data show volunteers submitted precipitation
+phase reports from a minimum air temperature value of -10.2°C to a
+maximum of 25.7°C with a median value of 1.1°C. What’s more, the vast
+majority of reports came from a relatively narrow air temperature range.
+Our data show 95% of observations corresponded to air temperatures
+between -5.0601094°C and 9.5923782°C.
+
+![](README_files/figure-gfm/unnamed-chunk-12-1.png)<!-- --> \#\#
+Rain-snow partitioning
 
 Using the observations and modeled meteorological data, we can compute
 snowfall probability curves and 50% snowfall probability temperatures,
@@ -167,15 +253,15 @@ rs_p <- readRDS("../data/processed/mros_obs_rs_partitioning_2020_2021.RDS")
 
 We can then look at the air temperature snowfall probability plot:
 
-![](README_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->
 
 The wet bulb temperature snowfall probability plot:
 
-![](README_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-15-1.png)<!-- -->
 
 And the two of them combined:
 
-![](README_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-16-1.png)<!-- -->
 
 We notice the 50% threshold is a fair bit higher for air temperature
 verus wet bulb temperature, which is expected because the former is
@@ -194,13 +280,13 @@ between approximately 25% and 50%.
 
 ## 
 
-![](README_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-18-1.png)<!-- -->
 
-![](README_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-19-1.png)<!-- -->
 
-![](README_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-20-1.png)<!-- -->
 
-![](README_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-21-1.png)<!-- -->
 
 ## GPM IMERG comparison
 
@@ -272,7 +358,7 @@ gpm_summary_noMIXED <- obsGPM %>%
 
 Then plot the analyzed results:
 
-![](README_files/figure-gfm/unnamed-chunk-15-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-23-1.png)<!-- -->
 
 ## Rain-snow line comparison
 
@@ -302,4 +388,4 @@ all <- left_join(gpm, flr, by = "datetime")
 
 Plot an event:
 
-![](README_files/figure-gfm/unnamed-chunk-17-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-25-1.png)<!-- -->

@@ -1,0 +1,349 @@
+﻿Id,St,County,Subwatershed,Site Name,Start,End,Lat,Lon,Elev,Element,CDBS id,NWS id
+SNOTEL 301,CA,Modoc,Cottonwood Creek,Adin Mtn,Oct-83,Jan-00,41.24,-120.79,6190,Air Temperature,20H13S,ADMC1
+SNOTELT 1239,CA,Del Norte,Dunn Creek,Althouse,Jun-13,Jan-00,42,-123.55,4970,Air Temperature,23G16S,ABZO3
+SCAN 2214,CA,Lassen,Ash Valley-Ash Creek,Ash Valley,Oct-14,Jan-00,41.05,-120.69,5097,Air Temperature,SC2214,VYAC1
+SNOTEL 356,CA,Alpine,Deer Creek,Blue Lakes,Oct-79,Jan-00,38.61,-119.92,8067,Air Temperature,19L05S,BLAC1
+SCAN 2215,CA,Mono,Aurora Canyon,Bodie Hills,Oct-14,Jan-00,38.26,-119.13,7825,Air Temperature,SC2215,HBDC1
+SNOTEL 1051,CA,Alpine,Hot Springs Creek,Burnside Lake,Sep-03,Jan-00,38.72,-119.89,8129,Air Temperature,19L41S,BSKC1
+SNOTEL 1067,CA,Alpine,Caples Creek,Carson Pass,Sep-04,Jan-00,38.69,-120,8360,Air Temperature,19L45S,CXSC1
+SNOTEL 391,CA,Modoc,Thoms Creek,Cedar Pass,Oct-78,Jan-00,41.58,-120.3,7030,Air Temperature,20H06S,CDRC1
+SCAN 2189,CA,San Luis Obispo,Black Sulphur Spring-Carrizo Plain,Cochora Ranch,Jun-12,Jan-00,35.12,-119.6,2697,Air Temperature,SC2189,CXXC1
+SNOTEL 977,CA,Modoc,Mosquito Creek-Willow Creek,Crowder Flat,Oct-99,Jan-00,41.89,-120.75,5170,Air Temperature,20H02S,CRWC1
+SNOTEL 428,CA,Nevada,Rattlesnake Creek-South Yuba River,Css Lab,Oct-80,Jan-00,39.33,-120.37,6894,Air Temperature,20K31S,CSSC1
+SCAN 2190,CA,Inyo,Ash Meadows,Death Valley Jct,Jun-12,Jan-00,36.33,-116.35,2062,Air Temperature,SC2190,DVJC1
+SCAN 2187,CA,Inyo,Lower Wyman Creek,Deep Springs,Nov-11,Jan-00,37.37,-117.97,5399,Air Temperature,SC2187,DPSC1
+SCAN 2183,CA,Riverside,181001004703-Pinto Wash,Desert Center,Nov-11,Jan-00,33.8,-115.31,556,Air Temperature,SC2183,ERTC1
+SNOTEL 446,CA,Modoc,Dismal Creek-Deep Creek,Dismal Swamp,Oct-79,Jan-00,41.99,-120.18,7360,Air Temperature,20H12S,DMLC1
+SCAN 2191,CA,Mono,Convict Creek,Doe Ridge,Jun-12,Jan-00,37.63,-118.83,7340,Air Temperature,SC2191,DOEC1
+SCAN 2192,CA,Lassen,Merrill Creek-Frontal Eagle Lake,Eagle Lake,Jun-12,Jan-00,40.62,-120.72,5134,Air Temperature,SC2192,EALC1
+SNOTEL 462,CA,Alpine,Silver Creek,Ebbetts Pass,Oct-78,Jan-00,38.55,-119.8,8661,Air Temperature,19L19S,EBTC1
+SNOTEL 463,CA,El Dorado,Upper Truckee River-Frontal Lake Tahoe,Echo Peak,Oct-78,Jan-00,38.85,-120.08,7653,Air Temperature,20L06S,ECOC1
+SCAN 2185,CA,San Bernardino,Honeymoon Wash-Watson Wash,Essex,Nov-11,Jan-00,34.67,-115.17,2644,Air Temperature,SC2185,EXCC1
+SNOTEL 473,CA,El Dorado,Fallen Leaf Lake-Frontal Lake Tahoe,Fallen Leaf,Oct-78,Jan-00,38.93,-120.05,6242,Air Temperature,20L10S,FLFC1
+SCAN 2184,CA,Riverside,1.81001E+11,Ford Dry Lake,Nov-11,Jan-00,33.65,-115.1,394,Air Temperature,SC2184,RDLC1
+SNOTEL 1049,CA,Alpine,Upper West Fork Carson River,Forestdale Creek,Sep-03,Jan-00,38.68,-119.96,8017,Air Temperature,19L43S,FDCC1
+SNOTEL 1277,CA,Lassen,Lower Dry Lake-Frontal Eagle Lake,Fredonyer Peak,Oct-16,Jan-00,40.69,-120.61,7208,Air Temperature,20J01S,FPKC1
+SCAN 2218,CA,Shasta,East Fork Clear Creek-Clear Creek,French Gulch,Oct-14,Jan-00,40.79,-122.55,3704,Air Temperature,SC2218,FGLC1
+SNOTEL 508,CA,El Dorado,Trout Creek,Hagans Meadow,Oct-78,Jan-00,38.85,-119.94,7742,Air Temperature,19L03S,HGNC1
+SNOTEL 518,CA,El Dorado,Trout Creek,Heavenly Valley,Oct-78,Jan-00,38.92,-119.92,8534,Air Temperature,19L24S,HVNC1
+SNOTEL 1050,CA,Alpine,Middle West Fork Carson River,Horse Meadow,Sep-03,Jan-00,38.84,-119.89,8557,Air Temperature,19L44S,HORC1
+SNOTEL 539,CA,Sierra,Independence Creek,Independence Camp,Oct-78,Jan-00,39.45,-120.29,6980,Air Temperature,20K04S,ICPC1
+SNOTEL 540,CA,Sierra,Independence Creek,Independence Creek,Oct-79,Jan-00,39.49,-120.28,6436,Air Temperature,20K03S,ICKC1
+SNOTEL 541,CA,Nevada,Sagehen Creek,Independence Lake,Oct-78,Jan-00,39.43,-120.31,8338,Air Temperature,20K05S,ILKC1
+SNOTEL 574,CA,Mono,Leavitt Creek-West Walker River,Leavitt Lake,Oct-88,Jan-00,38.28,-119.61,9604,Air Temperature,19L38S,LELC1
+SNOTEL 575,CA,Mono,Leavitt Creek-West Walker River,Leavitt Meadows,Oct-79,Jan-00,38.3,-119.55,7198,Air Temperature,19L08S,LVTC1
+SNOTEL 587,CA,Mono,Deep Creek,Lobdell Lake,Oct-78,Jan-00,38.44,-119.37,9249,Air Temperature,19L17S,LOBC1
+SCAN 2149,CA,Mono,Rock Creek-Spring Canyon Creek,Marble Creek,May-09,Jan-00,37.78,-118.42,6183,Air Temperature,SC2149,MCXC1
+SNOTEL 633,CA,Alpine,Leviathan Canyon,Monitor Pass,Oct-89,Jan-00,38.67,-119.61,8306,Air Temperature,19L40S,MNPC1
+SCAN 2217,CA,Fresno,Town of Levis,Monocline Ridge,Oct-14,Jan-00,36.54,-120.55,875,Air Temperature,SC2217,RGMC1
+SNOTEL 784,CA,Placer,Squaw Creek-Truckee River,Palisades Tahoe,Oct-79,Jan-00,39.19,-120.27,8013,Air Temperature,20K30S,SQWC1
+SNOTEL 697,CA,Alpine,Bryant Creek-East Fork Carson River,Poison Flat,Oct-79,Jan-00,38.51,-119.63,7736,Air Temperature,19L06S,XXXC1
+SNOTEL 724,CA,El Dorado,General Creek-Frontal Lake Tahoe,Rubicon #2,Oct-79,Jan-00,39,-120.13,7619,Air Temperature,20L02S,RUBC1
+SCAN 2186,CA,San Bernardino,Halloran Summit,Shadow Mtns,Nov-11,Jan-00,35.47,-115.72,3643,Air Temperature,SC2186,DWMC1
+SNOTEL 771,CA,Mono,Leavitt Creek-West Walker River,Sonora Pass,Oct-78,Jan-00,38.31,-119.6,8770,Air Temperature,19L07S,SRAC1
+SNOTEL 778,CA,Alpine,Hot Springs Creek,Spratt Creek,Oct-79,Jan-00,38.67,-119.82,6063,Air Temperature,19L39S,SPCC1
+SNOTEL 1258,CA,Modoc,Weed Valley-North Fork Willow Creek,State Line,Jun-14,Jan-00,41.99,-120.72,5680,Air Temperature,20H01S,TATC1
+SNOTELT 993,CA,Modoc,Weed Valley-North Fork Willow Creek,State Line AM,Aug-19,Jan-00,41.99,-120.72,5680,Air Temperature,,
+SCAN 2219,CA,San Luis Obispo,Padrones Spring-Carrizo Plain,Stubblefield,Oct-14,Jan-00,34.97,-119.48,2995,Air Temperature,SC2219,DLFC1
+SNOTEL 1052,CA,Alpine,Mill Creek,Summit Meadow,Sep-03,Jan-00,38.4,-119.54,9313,Air Temperature,19L42S,SDWC1
+SNOTEL 809,CA,Placer,Burton Creek-Frontal Lake Tahoe,Tahoe City Cross,Oct-79,Jan-00,39.17,-120.15,6797,Air Temperature,20K27S,THOC1
+SNOTEL 834,CA,Placer,Martis Creek,Truckee #2,Oct-79,Jan-00,39.3,-120.18,6509,Air Temperature,20K13S,TRUC1
+SNOTEL 846,CA,Mono,Virginia Creek,Virginia Lakes Ridge,Oct-78,Jan-00,38.07,-119.23,9400,Air Temperature,19L13S,VGAC1
+SNOTEL 848,CA,Placer,Ward Creek-Frontal Lake Tahoe,Ward Creek #3,Oct-78,Jan-00,39.14,-120.22,6745,Air Temperature,20K25S,WRDC1
+SNOTEL 303,CO,Huerfano,Middle Creek-Cucharas River,Apishapa,Oct-79,Jan-00,37.33,-105.07,10027,Air Temperature,05M07S,APSC2
+SNOTEL 1030,CO,Grand,Rabbit Ears Creek-Troublesome Creek,Arapaho Ridge,Aug-02,Jan-00,40.35,-106.38,10976,Air Temperature,06J08S,ARPC2
+SNOTEL 305,CO,Grand,Upper Fraser River,Arrow,Oct-78,Oct-13,39.92,-105.76,9680,Air Temperature,05K06S,AROC2
+SNOTEL 322,CO,Larimer,Glacier Creek,Bear Lake,Oct-79,Jan-00,40.31,-105.65,9522,Air Temperature,05J39S,BLKC2
+SNOTEL 1061,CO,Routt,Yamcolo Reservoir-Bear River,Bear River,Oct-04,Jan-00,40.06,-107.01,9112,Air Temperature,07J03S,BRRC2
+SNOTEL 327,CO,San Juan,Bear Creek-Rio Grande,Beartown,Oct-79,Jan-00,37.71,-107.51,11600,Air Temperature,07M32S,BRTC2
+SNOTEL 1041,CO,Eagle,Beaver Creek-Eagle Creek,Beaver Ck Village,Nov-02,Jan-00,39.6,-106.51,8565,Air Temperature,06K45S,BCVC2
+SNOTEL 335,CO,Grand,Upper Fraser River,Berthoud Summit,Oct-78,Jan-00,39.8,-105.78,11314,Air Temperature,05K14S,BTSC2
+SNOTEL 345,CO,Garfield,Headwaters Deep Creek,Bison Lake,Oct-85,Jan-00,39.76,-107.36,10964,Air Temperature,07K12S,BLSC2
+SNOTEL 1185,CO,Dolores,Fish Creek,Black Mesa,Jul-11,Jan-00,37.79,-108.18,11564,Air Temperature,08M12S,BMSC2
+SNOTEL 1161,CO,Larimer,Upper Dale Creek,Black Mountain,Oct-10,Jan-00,40.89,-105.66,8980,Air Temperature,05J28S,BMNC2
+SNOTEL 369,CO,Lake,North Fork Lake Creek,Brumley,Oct-79,Jan-00,39.09,-106.54,10594,Air Temperature,06K40S,BRMC2
+SNOTEL 938,CO,Park,Headwaters Middle Fork South Platte River,Buckskin Joe,Aug-98,Jan-00,39.3,-106.11,11166,Air Temperature,06K16S,BUCC2
+SNOTEL 913,CO,Grand,Red Dirt Creek,Buffalo Park,Sep-95,Jan-00,40.23,-106.6,9249,Air Temperature,06J18S,BUFC2
+SNOTEL 378,CO,Rio Blanco,North Elk Creek,Burro Mountain,Oct-78,Jan-00,39.88,-107.6,9317,Air Temperature,07K02S,BURC2
+SNOTEL 380,CO,Gunnison,Washington Gulch-Slate River,Butte,Oct-79,Jan-00,38.89,-106.95,10200,Air Temperature,06L11S,BUTC2
+SNOTEL 386,CO,San Juan,Headwaters Cascade Creek,Cascade,Oct-78,Jan-00,37.65,-107.81,8880,Air Temperature,07M05S,CSCC2
+SNOTEL 387,CO,San Juan,Headwaters Cascade Creek,Cascade #2,Oct-90,Jan-00,37.66,-107.8,9012,Air Temperature,07M35S,CADC2
+SNOTEL 1101,CO,Pitkin,Deeds Creek-Fryingpan River,Chapman Tunnel,Sep-07,Jan-00,39.26,-106.63,10100,Air Temperature,06K46S,HAPC2
+SNOTEL 1059,CO,Saguache,Luders Creek,Cochetopa Pass,Sep-04,Jan-00,38.16,-106.6,10061,Air Temperature,06L06S,CZSC2
+SNOTEL 408,CO,Jackson,Upper Grizzly Creek,Columbine,Oct-78,Jan-00,40.4,-106.6,9167,Air Temperature,06J03S,COLC2
+SNOTEL 409,CO,Montrose,Potter Creek,Columbine Pass,Oct-85,Jan-00,38.42,-108.38,9171,Air Temperature,08L02S,CPSC2
+SNOTEL 904,CO,La Plata,Headwaters La Plata River,Columbus Basin,Aug-94,Jan-00,37.44,-108.02,10781,Air Temperature,08M10S,CMBC2
+SNOTEL 412,CO,Boulder,Headwaters North Saint Vrain Creek,Copeland Lake,Oct-79,Jan-00,40.21,-105.57,8555,Air Temperature,05J18S,COPC2
+SNOTEL 415,CO,Summit,West Tenmile Creek,Copper Mountain,Oct-78,Jan-00,39.49,-106.17,10523,Air Temperature,06K24S,CPMC2
+SNOTELT 1281,CO,Gunnison,Outlet Willow Creek,Cottonwood Pass,Sep-17,Jan-00,38.83,-106.42,11681,Air Temperature,,
+SCAN 2197,CO,Weld,Headwaters Owl Creek,CPER,Sep-13,Jan-00,40.82,-104.71,5330,Air Temperature,SC2197,CPEC2
+SNOTEL 426,CO,Rio Blanco,Outlet Hunt Creek,Crosho,Oct-85,Jan-00,40.17,-107.06,8973,Air Temperature,07J04S,CRSC2
+SNOTEL 430,CO,Costilla,Headwaters Culebra Creek,Culebra #2,Oct-78,Jan-00,37.21,-105.2,10562,Air Temperature,05M03S,CULC2
+SNOTEL 431,CO,Conejos,Wolf Creek,Cumbres Trestle,Oct-79,Jan-00,37.02,-106.45,10035,Air Temperature,06M22S,CUMC2
+SNOTEL 438,CO,Larimer,Lower Dale Creek,Deadman Hill,Oct-78,Jan-00,40.81,-105.77,10239,Air Temperature,05J06S,DDMC2
+SNOTEL 457,CO,Routt,City of Steamboat Springs-Yampa River,Dry Lake,Oct-79,Jan-00,40.53,-106.78,8271,Air Temperature,06J01S,DRLC2
+SNOTEL 936,CO,Clear Creek,Vance Creek,Echo Lake,Aug-98,Jan-00,39.66,-105.59,10694,Air Temperature,05K27S,ECLC2
+SNOTEL 465,CO,Dolores,Cayton Valley-Dolores River,El Diente Peak,Oct-85,Jan-00,37.79,-108.02,10217,Air Temperature,08M06S,EDSC2
+SNOTEL 467,CO,Routt,Steamboat Lake,Elk River,Oct-78,Jan-00,40.85,-106.97,8739,Air Temperature,06J15S,ELKC2
+SNOTEL 1252,CO,Routt,Headwaters Elkhead Creek,Elkhead Divide,Sep-16,Jan-00,40.8,-107.1,8800,Air Temperature,07J06S,EKDC2
+SNOTEL 1120,CO,Summit,Deep Creek-Blue River,Elliot Ridge,Aug-09,Jan-00,39.86,-106.42,10549,Air Temperature,06K29S,ELRC2
+SNOTEL 1186,CO,Grand,Saint Louis Creek,Fool Creek,Jul-11,Jan-00,39.87,-105.87,11156,Air Temperature,05K30S,FCVC2
+SNOTEL 485,CO,Summit,Upper Tenmile Creek,Fremont Pass,Oct-79,Jan-00,39.38,-106.2,11326,Air Temperature,06K08S,FMTC2
+SNOTEL 1057,CO,Teller,Headwaters Fountain Creek,Glen Cove,Aug-04,Jan-00,38.88,-105.08,11391,Air Temperature,05L11S,GLNC2
+SNOTEL 1058,CO,Rio Grande,East Fork Pinos Creek,Grayback,Sep-04,Jan-00,37.47,-106.54,11626,Air Temperature,06M21S,GYBC2
+SNOTEL 505,CO,Summit,North Fork Snake River,Grizzly Peak,Oct-79,Jan-00,39.65,-105.87,11139,Air Temperature,05K09S,GZPC2
+SNOTEL 1102,CO,Saguache,Piney Creek-San Luis Creek,Hayden Pass,Aug-07,Jan-00,38.29,-105.85,10699,Air Temperature,05L12S,HPAC2
+SNOTEL 1187,CO,Grand,Meadows Creek-Ranch Creek,High Lonesome,Jul-11,Jan-00,40.04,-105.75,10638,Air Temperature,05J46S,HLNC2
+SNOTEL 531,CO,Summit,Headwaters Blue River,Hoosier Pass,Oct-79,Jan-00,39.36,-106.06,11611,Air Temperature,06K01S,HOOC2
+SNOTEL 1122,CO,Larimer,Beaver Creek,Hourglass Lake,Oct-08,Jan-00,40.58,-105.63,9417,Air Temperature,05J11S,HRLC2
+SNOTEL 538,CO,Ouray,Red Mountain Creek,Idarado,Oct-79,Jan-00,37.93,-107.68,9812,Air Temperature,07M27S,IDRC2
+SNOTEL 542,CO,Pitkin,Lincoln Creek,Independence Pass,Oct-79,Jan-00,39.08,-106.61,10598,Air Temperature,06K04S,IDPC2
+SNOTEL 547,CO,Pitkin,Headwaters Fryingpan River,Ivanhoe,Oct-91,Jan-00,39.29,-106.55,10541,Air Temperature,06K10S,IVHC2
+SNOTEL 935,CO,Clear Creek,Geneva Creek,Jackwhacker Gulch,Aug-98,Jan-00,39.57,-105.8,11054,Air Temperature,05K26S,JWGC2
+SNOTEL 551,CO,Larimer,Joe Wright Creek,Joe Wright,Oct-78,Jan-00,40.53,-105.89,10158,Air Temperature,05J37S,JWRC2
+SNOTEL 970,CO,Grand,Headwaters Williams Fork,Jones Pass,Sep-99,Jan-00,39.76,-105.91,10426,Air Temperature,05K21S,JNPC2
+SNOTEL 556,CO,Pitkin,Deeds Creek-Fryingpan River,Kiln,Oct-79,Jan-00,39.32,-106.62,9624,Air Temperature,06K30S,KLNC2
+SNOTEL 564,CO,Boulder,Middle Boulder Creek,Lake Eldora,Oct-78,Jan-00,39.94,-105.59,9728,Air Temperature,05J41S,LELC2
+SNOTEL 565,CO,Grand,Headwaters Colorado River,Lake Irene,Oct-78,Jan-00,40.41,-105.82,10682,Air Temperature,05J10S,LKIC2
+SNOTEL 580,CO,Conejos,Headwaters Alamosa River,Lily Pond,Oct-79,Jan-00,37.38,-106.55,11069,Air Temperature,06M23S,LPDC2
+SNOTEL 586,CO,Dolores,Headwaters Dolores River,Lizard Head Pass,Oct-79,Jan-00,37.8,-107.92,10193,Air Temperature,07M29S,LIZC2
+SNOTEL 589,CO,San Miguel,Headwaters Beaver Creek,Lone Cone,Oct-79,Jan-00,37.89,-108.2,9755,Air Temperature,08M07S,LNCC2
+SNOTEL 1123,CO,Larimer,La Poudre Pass Creek,Long Draw Resv,Oct-08,Jan-00,40.51,-105.77,10008,Air Temperature,05J27S,LRVC2
+SNOTEL 940,CO,Routt,Outlet North Fork Elk Creek,Lost Dog,Aug-98,Jan-00,40.82,-106.75,9327,Air Temperature,06J38S,LOTC2
+SNOTEL 602,CO,Clear Creek,Headwaters Clear Creek,Loveland Basin,Oct-91,Jan-00,39.67,-105.9,11427,Air Temperature,05K05S,LBAC2
+SNOTEL 607,CO,Routt,Headwaters Rock Creek,Lynx Pass,Oct-79,Jan-00,40.08,-106.67,8919,Air Temperature,06J06S,LYNC2
+SNOTEL 905,CO,Montezuma,West Mancos River,Mancos,Aug-94,Jan-00,37.43,-108.17,10044,Air Temperature,08M02S,MNCC2
+SNOTEL 618,CO,Gunnison,Lee Creek,Mc Clure Pass,Oct-79,Jan-00,39.13,-107.29,8774,Air Temperature,07K09S,MCPC2
+SNOTEL 1040,CO,Eagle,June Creek-Eagle River,Mccoy Park,Oct-02,Jan-00,39.6,-106.54,9516,Air Temperature,06K44S,MCYC2
+SNOTEL 914,CO,Saguache,Medano Creek,Medano Pass,Oct-95,Jan-00,37.85,-105.44,9668,Air Temperature,05M16S,MDPC2
+SNOTEL 622,CO,Mesa,Coon Creek,Mesa Lakes,Oct-85,Jan-00,39.06,-108.06,10168,Air Temperature,08K04S,MESC2
+SNOTEL 937,CO,Park,Michigan Creek,Michigan Creek,Aug-98,Jan-00,39.44,-105.91,10702,Air Temperature,05K28S,MIHC2
+SNOTEL 624,CO,Mineral,Headwaters Red Mountain Creek,Middle Creek,Oct-79,Jan-00,37.62,-107.04,11269,Air Temperature,07M21S,MDLC2
+SNOTEL 1014,CO,Grand,Headwaters Williams Fork,Middle Fork Camp,Sep-01,Jan-00,39.8,-106.03,8969,Air Temperature,06K12S,MFKC2
+SNOTEL 629,CO,San Juan,Mineral Creek,Mineral Creek,Oct-78,Jan-00,37.85,-107.73,10046,Air Temperature,07M14S,MINC2
+SNOTEL 632,CO,San Juan,Tenmile Creek-Animas River,Molas Lake,Oct-85,Jan-00,37.75,-107.69,10631,Air Temperature,07M12S,MLSC2
+SNOTEL 1124,CO,Saguache,California Gulch,Moon Pass,Oct-08,Jan-00,37.97,-106.56,11128,Air Temperature,06M26S,MOPC2
+SNOTEL 658,CO,Pitkin,Deeds Creek-Fryingpan River,Nast Lake,Oct-85,Jan-00,39.3,-106.61,8731,Air Temperature,06K06S,NSSC2
+SNOTEL 1031,CO,Jackson,Jack Creek,Never Summer,Sep-02,Jan-00,40.4,-105.96,10323,Air Temperature,06J27S,NEVC2
+SNOTEL 663,CO,Boulder,North Boulder Creek,Niwot,Oct-79,Jan-00,40.04,-105.55,9979,Air Temperature,05J42S,NIWC2
+SNOTEL 669,CO,Gunnison,Yule Creek-Crystal River,North Lost Trail,Oct-84,Jan-00,39.08,-107.14,9219,Air Temperature,07K01S,NLSC2
+SCAN 2017,CO,Weld,Headwaters Owl Creek,Nunn #1,Oct-93,Jan-00,40.87,-104.73,5900,Air Temperature,SC2017,NUNC2
+SNOTEL 675,CO,Delta,Cow Creek,Overland Res.,Oct-88,Jan-00,39.09,-107.64,9893,Air Temperature,07K14S,OVRC2
+SNOTEL 680,CO,Gunnison,Taylor Park Reservoir,Park Cone,Oct-79,Jan-00,38.82,-106.59,9621,Air Temperature,06L02S,PKCC2
+SNOTEL 682,CO,Delta,Surface Creek,Park Reservoir,Oct-78,Jan-00,39.04,-107.88,9987,Air Temperature,07K06S,PRVC2
+SNOTEL 688,CO,Grand,Headwaters Colorado River,Phantom Valley,Oct-79,Jan-00,40.4,-105.85,9045,Air Temperature,05J04S,PHTC2
+SNOTEL 701,CO,Gunnison,Porphyry Creek-Tomichi Creek,Porphyry Creek,Oct-78,Jan-00,38.49,-106.34,10788,Air Temperature,06L03S,PRPC2
+SNOTEL 709,CO,Routt,Harrison Creek,Rabbit Ears,Oct-85,Jan-00,40.37,-106.74,9411,Air Temperature,06J09S,RESC2
+SNOTEL 1032,CO,Jackson,Middle Canadian River,Rawah,Sep-02,Jan-00,40.71,-106.01,9069,Air Temperature,06J20S,RAWC2
+SNOTEL 713,CO,San Juan,Mineral Creek,Red Mountain Pass,Oct-79,Jan-00,37.89,-107.71,11080,Air Temperature,07M33S,RMPC2
+SNOTEL 717,CO,Rio Blanco,Snell Creek-North Fork White River,Ripple Creek,Oct-85,Jan-00,40.11,-107.29,10350,Air Temperature,07J05S,RCPC2
+SNOTEL 718,CO,Larimer,Laramie River-Stuck Creek,Roach,Oct-79,Jan-00,40.87,-106.05,9740,Air Temperature,06J12S,ROAC2
+SNOTEL 939,CO,Park,Headwaters South Fork South Platte River,Rough And Tumble,Aug-98,Jan-00,39.03,-106.08,10432,Air Temperature,06K43S,ROUC2
+SNOTEL 1100,CO,Chaffee,Headwaters Chalk Creek,Saint Elmo,Aug-07,Jan-00,38.7,-106.37,10450,Air Temperature,06L05S,CTEC2
+SNOTEL 1128,CO,Saguache,Middle Creek,Sargents Mesa,Oct-08,Jan-00,38.29,-106.37,11499,Air Temperature,06L13S,SGMC2
+SNOTEL 1251,CO,Boulder,Middle Saint Vrain Creek,Sawtooth,Sep-14,Jan-00,40.14,-105.58,9676,Air Temperature,05J45S,SATC2
+SNOTEL 737,CO,Gunnison,South Fork Crystal River,Schofield Pass,Oct-84,Jan-00,39.01,-107.05,10653,Air Temperature,07K11S,SOSC2
+SNOTEL 739,CO,Dolores,Scotch Creek-Dolores River,Scotch Creek,Oct-85,Jan-00,37.65,-108.01,9195,Air Temperature,08M08S,SHSC2
+SNOTEL 1060,CO,Montezuma,Bear Creek,Sharkstooth,Oct-04,Jan-00,37.5,-108.11,10747,Air Temperature,08M04S,SKZC2
+SNOTEL 762,CO,Hinsdale,Headwaters Cebolla Creek,Slumgullion,Oct-79,Jan-00,37.99,-107.2,11560,Air Temperature,07M30S,SLMC2
+SNOTEL 773,CO,Custer,Colony Creek-Grape Creek,South Colony,Oct-90,Jan-00,37.97,-105.54,10868,Air Temperature,05M13S,SCYC2
+SNOTEL 780,CO,San Juan,Lime Creek,Spud Mountain,Oct-85,Jan-00,37.7,-107.78,10674,Air Temperature,07M11S,SPSC2
+SNOTEL 793,CO,Grand,Stillwater Creek,Stillwater Creek,Oct-85,Jan-00,40.23,-105.92,8880,Air Temperature,05J12S,SCSC2
+SNOTEL 797,CO,La Plata,Virginia Gulch-Florida River,Stump Lakes,Oct-85,Jan-00,37.48,-107.63,11248,Air Temperature,07M34S,STPC2
+SNOTEL 802,CO,Summit,Rock Creek-Blue River,Summit Ranch,Oct-79,Jan-00,39.72,-106.16,9371,Air Temperature,06K14S,SUMC2
+SNOTEL 825,CO,Routt,Fish Creek,Tower,Oct-78,Jan-00,40.54,-106.68,10620,Air Temperature,06J29S,TOWC2
+SNOTEL 827,CO,Garfield,Headwaters North Fork White River,Trapper Lake,Oct-85,Jan-00,40,-107.24,9759,Air Temperature,07K13S,TLSC2
+SNOTEL 829,CO,Costilla,North Fork Trinchera Creek,Trinchera,Oct-88,Jan-00,37.35,-105.23,10922,Air Temperature,05M08S,TCHC2
+SNOTEL 838,CO,Boulder,North Boulder Creek,University Camp,Oct-78,Jan-00,40.03,-105.58,10360,Air Temperature,05J08S,UVCC2
+SNOTEL 839,CO,Hinsdale,Rio Grande Reservoir,Upper Rio Grande,Oct-85,Jan-00,37.72,-107.26,9379,Air Temperature,07M16S,URGC2
+SNOTEL 840,CO,Mineral,Wolf Creek,Upper San Juan,Oct-78,Jan-00,37.49,-106.84,10140,Air Temperature,06M03S,USJC2
+SNOTEL 1141,CO,Gunnison,Upper Taylor River,Upper Taylor,Aug-09,Jan-00,38.99,-106.75,10717,Air Temperature,06L14S,UPTC2
+SNOTEL 1005,CO,Costilla,East Fork Ute Creek,Ute Creek,Aug-00,Jan-00,37.61,-105.37,10734,Air Temperature,05M17S,UTCC2
+SNOTEL 842,CO,Eagle,Middle Gore Creek,Vail Mountain,Oct-78,Jan-00,39.62,-106.38,10310,Air Temperature,06K39S,VLMC2
+SNOTEL 843,CO,La Plata,Indian Creek-Los Pinos River,Vallecito,Oct-85,Jan-00,37.49,-107.51,10782,Air Temperature,07M31S,VALC2
+SNOTEL 1188,CO,Hinsdale,Lake Sanc Cristobal-Lake Fork,Wager Gulch,Jul-11,Jan-00,37.88,-107.36,11132,Air Temperature,07M37S,WRGC2
+SNOTEL 1160,CO,Hinsdale,Sand Creek,Weminuche Creek,Oct-10,Jan-00,37.52,-107.32,10749,Air Temperature,07M36S,WMNC2
+SNOTEL 857,CO,Las Animas,North Fork Purgatoire River,Whiskey Ck,Oct-79,Jan-00,37.21,-105.12,10290,Air Temperature,05M14S,WSKC2
+SNOTEL 1042,CO,Boulder,Headwaters North Saint Vrain Creek,Wild Basin,Dec-02,Jan-00,40.2,-105.6,9439,Air Temperature,05J05S,WLBC2
+SNOTEL 869,CO,Grand,Upper Willow Creek,Willow Creek Pass,Oct-78,Jan-00,40.35,-106.1,9523,Air Temperature,06J05S,WLLC2
+SNOTEL 870,CO,Larimer,Fall River,Willow Park,Oct-79,Jan-00,40.43,-105.74,10732,Air Temperature,05J40S,WPRC2
+SNOTEL 874,CO,Mineral,Wolf Creek,Wolf Creek Summit,Oct-85,Jan-00,37.48,-106.8,10957,Air Temperature,06M17S,WCSC2
+SNOTEL 1033,CO,Jackson,Middle North Fork North Platte River,Zirkel,Aug-02,Jan-00,40.79,-106.6,9338,Air Temperature,06J19S,ZIRC2
+SCAN 2069,NH,Grafton,Mill Brook-Pemigewasset River,Hubbard Brook,Sep-02,Jan-00,43.93,-71.72,1480,Air Temperature,SC2069,HUBN3
+SCAN 2043,NH,Grafton,Canaan Street Lake-Mascoma River,Mascoma River,Aug-98,Jan-00,43.78,-72.03,1400,Air Temperature,SC2043,MSRN3
+SNOTELT 1198,NV,Elko,Stoddard Creek-South Fork Humboldt River,American Beauty,Dec-11,Jan-00,40.53,-115.46,7545,Air Temperature,15J17S,AMBN2
+SNOTELT 1240,NV,Washoe,Evans Camp,Bald Mtn AM,Sep-14,Jan-00,41.78,-119.62,6720,Air Temperature,19H01S,BLDN2
+SNOTEL 321,NV,Elko,West Fork Pine Creek-Jarbidge River,Bear Creek,Oct-78,Jan-00,41.83,-115.45,8040,Air Temperature,15H01S,BERN2
+SNOTEL 334,NV,White Pine,Berry Creek,Berry Creek,Oct-79,Jan-00,39.32,-114.62,9377,Air Temperature,14K02S,BRCN2
+SNOTEL 336,NV,Elko,Martin Creek,Big Bend,Oct-78,Jan-00,41.76,-115.69,6898,Air Temperature,15H04S,BIGN2
+SNOTEL 337,NV,Lander,Big Creek,Big Creek Sum,Oct-79,Jan-00,39.29,-117.12,8685,Air Temperature,17K04S,BCSN2
+SNOTEL 340,NV,Washoe,Hunter Creek-Truckee River,Big Meadow,Oct-83,Jan-00,39.45,-119.94,8235,Air Temperature,19K08S,BMWN2
+SNOTEL 1155,NV,White Pine,Timber Creek-Duck Creek,Bird Creek,Jul-11,Jan-00,39.46,-114.65,7537,Air Temperature,14K01S,BIRN2
+SNOTEL 1111,NV,Clark,Lee Canyon,Bristlecone Trail,Jun-08,Jan-00,36.32,-115.7,8890,Air Temperature,15N09S,BRSN2
+SCAN 2216,NV,Washoe,Buckhorn Reservoir,Buckhorn,Oct-14,Jan-00,40.88,-119.95,3925,Air Temperature,SC2216,BUCN2
+SNOTEL 373,NV,Humboldt,Cabin Creek-Martin Creek,Buckskin Lower,Oct-79,Jan-00,41.75,-117.53,6930,Air Temperature,17H02S,BKLN2
+SNOTEL 1152,NV,White Pine,Bastian Creek,Cave Mountain,Jul-11,Jan-00,39.16,-114.61,10578,Air Temperature,14K08S,CAVN2
+SCAN 2145,NV,Clark,Upper Wheeler Wash,Charkiln,Oct-07,Jan-00,36.37,-115.82,6683,Air Temperature,SC2145,CHAN2
+SNOTEL 1204,NV,Elko,Columbia Creek,Columbia Basin,Dec-11,Jan-00,41.67,-116.07,6483,Air Temperature,16H06S,CMBN2
+SNOTEL 1209,NV,White Pine,Black Canyon Wash,Corduroy Flat,Dec-11,Jan-00,39,-115.42,8640,Air Temperature,15L02S,CORN2
+SNOTEL 417,NV,Elko,Corral Creek,Corral Canyon,Oct-78,Jan-00,40.28,-115.54,8445,Air Temperature,15J12S,COLN2
+SNOTEL 1210,NV,White Pine,Cooper Wash-Willow Creek,Defiance Mines,Dec-11,Jan-00,39.09,-114.9,9302,Air Temperature,14K09S,DEFN2
+SNOTEL 443,NV,Eureka,Torre Creek-Slough Creek-Frontal Diamond Valley,Diamond Peak,Oct-83,Jan-00,39.56,-115.84,8017,Air Temperature,15K03S,DPKN2
+SNOTEL 445,NV,Humboldt,Sage Creek,Disaster Peak,Oct-79,Jan-00,41.97,-118.19,6260,Air Temperature,18H01S,DSPN2
+SNOTEL 453,NV,Elko,Lower Secret Creek,Dorsey Basin,Oct-78,Jan-00,40.89,-115.21,7903,Air Temperature,15J01S,DRBN2
+SNOTEL 454,NV,Elko,Upper T Creek,Draw Creek,Oct-82,Jan-00,41.66,-115.32,7332,Air Temperature,15H24S,DRCN2
+SNOTEL 1243,NV,Elko,Upper Secret Creek,Dry Creek,Jul-13,Jan-00,40.86,-115.22,6555,Air Temperature,15J03S,DRKN2
+SNOTEL 476,NV,Elko,Fawn Creek-Owyhee River,Fawn Creek,Oct-79,Jan-00,41.82,-116.1,7031,Air Temperature,16H08S,FWCN2
+SNOTEL 1262,NV,Elko,Headwaters North Fork Humboldt River,Fry Canyon,Oct-14,Jan-00,41.57,-115.94,6798,Air Temperature,15H07S,FRYN2
+SNOTEL 1195,NV,Humboldt,Pole Creek,Golconda,Sep-11,Jan-00,40.88,-117.59,6616,Air Temperature,17J02S,GLCN2
+SNOTEL 498,NV,Humboldt,Indian Creek,Granite Peak,Oct-79,Jan-00,41.67,-117.57,8503,Air Temperature,17H08S,GRPN2
+SNOTEL 503,NV,Elko,Corral Creek,Green Mountain,Oct-78,Jan-00,40.38,-115.53,8185,Air Temperature,15J09S,GRMN2
+SCAN 2143,NV,Clark,White Sage Flat,Hayford Peak,Oct-07,Jan-00,36.66,-115.2,9870,Air Temperature,SC2143,WYPN2
+SNOTEL 527,NV,Elko,Winchell Creek-The Slough,Hole-in-Mountain,Oct-79,Jan-00,40.94,-115.1,8163,Air Temperature,15J15S,HIMN2
+SNOTEL 548,NV,Elko,Upper Harrington Creek,Jack Creek Upper,Oct-78,Jan-00,41.55,-116.01,7377,Air Temperature,16H02S,JCUN2
+SNOTEL 549,NV,Elko,Upper Harrington Creek,Jacks Peak,Oct-80,Jan-00,41.51,-116.01,8424,Air Temperature,16H04S,JAPN2
+SNOTEL 1211,NV,Elko,Upper Jakes Creek,Jakes Creek,Dec-11,Jan-00,41.57,-115.03,7380,Air Temperature,14H04S,JAKN2
+SNOTEL 1150,NV,White Pine,Lower Spring Valley Creek,Kalamazoo,Jul-11,Jan-00,39.56,-114.63,7775,Air Temperature,14K10S,KALN2
+SCAN 2141,NV,Clark,Kyle Canyon,Kyle Canyon,Oct-07,Jan-00,36.27,-115.61,7046,Air Temperature,SC2141,KCYN2
+SNOTEL 569,NV,Humboldt,Lamance Creek-Big Cottonwood Creek,Lamance Creek,Oct-79,Jan-00,41.52,-117.63,6395,Air Temperature,17H07S,LMCN2
+SNOTEL 570,NV,Elko,Thomas Creek-Lamoille Creek,Lamoille #3,Oct-79,Jan-00,40.64,-115.38,8051,Air Temperature,15J06S,LMLN2
+SNOTEL 573,NV,Elko,Trail Creek,Laurel Draw,Oct-78,Jan-00,41.78,-116.03,6682,Air Temperature,16H05S,LADN2
+SNOTEL 1112,NV,Clark,Lee Canyon,Lee Canyon,Jun-08,Jan-00,36.31,-115.68,8626,Air Temperature,15N10S,LCAN2
+SNOTEL 1006,NV,Lander,Trout Creek,Lewis Peak,Aug-00,Jan-00,40.36,-116.86,7370,Air Temperature,16J01S,LWPN2
+SNOTEL 1242,NV,Washoe,Franktown Creek-Frontal Washoe Lake,Little Valley,Jul-13,Jan-00,39.25,-119.88,6493,Air Temperature,19K03S,LTVN2
+SCAN 2146,NV,Clark,Wild Rose Spring,Lovell Summit,Oct-07,Jan-00,36.17,-115.61,6582,Air Temperature,SC2146,LSMN2
+SCAN 2116,NV,Pershing,City of Lovelock-Humboldt River,Lovelock NNR,Sep-06,Jan-00,40.09,-118.49,3934,Air Temperature,SC2116,LUVN2
+SNOTEL 615,NV,Carson City,Sand Harbor-Frontal Lake Tahoe,Marlette Lake,Oct-78,Jan-00,39.16,-119.9,7884,Air Temperature,19K04S,MRLN2
+SNOTEL 1207,NV,Elko,Merritt Creek-Sheep Creek,Merritt Mountain,Dec-11,Jan-00,41.89,-115.86,6915,Air Temperature,15H20S,MERN2
+SNOTEL 1206,NV,Elko,Frazer Creek,Midas,Dec-11,Jan-00,41.27,-116.8,6630,Air Temperature,16H03S,MDSN2
+SNOTEL 652,NV,Washoe,Hidden Valley-Steamboat Creek,Mt Rose Ski Area,Oct-79,Jan-00,39.32,-119.89,8801,Air Temperature,19K07S,MRSN2
+SNOTEL 1272,NV,Elko,Pole Creek,ONeil Creek,May-18,Jan-00,41.86,-115.08,6520,Air Temperature,15H25S,ONLN2
+SCAN 2144,NV,Clark,Horse Canyon,Pine Nut,Oct-07,Jan-00,36.57,-115.2,6780,Air Temperature,SC2144,NUTN2
+SNOTEL 1244,NV,Elko,Woods Creek-Franklin River,Pole Canyon,Jul-13,Jan-00,40.86,-115.12,7760,Air Temperature,15J20S,POLN2
+SNOTEL 698,NV,Elko,Upper Big Flat Creek,Pole Creek R.S.,Oct-79,Jan-00,41.87,-115.25,8360,Air Temperature,15H14S,PRSN2
+SNOTEL 2170,NV,Lander,Porter Canyon-Porter Creek,Porter Canyon,Oct-09,Jan-00,39.47,-117.62,7187,Air Temperature,SC2170,PRTN2
+SNOTELT 1297,NV,Humboldt,Middle East Fork Quinn River,Quinn Ridge,Oct-20,Jan-00,41.96,-117.34,6266,Air Temperature,,
+SNOTEL 1110,NV,Clark,Kyle Canyon,Rainbow Canyon,Jun-08,Jan-00,36.25,-115.63,7860,Air Temperature,15N11S,RACN2
+SNOTELT 1199,NV,Elko,Robinson Creek-Franklin River,Robinson Lake,Dec-11,Jan-00,40.73,-115.28,9194,Air Temperature,15J16S,ROBN2
+SCAN 2229,NV,Elko,Upper Withington Creek,Ruby,Aug-19,Jan-00,40.64,-115.23,6000,Air Temperature,,RBYN2
+SNOTEL 746,NV,Elko,Annie Creek-Bruneau River,Seventysix Creek,Oct-78,Jan-00,41.74,-115.47,7350,Air Temperature,15H03S,SSCN2
+SNOTEL 750,NV,Washoe,Catnip Creek,Sheldon,Oct-88,Jan-00,41.9,-119.44,5865,Air Temperature,19H05S,SHEN2
+SNOTEL 1205,NV,White Pine,Headwaters Silver Creek,Silver Creek Nv,Dec-11,Jan-00,39.23,-114.24,8200,Air Temperature,14K07S,SILN2
+SNOTELT 1235,NV,Elko,Gennette Creek-Smith Creek,Smith Creek,Jun-13,Jan-00,40.45,-115.51,7588,Air Temperature,15J19S,SMCN2
+SNOTEL 1208,NV,Elko,First Creek-South Fork Little Humboldt River,Snowstorm Mtn,Dec-11,Jan-00,41.34,-116.98,7403,Air Temperature,16H11S,SSMN2
+SNOTEL 1203,NV,Elko,Stag Creek,Stag Mountain,Dec-11,Jan-00,41.41,-115.45,7640,Air Temperature,15H19S,STGN2
+SNOTEL 1194,NV,Humboldt,Summit Lake,Summit Lk,Sep-11,Jan-00,41.49,-119,7615,Air Temperature,18H02S,MTLN2
+SNOTEL 811,NV,Elko,Upper Taylors Canyon Creek,Taylor Canyon,Oct-79,Jan-00,41.23,-116.03,6325,Air Temperature,15H09S,TACN2
+SNOTEL 1202,NV,Elko,Starr Creek,Tent Mtn Lower,Dec-11,Jan-00,40.98,-115.17,7100,Air Temperature,15J22S,TMLN2
+SNOTELT 1201,NV,Elko,Starr Creek,Tent Mtn Upper,Dec-11,Jan-00,40.97,-115.16,8333,Air Temperature,15J23S,TMUN2
+SNOTEL 1136,NV,Elko,Toe Jam Creek,Toe Jam,Jul-09,Jan-00,41.32,-116.34,7690,Air Temperature,16H07S,TJMN2
+SCAN 2142,NV,Clark,Upper Wheeler Wash,Trough Springs,Oct-07,Jan-00,36.37,-115.78,7846,Air Temperature,SC2142,TRUN2
+SNOTELT 1200,NV,Elko,Trout Creek-Humboldt River,Trout Creek Upper,Dec-11,Jan-00,41.05,-115.1,8280,Air Temperature,15H11S,TCUN2
+SNOTEL 1137,NV,Eureka,Torre Creek-Slough Creek-Frontal Diamond Valley,Vacarro Springs,Jun-11,Jan-00,39.45,-115.98,7890,Air Temperature,15K04S,VCSN2
+SNOTEL 849,NV,White Pine,Holt Creek,Ward Mountain,Oct-79,Jan-00,39.13,-114.96,9163,Air Temperature,14K05S,WDMN2
+SNOTEL 1147,NV,White Pine,Lehman Creek,Wheeler Peak,Jul-10,Jan-00,39.01,-114.31,10060,Air Temperature,14L04S,WHPN2
+SNOTEL 1213,NV,White Pine,Saddle Spring-White River,White River Nv,Dec-11,Jan-00,38.95,-115.38,7367,Air Temperature,15L01S,WHRN2
+SNOTEL 302,OR,Wallowa,West Fork Wallowa River-Wallowa River,Aneroid Lake #2,Nov-80,Jan-00,45.21,-117.19,7400,Air Temperature,17D02S,ANRO3
+SNOTEL 1000,OR,Klamath,Upper Annie Creek,Annie Springs,Sep-00,Jan-00,42.87,-122.17,6010,Air Temperature,22G06S,ANSO3
+SNOTELT 1245,OR,Baker,Upper Anthony Creek,Anthony Lake,Jul-13,Jan-00,44.96,-118.23,7160,Air Temperature,18E31S,ANZO3
+SNOTEL 304,OR,Morrow,Upper Fivemile Creek,Arbuckle Mtn,Oct-78,Jan-00,45.19,-119.25,5770,Air Temperature,19D02S,ARBO3
+SNOTELT 447,OR,Union,Little Catherine Creek,Bald Mtn AM OR,Aug-18,Jan-00,45.21,-117.66,6700,Air Temperature,,
+SNOTELT 1246,OR,Baker,Middle South Fork Burnt River,Barney Creek,Jul-13,Jan-00,44.36,-118.31,5830,Air Temperature,18E37S,BRCO3
+SNOTELT 1291,OR,Lake,Ben Young Creek,Bear Flat Meadow AM,May-18,Jan-00,42.42,-120.47,6580,Air Temperature,,
+SNOTEL 1166,OR,Linn,Smith River,Bear Grass,Jul-11,Jan-00,44.33,-122.09,4720,Air Temperature,22E10S,BKSO3
+SNOTEL 331,OR,Union,Upper Beaver Creek,Beaver Reservoir,Oct-79,Jan-00,45.15,-118.22,5150,Air Temperature,18D09S,BVRO3
+SNOTEL 341,OR,Jackson,Upper Little Applegate River,Big Red Mountain,Oct-79,Jan-00,42.05,-122.85,6050,Air Temperature,22G21S,BRMO3
+SNOTELT 1229,OR,Wallowa,Salt Creek-Big Sheep Creek,Big Sheep AM,Aug-12,Jan-00,45.17,-117.09,6240,Air Temperature,17D14S,BSZO3
+SNOTEL 343,OR,Josephine,Sturgis Fork Carberry Creek,Bigelow Camp,Oct-79,Jan-00,42.08,-123.34,5130,Air Temperature,23G15S,BGCO3
+SNOTEL 344,OR,Klamath,Seldom Creek,Billie Creek Divide,Oct-78,Jan-00,42.41,-122.27,5280,Air Temperature,22G13S,BCDO3
+SNOTEL 351,OR,Clackamas,Clear Creek-Sandy River,Blazed Alder,Oct-79,Jan-00,45.43,-121.86,3650,Air Temperature,21D33S,BLAO3
+SNOTEL 357,OR,Grant,Summit Creek,Blue Mountain Spring,Oct-78,Jan-00,44.25,-118.52,5870,Air Temperature,18E16S,BLPO3
+SNOTEL 361,OR,Baker,Cracker Creek,Bourne,Oct-78,Jan-00,44.83,-118.19,5850,Air Temperature,18E05S,BORO3
+SNOTEL 362,OR,Umatilla,Johnson Creek,Bowman Springs,Oct-78,Jan-00,45.36,-118.47,4530,Air Temperature,18D20S,BMSO3
+SNOTELT 1292,OR,Harney,Hog Wallow Spring-Donner und Blitzen River,Buckskin Lake AM,May-18,Jan-00,43.03,-118.95,5190,Air Temperature,,
+SNOTELT 1289,OR,Harney,Cow Creek,Call Meadows AM,Apr-18,Jan-00,43.81,-118.79,5380,Air Temperature,,
+SNOTEL 388,OR,Deschutes,Upper Salt Creek,Cascade Summit,Oct-79,Jan-00,43.59,-122.06,5100,Air Temperature,22F03S,CSTO3
+SNOTEL 395,OR,Klamath,Deer Creek,Chemult Alternate,Oct-79,Jan-00,43.23,-121.81,4850,Air Temperature,21F22S,CHUO3
+SNOTEL 398,OR,Clackamas,Headwaters Oak Grove Fork Clackamas River,Clackamas Lake,Oct-79,Jan-00,45.1,-121.75,3400,Air Temperature,21D13S,CLLO3
+SNOTEL 401,OR,Wasco,Clear Creek,Clear Lake,Oct-79,Jan-00,45.19,-121.69,3810,Air Temperature,21D12S,CLKO3
+SNOTEL 406,OR,Klamath,Upper Fourmile Creek,Cold Springs Camp,Oct-79,Jan-00,42.53,-122.18,5940,Air Temperature,22G24S,CSCO3
+SNOTEL 422,OR,Umatilla,Middle Meadow Creek,County Line,Oct-79,Jan-00,45.19,-118.55,4830,Air Temperature,18D08S,COLO3
+SNOTELT 1273,OR,Lake,Upper Thomas Creek,Cox Flat AM,Jul-15,Jan-00,42.36,-120.61,5710,Air Temperature,20G11S,CXZO3
+SNOTEL 1010,OR,Klamath,Paradise Creek,Crazyman Flat,Sep-01,Jan-00,42.64,-120.95,6180,Air Temperature,20G12S,CZFO3
+SNOTEL 434,OR,Linn,Pyramid Creek,Daly Lake,Oct-78,Jan-00,44.52,-122.09,3690,Air Temperature,22E08S,DALO3
+SNOTEL 440,OR,Wheeler,Jackson Creek,Derr.,Oct-79,Jan-00,44.45,-119.93,5850,Air Temperature,19E03S,DERO3
+SNOTEL 442,OR,Douglas,Lake Creek,Diamond Lake,Oct-79,Jan-00,43.19,-122.14,5280,Air Temperature,22F18S,DIAO3
+SNOTEL 464,OR,Baker,Rock Creek,Eilertson Meadows,Oct-79,Jan-00,44.87,-118.11,5510,Air Temperature,18E03S,EIMO3
+SNOTEL 470,OR,Umatilla,Iskuulpa Creek,Emigrant Springs,Oct-79,Jan-00,45.56,-118.45,3800,Air Temperature,18D04S,ESPO3
+SNOTELT 1274,OR,Lake,Upper South Fork Sprague River,Finley Corrals AM,Jul-15,Jan-00,42.46,-120.79,5950,Air Temperature,20G14S,FNZO3
+SNOTEL 477,OR,Harney,Fish Creek,Fish Creek,Oct-78,Jan-00,42.71,-118.63,7660,Air Temperature,18G02S,FCKO3
+SNOTEL 479,OR,Jackson,Upper North Fork Little Butte Creek,Fish Lk.,Oct-79,Jan-00,42.38,-122.35,4660,Air Temperature,22G14S,FISO3
+SNOTEL 483,OR,Klamath,Upper Fourmile Creek,Fourmile Lake,Oct-78,Jan-00,42.44,-122.23,5970,Air Temperature,22G12S,FRLO3
+SNOTEL 945,OR,Klamath,Gerber Reservoir,Gerber Reservoir,Oct-98,Jan-00,42.21,-121.13,4890,Air Temperature,21G04S,GSTO3
+SNOTEL 494,OR,Grant,Bull Run Creek,Gold Center,Oct-79,Jan-00,44.76,-118.31,5410,Air Temperature,18E08S,GLDO3
+SNOTELT 1250,OR,Harney,Big Trout Creek,Government Corrals,Aug-13,Jan-00,42.04,-118.32,7400,Air Temperature,18G04S,GVZO3
+SNOTEL 504,OR,Hood River,Lower West Fork Hood River,Greenpoint,Oct-78,Jan-00,45.62,-121.7,3310,Air Temperature,21D01S,GRPO3
+SNOTELT 1218,OR,Lake,Headwaters Rock Creek,Hart Mountain AM,Jun-12,Jan-00,42.48,-119.72,6480,Air Temperature,19G01S,HTZO3
+SNOTEL 523,OR,Umatilla,Buck Creek-South Fork Umatilla River,High Ridge,Oct-78,Jan-00,45.7,-118.11,4920,Air Temperature,18D19S,HIRO3
+SNOTEL 526,OR,Linn,Parks Creek-Lost Lake,Hogg Pass,Oct-78,Jan-00,44.42,-121.86,4790,Air Temperature,21E06S,HOPO3
+SNOTEL 529,OR,Lane,Layng Creek,Holland Meadows,Oct-79,Jan-00,43.67,-122.57,4930,Air Temperature,22F42S,HLMO3
+SNOTEL 1158,OR,Jackson,Upper Jenny Creek,Howard Prairie,Sep-12,Jan-00,42.22,-122.37,4580,Air Temperature,22G26S,HOWO3
+SNOTEL 545,OR,Deschutes,Deer Creek,Irish Taylor,Oct-78,Jan-00,43.8,-121.95,5540,Air Temperature,21F21S,BEDO3
+SNOTEL 552,OR,Linn,Sevenmile Creek-South Santiam River,Jump Off Joe,Oct-78,Jan-00,44.39,-122.17,3520,Air Temperature,22E07S,JOJO3
+SNOTEL 558,OR,Jackson,Whitehorse Creek-Cow Creek,King Mountain,Oct-79,Jan-00,42.72,-123.2,4340,Air Temperature,23G09S,KIMO3
+SNOTEL 563,OR,Grant,Lake Creek,Lake Creek R.S.,Oct-78,Jan-00,44.21,-118.64,5240,Air Temperature,18E18S,LKCO3
+SNOTEL 584,OR,Linn,Headwaters Quartzville Creek,Little Meadows,Oct-81,Jan-00,44.61,-122.23,4020,Air Temperature,22E09S,LMDO3
+SNOTELT 1298,OR,Malheur,Middle Tent Creek,Lookout Butte,Oct-20,Jan-00,42.13,-117.18,5730,Air Temperature,,
+SNOTELT 1296,OR,Unknown,Lower East Fork Quinn River,Louse Canyon,Oct-20,Jan-00,42.07,-117.55,6520,Air Temperature,,
+SNOTEL 605,OR,Umatilla,West Birch Creek,Lucky Strike,Oct-78,Jan-00,45.27,-118.85,4970,Air Temperature,18D06S,LUKO3
+SCAN 2074,OR,Klamath,Mills Creek-Tule Lake Valley,Lynhart Ranch,Jun-03,Jan-00,42.02,-121.39,4092,Air Temperature,SC2074,LYNO3
+SNOTEL 608,OR,Morrow,Chapin Creek-Rock Creek,Madison Butte,Oct-79,Jan-00,45.11,-119.5,5150,Air Temperature,19D03S,MDBO3
+SNOTEL 614,OR,Linn,Minto Creek-North Santiam River,Marion Forks,Oct-79,Jan-00,44.59,-121.97,2590,Air Temperature,21E04S,MRFO3
+SNOTEL 619,OR,Lane,White Branch,Mckenzie,Oct-79,Jan-00,44.21,-121.87,4770,Air Temperature,21E07S,MKZO3
+SNOTEL 1079,OR,Wallowa,Upper Mill Creek,Milk Shakes,May-07,Jan-00,45.98,-117.95,5580,Air Temperature,17D20S,MLKO3
+SNOTEL 1084,OR,Yamhill,Baker Creek,Miller Woods,Sep-06,Jan-00,45.25,-123.28,420,Air Temperature,23D03S,MWDO3
+SNOTEL 647,OR,Union,Mill Creek,Moss Springs,Oct-79,Jan-00,45.27,-117.69,5760,Air Temperature,17D06S,MOSO3
+SNOTEL 651,OR,Clackamas,Upper Salmon River,Mt Hood Test Site,Oct-79,Jan-00,45.32,-121.72,5370,Air Temperature,21D08S,MTHO3
+SNOTEL 653,OR,Wallowa,Upper Prairie Creek,Mt. Howard,Oct-79,Jan-00,45.27,-117.17,7910,Air Temperature,17D18S,MHWO3
+SNOTEL 655,OR,Clackamas,Upper Salmon River,Mud Ridge,Oct-78,Jan-00,45.25,-121.74,4070,Air Temperature,21D35S,MUDO3
+SNOTEL 660,OR,Klamath,Upper Crescent Creek,New Crescent Lake,Oct-79,Jan-00,43.51,-121.98,4910,Air Temperature,21F10S,NCLO3
+SNOTEL 666,OR,Multnomah,Middle Bull Run River,North Fork,Oct-78,Jan-00,45.55,-122,3060,Air Temperature,22D02S,NFRO3
+SNOTEL 671,OR,Crook,Headwaters Ochoco Creek,Ochoco Meadows,Oct-79,Jan-00,44.43,-120.33,5430,Air Temperature,20E02S,OCMO3
+SNOTELT 1241,OR,Lake,Muddy Creek,Patton Meadows AM,Jun-13,Jan-00,42.25,-120.61,6780,Air Temperature,20G17S,PTZO3
+SNOTEL 687,OR,Clackamas,Cot Creek-Oat Grove Fork Clackamas River,Peavine Ridge,Oct-79,Jan-00,45.04,-121.93,3420,Air Temperature,21D14S,PVRO3
+SNOTEL 706,OR,Lake,Middle South Fork Sprague River,Quartz Mountain,Oct-79,Jan-00,42.32,-120.83,5720,Air Temperature,20G06S,QRMO3
+SNOTEL 710,OR,Lane,Middle Salt Creek,Railroad Overpass,Oct-80,Jan-00,43.66,-122.21,2680,Air Temperature,22F05S,RROO3
+SNOTEL 712,OR,Hood River,Lower Middle Fork Hood River,Red Hill,Oct-78,Jan-00,45.46,-121.7,4410,Air Temperature,21D04S,REDO3
+SNOTEL 719,OR,Lane,Roaring River-South Fork McKenzie River,Roaring River,Oct-79,Jan-00,43.9,-122.03,4950,Air Temperature,22F43S,RORO3
+SNOTEL 721,OR,Grant,Calamity Creek,Rock Springs,Oct-79,Jan-00,44.01,-118.84,5290,Air Temperature,18F01S,RCSO3
+SNOTELT 1220,OR,Lake,Burnt Creek-Deep Creek,Rogger Meadow AM,Jun-12,Jan-00,42.17,-120.25,6360,Air Temperature,20G19S,RGZO3
+SNOTEL 726,OR,Washington,Headwaters Tualatin River,Saddle Mountain,Oct-78,Jan-00,45.54,-123.37,3110,Air Temperature,23D01S,SDMO3
+SNOTEL 729,OR,Lane,Upper Salt Creek,Salt Creek Falls,Oct-79,Jan-00,43.61,-122.12,4220,Air Temperature,22F04S,SCFO3
+SNOTEL 733,OR,Linn,Parks Creek-Lost Lake,Santiam Jct.,Oct-78,Jan-00,44.44,-121.95,3740,Air Temperature,21E05S,SAJO3
+SNOTEL 736,OR,Baker,Clear Creek,Schneider Meadows,Oct-80,Jan-00,45,-117.17,5400,Air Temperature,17D08S,SCHO3
+SNOTEL 743,OR,Washington,Sain Creek-Scoggins Creek,Seine Creek,Oct-79,Jan-00,45.53,-123.3,2060,Air Temperature,23D02S,SECO3
+SNOTEL 745,OR,Klamath,Sevenmile Creek,Sevenmile Marsh,Oct-79,Jan-00,42.7,-122.14,5700,Air Temperature,22G33S,SVMO3
+SNOTELT 1219,OR,Lake,Upper Honey Creek,Sherman Valley AM,Jun-12,Jan-00,42.36,-120.23,6630,Air Temperature,20G10S,SHZO3
+SNOTEL 756,OR,Lake,West Fork Silver Creek,Silver Creek,Oct-79,Jan-00,42.96,-121.18,5740,Air Temperature,21F12S,SVCO3
+SNOTEL 759,OR,Harney,Mud Creek,Silvies,Oct-78,Jan-00,42.75,-118.69,6990,Air Temperature,18G01S,SLVO3
+SNOTEL 1167,OR,Linn,Smith River,Smith Ridge,Oct-11,Jan-00,44.3,-122.04,3270,Air Temperature,22E11S,SMTO3
+SNOTEL 767,OR,Harney,Crowsfoot Creek-Emigrant Creek,Snow Mountain,Oct-78,Jan-00,43.95,-119.54,6230,Air Temperature,19F01S,SNWO3
+SNOTEL 925,OR,Clackamas,South Fork Bull Run River,South Fork Bull Run,Sep-97,Jan-00,45.45,-122.03,2690,Air Temperature,22D03S,SFBO3
+SNOTEL 789,OR,Grant,Starr Creek-Silvies River,Starr Ridge,Oct-79,Jan-00,44.26,-119.02,5250,Air Temperature,19E07S,STRO3
+SNOTEL 794,OR,Lake,Barnes Valley Creek,Strawberry,Oct-79,Jan-00,42.13,-120.84,5770,Air Temperature,20G09S,STWO3
+SNOTEL 800,OR,Lake,Headwaters Sycan River,Summer Rim,Oct-78,Jan-00,42.7,-120.8,7080,Air Temperature,20G02S,SMRO3
+SNOTEL 801,OR,Klamath,Summit Lake,Summit Lake,Oct-78,Jan-00,43.45,-122.14,5610,Air Temperature,22F14S,SMLO3
+SNOTEL 1078,OR,Klamath,Egan Spring-Williamson River,Sun Pass,Jun-06,Jan-00,42.79,-121.98,5400,Air Temperature,21G17S,SSSO3
+SNOTEL 1077,OR,Klamath,Grizzly Butte,Swan Lake Mtn,Oct-06,Jan-00,42.41,-121.68,6830,Air Temperature,21G16S,SWNO3
+SNOTEL 810,OR,Klamath,Chester Spring-Sycan River,Taylor Butte,Oct-78,Jan-00,42.69,-121.43,5030,Air Temperature,21G03S,TYBO3
+SNOTEL 812,OR,Baker,South Fork Catherine Creek,Taylor Green,Oct-78,Jan-00,45.08,-117.55,5740,Air Temperature,17D07S,TYLO3
+SNOTEL 815,OR,Deschutes,Three Creek,Three Creeks Meadow,Oct-79,Jan-00,44.14,-121.64,5690,Air Temperature,21E13S,TCMO3
+SNOTEL 821,OR,Baker,Upper North Fork Burnt River,Tipton,Oct-78,Jan-00,44.66,-118.43,5150,Air Temperature,18E09S,TIPO3
+SNOTEL 1044,OR,Douglas,Lower Fish Creek,Toketee Airstrip,Oct-03,Jan-00,43.23,-122.43,3240,Air Temperature,22F45S,TOKO3
+SNOTELT 1238,OR,Harney,Big Trout Creek,Trout Creek AM,Aug-13,Jan-00,42.04,-118.24,7890,Air Temperature,18G05S,TRZO3
+SNOTELT 1230,OR,Wallowa,Silver Creek-Lostine River,TV Ridge AM,Aug-12,Jan-00,45.4,-117.39,7050,Air Temperature,17D16S,TVZO3
+SNOTELT 1237,OR,Harney,Home Creek,V Lake AM,Aug-13,Jan-00,42.47,-118.77,6640,Air Temperature,18G07S,VKZO3
+SNOTELT 1288,OR,Union,West Eagle Creek,West Eagle Meadows AM,Jul-17,Jan-00,45.08,-117.48,5490,Air Temperature,,
+SNOTEL 873,OR,Union,Upper Wolf Creek,Wolf Creek,Oct-78,Jan-00,45.07,-118.15,5630,Air Temperature,18D21S,WFCO3
+SCAN 2042,VT,Bennington,Warm Brook,Lye Brook,Sep-00,Jan-00,43.05,-73.03,2435,Air Temperature,SC2042,LBKV1
+SCAN 2041,VT,Chittenden,Headwaters Browns River,Mount Mansfield,Sep-00,Jan-00,44.53,-72.83,2236,Air Temperature,SC2041,MMSV1

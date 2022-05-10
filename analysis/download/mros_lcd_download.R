@@ -1,4 +1,4 @@
-# Script for gather Local Climatological Data from web
+# Script for gathering Local Climatological Data from web
 
 library(rvest)
 library(tidyverse)

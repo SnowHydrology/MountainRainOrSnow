@@ -11,7 +11,6 @@ library(foreach) # for parallel processing
 library(doMC)
 library(minpack.lm)
 library(sp)
-library(raster)
 
 ########## User input
 
@@ -336,7 +335,13 @@ tair_validation.l <-
   }
 
 # Bind all into a data frame
-tair_validation <- plyr::ldply(tair_validation.l, bind_rows)
+#tair_validation <- plyr::ldply(tair_validation.l, bind_rows)
+tair_validation <- data.frame()
+for(i in 1:length(tair_validation.l)){
+  if(length(tair_validation.l[[i]]) == 16){
+    tair_validation <- bind_rows(tair_validation, tair_validation.l[[i]])
+  }
+}
 
 # Summary stats
 summary(lm(tair ~ tair_idw_lapse_const, tair_validation))

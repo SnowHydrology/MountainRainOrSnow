@@ -21,15 +21,16 @@ citsci.input = "data/NOSHARE/mros_obs_cit_sci_processed_20220503.RDS"
 elev.input = "data/NOSHARE/mros_elev_3dep_pts_20220503.csv"
 
 # Output files
-citsci.output = "data/NOSHARE/mros_cit_sci_obs_processed_with_tair_20220503.RDS"
-model.output = "data/processed/tair_model_data_full_20220503.RDS"
-validation.output = "data/processed/tair_model_validation_20220503.RDS"
+citsci.output = "data/NOSHARE/mros_cit_sci_obs_processed_with_tair_20220503_v2.RDS"
+model.output = "data/processed/tair_model_data_full_20220503_v2.RDS"
+validation.output = "data/processed/tair_model_validation_20220503_v2.RDS"
 
   
 # Other
-met.search.radius = 300000 # search radius for met stations (m)
+met.search.radius = 100000 # search radius for met stations (m)
 n.station.thresh = 5 # threshold for the number of met stations in search radius to perform temp modeling
 n.remove = 50000 # number of random tair obs to remove for model validation
+stations.remove <- c("WRSV1", "XONC1", "DPHC1", "DKKC2" ) # bad data
 
 # Assign cores for parallelization
 registerDoMC(cores = 4)
@@ -40,7 +41,8 @@ registerDoMC(cores = 4)
 # Remove extreme values
 tair <- readRDS(file = met.input) %>% 
   mutate(tair = case_when(tair < -30 | tair > 45 ~ NA_real_,
-                          TRUE ~ tair))
+                          TRUE ~ tair)) %>% 
+  filter(!(id %in% stations.remove))
 
 # Import the station metadata
 meta <- read.csv(meta.input) %>% 
@@ -119,6 +121,10 @@ rain_snow.l <-
                   elev = mean(elev),
                   dist = mean(dist))
       
+      # Remove outliers
+      tmp.tair <- tmp.tair %>%
+        filter(!(abs(tair - median(tair)) > 2*sd(tair)))
+
       # Compute lapse rate from all stations using linear regression
       tmp.lapse.fit <- lm(tair ~ elev, tmp.tair)
       tmp.lapse = tmp.lapse.fit$coefficients[2] %>% as.numeric()
@@ -160,6 +166,9 @@ rain_snow.l <-
                                   tair_idw_lapse_var = tmp.tair_idw_lapse_var,
                                   tair_nearest_lapse_const = tmp.tair_nearest_site_const,
                                   tair_nearest_lapse_var = tmp.tair_nearest_site_var,
+                                  tair_avg_obs = mean(tmp.tair$tair, na.rm = T),
+                                  tair_min_obs = min(tmp.tair$tair, na.rm = T),
+                                  tair_max_obs = max(tmp.tair$tair, na.rm = T),
                                   lapse_var = tmp.lapse,
                                   lapse_var_r2 = tmp.lapse.r2,
                                   lapse_var_pval = tmp.lapse.pval,
@@ -176,6 +185,9 @@ rain_snow.l <-
                                   tair_idw_lapse_var = NA,
                                   tair_nearest_lapse_const = NA,
                                   tair_nearest_lapse_var = NA,
+                                  tair_avg_obs = NA,
+                                  tair_min_obs = NA,
+                                  tair_max_obs = NA,
                                   lapse_var = NA,
                                   lapse_var_r2 = NA,
                                   lapse_var_pval = NA,

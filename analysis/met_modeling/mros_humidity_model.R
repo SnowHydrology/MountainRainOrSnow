@@ -20,19 +20,20 @@ library(humidity) # devtools::install_github("SnowHydrology/humidity")
 # Input files
 met.input = "data/NOSHARE/mros_met_all_20220503.RDS"
 meta.input = "data/metadata/all_metadata_valid.csv"
-citsci.input = "data/NOSHARE/mros_cit_sci_obs_processed_with_tair_20220503.RDS"
+citsci.input = "data/NOSHARE/mros_cit_sci_obs_processed_with_tair_20220503_v2.RDS"
 elev.input = "data/NOSHARE/mros_elev_3dep_pts_20220503.csv"
 
 # Output files
-citsci.output = "data/NOSHARE/mros_cit_sci_obs_processed_with_met_all_20220503.RDS"
-model.output = "data/processed/tdew_model_data_full_20220503.RDS"
+citsci.output = "data/NOSHARE/mros_cit_sci_obs_processed_with_met_all_20220503_v2.RDS"
+model.output = "data/processed/tdew_model_data_full_20220503_v2.RDS"
 validation.output = "data/processed/tdew_model_validation_20220503.RDS"
 all.validation.output = "data/NOSHARE/met_equation_validation_20220503.RDS"
 
 # Other
-met.search.radius = 300000 # search radius for met stations (m)
+met.search.radius = 100000 # search radius for met stations (m)
 n.station.thresh = 5 # threshold for the number of met stations in search radius to perform temp modeling
 n.remove = 50000 # number of random tair obs to remove for model validation
+stations.remove <- c("WRSV1", "XONC1", "DPHC1", "DKKC2" ) # bad data
 
 # Assign cores for parallelization
 registerDoMC(cores = 4)
@@ -43,6 +44,7 @@ registerDoMC(cores = 4)
 # Remove extreme values
 # No current TWET or TDEW extreme values (airport data preprocessed by NCDC?)
 met <- readRDS(file = met.input) %>% 
+  filter(!(id %in% stations.remove)) %>% 
   mutate(tair = case_when(tair < -30 | tair > 45 ~ NA_real_,
                           TRUE ~ tair),
          tdew = case_when(tdew < -40 | tdew > 45 ~ NA_real_,
@@ -54,15 +56,12 @@ met <- readRDS(file = met.input) %>%
 
 # Import the station metadata
 meta <- read.csv(meta.input) %>% 
-  mutate(lat = as.numeric(lat)) %>% 
-  left_join(.,
-            select(read.csv(elev.input), id, elev = elevation),
-            by = "id")
+  mutate(lat = as.numeric(lat))
 
 # Import the citizen science observations
 # These were already pre-processed & filtered once
 obs <- readRDS(citsci.input) %>% 
-  mutate(phase = str_trim(phase))
+  mutate(phase = str_trim(phase)) 
 
 ################################################################################
 #                Use RH and TAIR to compute TWET and TDEW                      #
@@ -178,6 +177,10 @@ rain_snow.l <-
                   dist = mean(dist)) %>% 
         arrange(dist)
       
+      # Remove outliers
+      tmp.met <- tmp.met %>%
+        filter(!(abs(tdew - median(tdew)) > 2*sd(tdew)))
+      
       # Compute lapse rate from all stations using linear regression
       tmp.lapse.fit <- lm(tdew ~ elev, tmp.met)
       tmp.lapse = tmp.lapse.fit$coefficients[2] %>% as.numeric()
@@ -214,6 +217,9 @@ rain_snow.l <-
       tmp.rain_snow <- data.frame(id = obs[i, "id"],
                                   tdew_idw_lapse_var = tmp.tdew_idw_lapse_var,
                                   tdew_nearest_lapse_var = tmp.tdew_nearest_site_var,
+                                  tdew_avg_obs = mean(tmp.met$tdew, na.rm = T),
+                                  tdew_min_obs = min(tmp.met$tdew, na.rm = T),
+                                  tdew_max_obs = max(tmp.met$tdew, na.rm = T),
                                   lapse_var = tmp.lapse,
                                   lapse_var_r2 = tmp.lapse.r2,
                                   lapse_var_pval = tmp.lapse.pval,
@@ -228,6 +234,9 @@ rain_snow.l <-
       tmp.rain_snow <- data.frame(id = obs[i, "id"],
                                   tdew_idw_lapse_var = NA,
                                   tdew_nearest_lapse_var = NA,
+                                  tdew_avg_obs = NA,
+                                  tdew_min_obs = NA,
+                                  tdew_max_obs = NA,
                                   lapse_var = NA,
                                   lapse_var_r2 = NA,
                                   lapse_var_pval = NA,

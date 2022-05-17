@@ -3,8 +3,11 @@
 # 1) Check nearby airports for precipitation
 # 2) Check air temperature
 # 3) Check relative humidity
-# 4) Check distance from temperature observations
-# 5) Check whether timestamp is duplicate of report from same observer
+# 4) Check average distance from temperature observations
+# 5) Check distance from closest station
+# 6) Check number of stations
+# 7) Check p-value of variable lapse rate
+# 8) Check whether timestamp is duplicate of report from same observer
 
 # Keith Jennings
 # 2021-07-26
@@ -17,13 +20,13 @@ library(geosphere) # used for computing distances between points
 ########## User input
 
 # Input files
-citsci.input = "data/NOSHARE/mros_cit_sci_obs_processed_with_met_all_20220503.RDS"
-dist.input = "data/processed/tair_model_data_full_20220503.RDS" # for met station distance
+citsci.input = "data/NOSHARE/mros_cit_sci_obs_processed_with_met_all_20220503_v2.RDS"
+dist.input = "data/processed/tair_model_data_full_20220503_v2.RDS" # for met station distance
 lcd.input = "data/NOSHARE/mros_met_lcd_20220503.RDS"
 meta.input = "data/metadata/all_metadata_valid.csv"
 
 # Output files
-noshare.output = "data/NOSHARE/mros_cit_sci_obs_processed_with_tair_QCflags_20220503.RDS"
+noshare.output = "data/NOSHARE/mros_cit_sci_obs_processed_with_tair_QCflags_20220503_v2.RDS"
 share.output = "data/processed/mros_obs_processed_20220503.RDS"
 
 # Import data

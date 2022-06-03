@@ -1,0 +1,44 @@
+variable,description,unit
+id,numeric id of observation,-
+datetime_local_obs,local date and time of observation,-
+datetime_local_sub,local date and time of submission,-
+latitude,latitude of observation truncated to two decimal places,°
+longitude,longitude of observation truncated to two decimal places,°
+phase,precipitaion phase of observation as rain or snow or mix,-
+timezone,time zone of observation,-
+date,local time date of observation,-
+year,local time year of observation,-
+month,local time month of observation,-
+day,local time day of observation,-
+hour,local time hour of observation,-
+minute,local time minute of observation,-
+second,local time second of observation,-
+day_of_week,local time day of week of observation,-
+doy,local time day of year of observation,-
+dowy,local time day of water year of observation,-
+utc_datetime,UTC date and time of observation,-
+eco_l4,EPA Level IV ecoregion of observation,-
+eco_l3,EPA Level III ecoregion of observation,-
+eco_l2,EPA Level II ecoregion of observation,-
+state,US state of observation,-
+elev,elevation of observation derived from USGS 3DEP data,m
+tair,modeled air temperature of observation,°C
+tair_bin,categorical modeled air temperature bin of observation,°C
+tair_bin_num,numeric modeled air temperature bin of observation,°C
+twet,modeled wet bulb temperature of observation,°C
+tdew,modeled dew point temperature of observation,°C
+rh,modeled relative humidity of observation,%
+avg_dist,average distance between observation and met stations used in modeling,m
+nearest_dist,distance between observation and closest met station used in modeling,m
+n_stations,number of met stations used in modeling,-
+lapse_var_pval,p-value of the modeled lapse rate,-
+ppt,daily precipitation recorded at nearby met stations,mm
+tair_flag,air temperature quality control flag,-
+ppt_flag,daily precipitation quality control flag,-
+rh_flag,relative humidity quality control flag,-
+dist_flag,average distance to met stations quality control flag,-
+closest_flag,distance to closest met station quality control flag,-
+nstation_flag,number of met stations quality control flag,-
+pval_flag,lapse rate p-value quality control flag,-
+dupe_flag,duplicate observation quality control flag,-
+gpm_prob,GPM IMERG probabilityLiquidPrecipitation value for grid cell containing observation,%

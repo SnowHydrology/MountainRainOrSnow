@@ -13,6 +13,9 @@ library(doMC); registerDoMC(cores = 4)
 # Input files
 citsci.input = "data/processed/mros_obs_processed_20220503.RDS"
 
+# Output
+rs.output = "data/processed/mros_obs_rain_snow_line_20220503.RDS"
+
 # Threshold for n valid obs per grouping unit
 obs_thresh = 300
 
@@ -91,10 +94,4 @@ rain_snow_line <- plyr::ldply(rain_snow_line.l, bind_rows)
 
 # Export data
 saveRDS(object = rain_snow_line,
-        file = "data/processed/mros_obs_rain_snow_line_2020-2021.RDS")
-
-
-# Plot all probs by elev bin
-ggplot(obs_by_elev_date, aes(elev_bin, snow_prob)) + 
-  geom_point() + 
-  facet_wrap(~date)
+        file = rs.output)

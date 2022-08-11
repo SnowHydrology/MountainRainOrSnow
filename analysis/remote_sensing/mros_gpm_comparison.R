@@ -8,7 +8,7 @@ citsci.input = "data/processed/mros_obs_processed_20220503.RDS"
 gpm.input = "data/processed/mros_gpm_processed_20220503.RDS"
 
 # Output files
-citsci.output = "data/processed/"
+summary.output = "data/processed/mros_gpm_summary_20220503.RDS"
 
 # Threshold for n valid obs per grouping unit
 obs_thresh = 300
@@ -85,12 +85,12 @@ obs <- bind_rows(
 
 # Denote whether phase designation was correct or not
 obs <- obs %>% 
-  mutate(gpm_phase = case_when(mix == "yes" ~
+  mutate(gpm_phase = case_when(mix == "no" ~
                                  case_when(gpm_prob <= prob_thresh_upper_snow &
                                              gpm_prob >= prob_thresh_lower_snow ~ "Snow",
                                            gpm_prob <= prob_thresh_upper_rain &
                                              gpm_prob >= prob_thresh_lower_rain ~ "Rain"),
-                               mix == "no" ~
+                               mix == "yes" ~
                                  case_when(gpm_prob <= (prob_thresh_upper_snow - prob_mix_offset) &
                                              gpm_prob >= prob_thresh_lower_snow ~ "Snow",
                                            gpm_prob <= prob_thresh_upper_rain  &
@@ -111,7 +111,28 @@ gpm_summary <- obs %>%
 
 
 # Export
+saveRDS(object = gpm_summary,
+        file = summary.output)
 
+# Export only the qc, no-mix scenario data for confusion matrices
+test <- obs %>% 
+  filter(qc == "yes" &
+           mix == "no" &
+           loc_group == "eco_l3")
+
+#
+# Compute confusion matrix
+test <- test %>% 
+  mutate(phase = as.factor(phase),
+         gpm_phase = as.factor(gpm_phase))
+caret::confusionMatrix(data = test$gpm_phase, reference = test$phase)
+test2 <- filter(test, tair_bin_num > 0 & tair_bin_num < 4)
+caret::confusionMatrix(data = test2$gpm_phase, reference = test2$phase)
+
+test %>% 
+  xtabs(~ phase + gpm_phase + name, data = .) %>%  
+  array_tree(., margin = 3) %>% 
+  map(~caret::confusionMatrix(as.table(.x)))
 
 # First source the script for plot formats and fills
 source("analysis/functions/mros_plot_formats.R")
@@ -150,6 +171,34 @@ filter(gpm_summary, loc_group == "state") %>%
   labs(x = expression("Air Temperature Bin ("*degree*C*")"),
        y = "GPM Success Rate (black)\nObs Snow (purple)\nGPM Snow (blue) (all %)") + 
   facet_wrap(~name + qc)
+
+filter(gpm_summary, loc_group == "state" & qc == "yes" & mix == "no") %>% 
+  ggplot(., aes(tair_bin_num, gpm_perf_pct)) + 
+  geom_line()+
+  geom_line(aes(tair_bin_num, snow_pct_obs), color = "purple") +
+  geom_line(aes(tair_bin_num, snow_pct_gpm), color = "blue") +
+  labs(x = expression("Air Temperature Bin ("*degree*C*")"),
+       y = "GPM Success Rate (black)\nObs Snow (purple)\nGPM Snow (blue) (all %)") + 
+  facet_wrap(~name)
+
+filter(gpm_summary, loc_group == "state" & qc == "yes" & mix == "no") %>% 
+  ggplot(., aes(tair_bin_num, gpm_perf_pct)) + 
+  geom_line()+
+  geom_line(aes(tair_bin_num, snow_pct_obs), color = "purple") +
+  geom_line(aes(tair_bin_num, snow_pct_gpm), color = "blue") +
+  labs(x = expression("Air Temperature Bin ("*degree*C*")"),
+       y = "GPM Success Rate (black)\nObs Snow (purple)\nGPM Snow (blue) (all %)") + 
+  facet_wrap(~name)
+
+
+filter(gpm_summary, loc_group == "eco_l3" & qc == "yes" & mix == "no" & name != "Northern Piedmont") %>% 
+  ggplot(., aes(tair_bin_num, name,fill = gpm_perf_pct)) + 
+  geom_raster()+
+  labs(x = expression("Air Temperature ("*degree*C*")"),
+       y = "GPM Success Rate (%)") +
+  scale_fill_viridis_c(option = "magma", name = "IMERG Success Rate (%)") +
+  theme(axis.title.y = element_blank(),
+        legend.position = "top",legend.key.width = unit(10, "mm"))
 
 reshape2::melt(select(gpm_summary_noMIXED, -n_obs), id.vars = "tair_bin_num2", 
                variable.name = "metric", value.name = "pct") %>% 

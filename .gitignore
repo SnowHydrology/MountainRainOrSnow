@@ -46,3 +46,6 @@ data/NOSHARE/
 
 # West US DEM (1.8GB)
 elev_westUS_90m.tif
+
+# Temp analyses
+TEMPORARY.R

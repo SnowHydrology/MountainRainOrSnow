@@ -27,8 +27,10 @@ obs <- obs %>%
 obs_by_elev_date <- obs %>% 
   group_by(date, elev_bin2) %>% 
   summarise(snow_prob = sum(phase == "Snow")/length(phase) * 100) %>% 
-  mutate(elev = case_when(elev_bin2 == "[875,1.12e+03]" ~ 1000,
-                          TRUE ~ as.numeric(substr(elev_bin2, 2, 5)) * 1000 + 125))
+  mutate(elev = case_when(elev_bin2 == "[625,875]" ~ 750,
+                          elev_bin2 == "(875,1.12e+03]" ~ 1000,
+                          TRUE ~ as.numeric(substr(elev_bin2, 2, 5)) * 1000 + 125),
+         n = n())
 
 # Get unique dates
 dates <- unique(obs_by_elev_date$date)
@@ -61,7 +63,8 @@ rain_snow_line.l <-
     # Output into dataframe
     tmp.rain_snow_line <- data.frame(date = dates[i],
                                      rs_line = tmp.rs_line,
-                                     note = tmp.note)
+                                     note = tmp.note,
+                                     n = sum(tmp.df$n))
     
     # Print to list
     tmp.rain_snow_line
@@ -75,9 +78,5 @@ rain_snow_line <- plyr::ldply(rain_snow_line.l, bind_rows)
 # Export data
 saveRDS(object = rain_snow_line,
         file = "data/processed/mros_obs_rain_snow_line_2020-2021.RDS")
-
-
-# Plot all probs by elev bin
-ggplot(obs_by_elev_date, aes(elev_bin2, snow_prob)) + 
-  geom_point() + 
-  facet_wrap(~date)
+saveRDS(object = obs_by_elev_date,
+        file = "data/processed/mros_obs_rain_snow_prob_elev_2020-2021.RDS")

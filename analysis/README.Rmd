@@ -450,6 +450,12 @@ reshape2::melt(select(gpm_summary_noMIXED, -n_obs), id.vars = "tair_bin_num2",
 
 ## Rain-snow line comparison
 
+TODO: Add the following:
+```{r message = FALSE}
+valid_dates = filter(rain_snow_line, note == "valid" & n > 10)$date
+ggplot(filter(obs_by_elev_date, date %in% valid_dates), aes(elev, snow_prob)) + geom_point() + geom_vline(data = filter(rain_snow_line, date %in% valid_dates), aes(xintercept = rs_line)) + facet_wrap(~date) + xlim(min(obs_by_elev_date$elev), max(obs_by_elev_date$elev)) + geom_hline(yintercept = 50)
+```
+
 Import the data
 
 ```{r message = FALSE}

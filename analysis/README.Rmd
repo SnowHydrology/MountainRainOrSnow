@@ -7,7 +7,7 @@ output: github_document
 
 # Introduction
 
-The `Analysis` directory includes the processing scripts used to evaluate precipitation phase data submitted by citizen scientists taking part in _Mountain Rain or Snow_. This includes pre-processing the observations, downloading ancillary meteorological data, estimating air temperature at each observation point, and quality controlling the precipitation phase reports.
+The `Analysis` directory includes the processing scripts used to evaluate precipitation phase data submitted by citizen scientists taking part in *Mountain Rain or Snow*. This includes pre-processing the observations, downloading ancillary meteorological data, estimating air temperature at each observation point, and quality controlling the precipitation phase reports.
 
 The analysis below includes observations submitted near Lake Tahoe during the 2020 and 2021 campaigns.
 
@@ -15,9 +15,9 @@ The analysis below includes observations submitted near Lake Tahoe during the 20
 
 The `mros_cit_sci_obs_preprocess.R` script in `analysis/pre_processing` associates the following geospatial data with each observation:
 
-* Level II, III, and IV Ecoregions
-* US State
-* Elevation (m)
+-   Level II, III, and IV Ecoregions
+-   US State
+-   Elevation (m)
 
 The script also formats the time data and removes all observations submitted without geolocation info.
 
@@ -25,12 +25,12 @@ The script also formats the time data and removes all observations submitted wit
 
 Few of the citizen science observations are submitted near existing meteorological measurement stations, meaning we need to model the air temperature for each rain, snow, mixed data point. We do this with air temperature data from four networks:
 
-Network Name | URL
--------------|---------------------------------------------------------
-HADS         | <https://mesonet.agron.iastate.edu/request/dcp/fe.phtml>
-SNOTEL       | <https://wcc.sc.egov.usda.gov/reportGenerator/>
-RAWS         | <https://raws.dri.edu/>
-NCDC LCD     | <https://gis.ncdc.noaa.gov/maps/ncei/lcd>
+| Network Name | URL                                                      |
+|--------------|----------------------------------------------------------|
+| HADS         | <https://mesonet.agron.iastate.edu/request/dcp/fe.phtml> |
+| SNOTEL       | <https://wcc.sc.egov.usda.gov/reportGenerator/>          |
+| RAWS         | <https://raws.dri.edu/>                                  |
+| NCDC LCD     | <https://gis.ncdc.noaa.gov/maps/ncei/lcd>                |
 
 The two intial datasets can be accessed programatically using `analysis/download/data_download_hads.R` and `analysis/download/data_download_snotel.R` while the latter two need to be downloaded manually from the links. After downloading the data, we prepare them for the temperature model using `analysis/pre_processing/mros_met_data_preprocess.R`.
 
@@ -38,10 +38,10 @@ The two intial datasets can be accessed programatically using `analysis/download
 
 We then model the air temperature at each location using four methods in the `analysis/met_modeling/mros_air_temperature_model.R` script:
 
-* Inverse distance weighting (IDW), plus a constant lapse rate of -0.005°C/m
-* IDW, plus a variable lapse rate computed from air temperature observations
-* Nearest met station, plus a constant lapse rate of -0.005°C/m
-* Nearest met station, plus a variable lapse rate computed from air temperature observations
+-   Inverse distance weighting (IDW), plus a constant lapse rate of -0.005°C/m
+-   IDW, plus a variable lapse rate computed from air temperature observations
+-   Nearest met station, plus a constant lapse rate of -0.005°C/m
+-   Nearest met station, plus a variable lapse rate computed from air temperature observations
 
 As a result of its higher performance in terms of mean bias and r<sup>2</sup>, we use the IDW plus variable lapse rate method when assigning air temperature to each observation point.
 
@@ -51,11 +51,11 @@ Future versions of the code will model additional meteorological variables, such
 
 Next, we flag observations based on five criteria:
 
-1. Whether precipitation was recorded that day at the nearby NCDC LCD met stations.
-2. The estimated air temperature relative to realistic values for rain and snow.
-3. The relative humidity at the observation point
-4. Average distance from the met stations.
-5. If the timestamp was a duplicate of an observation from the same observer.
+1.  Whether precipitation was recorded that day at the nearby NCDC LCD met stations.
+2.  The estimated air temperature relative to realistic values for rain and snow.
+3.  The relative humidity at the observation point
+4.  Average distance from the met stations.
+5.  If the timestamp was a duplicate of an observation from the same observer.
 
 We then output the processed, quality controlled observations to a shareable data file: `data/processed/mros_obs_processed_2020_2021.RDS`
 
@@ -100,7 +100,7 @@ obsPass <- obsPass %>%
 
 ## Observations by elevation
 
-We received precipitation reports in the study area between `r min(obsPass$elev)` m and `r max(obsPass$elev)` m, with mean and median report elevations of `r round(mean(obsPass$elev), digits = 0)` m and `r round(median(obsPass$elev), digits = 0)` m, respectively. In total, there were `r length(filter(obsPass, phase == "Snow")$phase)`, `r length(filter(obsPass, phase == "Rain")$phase)`, `r length(filter(obsPass, phase == "Mixed")$phase)`, snow, rain, and mixed observations. 
+We received precipitation reports in the study area between `r min(obsPass$elev)` m and `r max(obsPass$elev)` m, with mean and median report elevations of `r round(mean(obsPass$elev), digits = 0)` m and `r round(median(obsPass$elev), digits = 0)` m, respectively. In total, there were `r length(filter(obsPass, phase == "Snow")$phase)`, `r length(filter(obsPass, phase == "Rain")$phase)`, `r length(filter(obsPass, phase == "Mixed")$phase)`, snow, rain, and mixed observations.
 
 The elevational breakdown of precipitation phase looks like this:
 
@@ -197,7 +197,7 @@ obsPass <- obsPass %>%
   mutate(n_cumulative = row_number())
 ```
 
-We received `r length(filter(obsPass, wy == 2020)$phase)` observations in water year 2020 and `r length(filter(obsPass, wy == 2021)$phase)` in 2021. Snow was the most frequent phase in both water years, but both rain and mixed precipitation increased in relative proportion in 2021. 
+We received `r length(filter(obsPass, wy == 2020)$phase)` observations in water year 2020 and `r length(filter(obsPass, wy == 2021)$phase)` in 2021. Snow was the most frequent phase in both water years, but both rain and mixed precipitation increased in relative proportion in 2021.
 
 ```{r echo = FALSE, warning = FALSE, message = FALSE}
 obsPass %>% 
@@ -208,7 +208,6 @@ obsPass %>%
   mutate(pct = round(n / sum(n) * 100, digits = 1)) %>% 
   knitr::kable()
 ```
-
 
 ```{r echo = FALSE, warning = FALSE, message = FALSE, fig.dim= c(6,4)}
 ggplot(obsPass, aes(dowy, n_cumulative, color = phase)) + 
@@ -222,9 +221,88 @@ ggplot(obsPass, aes(dowy, n_cumulative, color = phase)) +
   scale_x_continuous(breaks = c(1, 93, 183, 274), 
                      labels = c("Oct. 1", "Jan. 1", "Apr. 1", "Jul. 1"))
 ```
+
 ## Observations by air temperature
 
-Modeled meteorological data show volunteers submitted precipitation phase reports from a minimum air temperature value of `r round(min(obsPass$tair), digits = 1)`°C to a maximum of `r round(max(obsPass$tair), digits = 1)`°C with a median value of `r round(median(obsPass$tair), digits = 1)`°C. What’s more, the vast majority of reports came from a relatively narrow air temperature range. Our data show 95% of observations corresponded to air temperatures between `r round(quantile(obsPass$tair, probs = c(0.025, 0.975))[1], digits = 1)`°C and `r round(quantile(obsPass$tair, probs = c(0.025, 0.975))[2], digits = 1)`°C. 
+Modeled meteorological data show volunteers submitted precipitation phase reports from a minimum air temperature value of `r round(min(obsPass$tair), digits = 1)`°C to a maximum of `r round(max(obsPass$tair), digits = 1)`°C with a median value of `r round(median(obsPass$tair), digits = 1)`°C. The vast majority of reports came from a relatively narrow air temperature range. Our data show 95% of observations corresponded to air temperatures between `r round(quantile(obsPass$tair, probs = c(0.025, 0.975))[1], digits = 1)`°C and `r round(quantile(obsPass$tair, probs = c(0.025, 0.975))[2], digits = 1)`°C. `r round(sum(obsPass$tair >= 0 & obsPass$tair <= 4)/length(obsPass$tair) * 100, 1)`% of reported precipitation fell between 0°C and 4°C, the air temperature range identified by previous research to have the greatest rain-snow partitioning uncertainty. 
+
+```{r echo = FALSE, warning = FALSE, message = FALSE}
+# Compute a whole mess of distributions and their overlaps
+
+# By tair
+tair_snowDens <- with(obsPass, density(tair[phase == "Snow"], 
+                           from = min(tair), 
+                           to = max(tair)))
+tair_rainDens <- with(obsPass, density(tair[phase == "Rain"], 
+                           from = min(tair),
+                           to = max(tair)))
+tair_mixDens <- with(obsPass, density(tair[phase == "Mixed"], 
+                                from = min(tair),
+                                to = max(tair)))
+tair_snowRain_joint <- pmin(tair_snowDens$y, tair_rainDens$y)
+tair_snowRain_overlap = (sum(tair_snowRain_joint)/sum(tair_snowDens$y) +
+                           sum(tair_snowRain_joint)/sum(tair_rainDens$y))/2
+tair_snowMix_joint <- pmin(tair_snowDens$y, tair_mixDens$y)
+tair_snowMix_overlap = (sum(tair_snowMix_joint)/sum(tair_snowDens$y) +
+                           sum(tair_snowMix_joint)/sum(tair_mixDens$y))/2
+tair_rainMix_joint <- pmin(tair_rainDens$y, tair_mixDens$y)
+tair_rainMix_overlap = (sum(tair_rainMix_joint)/sum(tair_rainDens$y) +
+                           sum(tair_rainMix_joint)/sum(tair_mixDens$y))/2
+tair_all_joint <- pmin(tair_rainDens$y, tair_mixDens$y, tair_snowDens$y)
+tair_all_overlap = (sum(tair_all_joint)/sum(tair_rainDens$y) +
+                      sum(tair_all_joint)/sum(tair_mixDens$y) +
+                      sum(tair_all_joint)/sum(tair_snowDens$y))/3
+
+# By twet
+twet_snowDens <- with(obsPass, density(twet[phase == "Snow"], 
+                           from = min(twet), 
+                           to = max(twet)))
+twet_rainDens <- with(obsPass, density(twet[phase == "Rain"], 
+                           from = min(twet),
+                           to = max(twet)))
+twet_mixDens <- with(obsPass, density(twet[phase == "Mixed"], 
+                                from = min(twet),
+                                to = max(twet)))
+twet_snowRain_joint <- pmin(twet_snowDens$y, twet_rainDens$y)
+twet_snowRain_overlap = (sum(twet_snowRain_joint)/sum(twet_snowDens$y) +
+                           sum(twet_snowRain_joint)/sum(twet_rainDens$y))/2
+twet_snowMix_joint <- pmin(twet_snowDens$y, twet_mixDens$y)
+twet_snowMix_overlap = (sum(twet_snowMix_joint)/sum(twet_snowDens$y) +
+                           sum(twet_snowMix_joint)/sum(twet_mixDens$y))/2
+twet_rainMix_joint <- pmin(twet_rainDens$y, twet_mixDens$y)
+twet_rainMix_overlap = (sum(twet_rainMix_joint)/sum(twet_rainDens$y) +
+                           sum(twet_rainMix_joint)/sum(twet_mixDens$y))/2
+twet_all_joint <- pmin(twet_rainDens$y, twet_mixDens$y, twet_snowDens$y)
+twet_all_overlap = (sum(twet_all_joint)/sum(twet_rainDens$y) +
+                      sum(twet_all_joint)/sum(twet_mixDens$y) +
+                      sum(twet_all_joint)/sum(twet_snowDens$y))/3
+
+# By tdew
+tdew_snowDens <- with(obsPass, density(tdew[phase == "Snow"], 
+                           from = min(tdew), 
+                           to = max(tdew)))
+tdew_rainDens <- with(obsPass, density(tdew[phase == "Rain"], 
+                           from = min(tdew),
+                           to = max(tdew)))
+tdew_mixDens <- with(obsPass, density(tdew[phase == "Mixed"], 
+                                from = min(tdew),
+                                to = max(tdew)))
+tdew_snowRain_joint <- pmin(tdew_snowDens$y, tdew_rainDens$y)
+tdew_snowRain_overlap = (sum(tdew_snowRain_joint)/sum(tdew_snowDens$y) +
+                           sum(tdew_snowRain_joint)/sum(tdew_rainDens$y))/2
+tdew_snowMix_joint <- pmin(tdew_snowDens$y, tdew_mixDens$y)
+tdew_snowMix_overlap = (sum(tdew_snowMix_joint)/sum(tdew_snowDens$y) +
+                           sum(tdew_snowMix_joint)/sum(tdew_mixDens$y))/2
+tdew_rainMix_joint <- pmin(tdew_rainDens$y, tdew_mixDens$y)
+tdew_rainMix_overlap = (sum(tdew_rainMix_joint)/sum(tdew_rainDens$y) +
+                           sum(tdew_rainMix_joint)/sum(tdew_mixDens$y))/2
+tdew_all_joint <- pmin(tdew_rainDens$y, tdew_mixDens$y, tdew_snowDens$y)
+tdew_all_overlap = (sum(tdew_all_joint)/sum(tdew_rainDens$y) +
+                      sum(tdew_all_joint)/sum(tdew_mixDens$y) +
+                      sum(tdew_all_joint)/sum(tdew_snowDens$y))/3
+```
+
+We also found differing patterns when examining the distributions of the precipitation phase types. In each case, there was marked overlap in the phase distributions by temperature, underscoring the difficulty in using near-surface meteorological data to partition rain, snow, and mixed precipitation. The distributions for rain and snow, for example, overlapped by `r round(tair_snowRain_overlap * 100, 1)`%, `r round(twet_snowRain_overlap * 100, 1)`%, and `r round(tdew_snowRain_overlap * 100, 1)`% for air, wet bulb, and dew point temperature, respectively. This suggests wet bulb temperature is a more sensitive predictor of rain versus snow relative to the other temperature types, while air temperature is the least sensitive. Similarly, air temperature had the highest percent overlap between snow and mixed (`r round(tair_snowMix_overlap * 100, 1)`%) and rain and mixed phases (`r round(tair_rainMix_overlap * 100, 1)`%). 
 
 ```{r echo = FALSE, warning = FALSE, message = FALSE}
 plot_grid(
@@ -232,15 +310,24 @@ plot_grid(
     geom_density(lwd = 1)+
     scale_color_manual(values = c("blue", "purple", "black")) +
     labs(x = "Air Temperature (°C)", y = "Density") +
-    theme(legend.position = c(0.8,0.8), legend.title = element_blank()),
+    theme(legend.position = c(0.8,0.8), legend.title = element_blank()) +
+    xlim(-15, 10),
   ggplot(obsPass, aes(twet, color = phase)) +
     geom_density(lwd = 1)+
     scale_color_manual(values = c("blue", "purple", "black")) +
     labs(x = "Wet Bulb Temperature (°C)", y = "Density") +
-    theme(legend.position = "none"),
+    theme(legend.position = "none") +
+    xlim(-15, 10),
+  ggplot(obsPass, aes(tdew, color = phase)) +
+    geom_density(lwd = 1)+
+    scale_color_manual(values = c("blue", "purple", "black")) +
+    labs(x = "Dew Point Temperature (°C)", y = "Density") +
+    theme(legend.position = "none") +
+    xlim(-15, 10),
   cols = 1, align = "vh", labels = "auto"
 )
 ```
+
 ## Rain-snow partitioning
 
 Using the observations and modeled meteorological data, we can compute snowfall probability curves and 50% snowfall probability temperatures, the latter of which are used as thresholds in models to split solid and liquid precipitation. We provide a methods overview here and the full code can be found in `mros_obs_analysis.R`. In short, we bin air temperature in 1°C increments from -10°C to 20°C and wet bulb temperature in 1°C increments from -12°C to 16°C. We then compute the probability of snowfall occurring in each air and wet bulb temperature bin. Those data are next fit with a hyperbolic tangent as in Dai (2008) and Jennings et al. (2018) to create snowfall probability curves. The 50% snowfall probability air and wet bulb temperature thresholds are where the fitted curves pass the 50% mark.
@@ -301,7 +388,7 @@ ggplot() +
   annotate(geom = "text", x = -10, y = 15, label = "Wet bulb temperature", color = "aquamarine3", hjust = 0)
 ```
 
-We notice the 50% threshold is a fair bit higher for air temperature verus wet bulb temperature, which is expected because the former is always warmer than the latter when relative humidity is less than 100%. We also see a fair bit more noise in the curve for air temperature between approximately 25% and 50%. 
+We notice the 50% threshold is a fair bit higher for air temperature verus wet bulb temperature, which is expected because the former is always warmer than the latter when relative humidity is less than 100%. We also see a fair bit more noise in the curve for air temperature between approximately 25% and 50%.
 
 ```{r echo = FALSE, warning = FALSE, message = FALSE}
 tmp <- filter(obsPass, tair >= min(filter(rs_p[["snow_prob_tair"]],snow_prob <= .50 & snow_prob >= .25)$tair_bin_num) &
@@ -360,6 +447,24 @@ p +  geom_area(data = filter(d, x>tair_thresh), aes(x=x,y=y), fill = "darkred", 
   annotate(geom = "text", x = 2.5, y = 0.1, 
            label = paste0(round(pct_incorrect, digits = 1), "% of snow misidentified"), color = "darkred",
            hjust = 0)
+```
+
+## Precipitation phase partitioning method comparison
+
+Import the summary data produced in `analysis/rain_snow/mros_method_comparison.R`
+
+```{r message = FALSE}
+# import the summary and summary by tair data
+method_summary <- readRDS("../data/processed/mros_obs_sim_summary.RDS")
+method_summary_byTair <- readRDS("../data/processed/mros_obs_sim_summary_byTair.RDS")
+```
+
+And make a tri-panel plot showing method success rate by air temperature for the three evaluation scenarios
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.dim= c(7,4.5)}
+ggplot(method_summary_byTair, aes(tair_bin_num, scenario, fill = perf_pct)) + 
+  geom_raster() + 
+  facet_wrap(~eval_type)
 ```
 
 ## GPM IMERG comparison
@@ -451,9 +556,10 @@ reshape2::melt(select(gpm_summary_noMIXED, -n_obs), id.vars = "tair_bin_num2",
 ## Rain-snow line comparison
 
 TODO: Add the following:
+
 ```{r message = FALSE}
-valid_dates = filter(rain_snow_line, note == "valid" & n > 10)$date
-ggplot(filter(obs_by_elev_date, date %in% valid_dates), aes(elev, snow_prob)) + geom_point() + geom_vline(data = filter(rain_snow_line, date %in% valid_dates), aes(xintercept = rs_line)) + facet_wrap(~date) + xlim(min(obs_by_elev_date$elev), max(obs_by_elev_date$elev)) + geom_hline(yintercept = 50)
+# valid_dates = filter(rain_snow_line, note == "valid" & n > 10)$date
+# ggplot(filter(obs_by_elev_date, date %in% valid_dates), aes(elev, snow_prob)) + geom_point() + geom_vline(data = filter(rain_snow_line, date %in% valid_dates), aes(xintercept = rs_line)) + facet_wrap(~date) + xlim(min(obs_by_elev_date$elev), max(obs_by_elev_date$elev)) + geom_hline(yintercept = 50)
 ```
 
 Import the data

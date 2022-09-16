@@ -20,9 +20,9 @@ during the 2020 and 2021 campaigns.
 The `mros_cit_sci_obs_preprocess.R` script in `analysis/pre_processing`
 associates the following geospatial data with each observation:
 
-  - Level II, III, and IV Ecoregions
-  - US State
-  - Elevation (m)
+-   Level II, III, and IV Ecoregions
+-   US State
+-   Elevation (m)
 
 The script also formats the time data and removes all observations
 submitted without geolocation info.
@@ -32,11 +32,10 @@ submitted without geolocation info.
 Few of the citizen science observations are submitted near existing
 meteorological measurement stations, meaning we need to model the air
 temperature for each rain, snow, mixed data point. We do this with air
-temperature data from four
-networks:
+temperature data from four networks:
 
 | Network Name | URL                                                      |
-| ------------ | -------------------------------------------------------- |
+|--------------|----------------------------------------------------------|
 | HADS         | <https://mesonet.agron.iastate.edu/request/dcp/fe.phtml> |
 | SNOTEL       | <https://wcc.sc.egov.usda.gov/reportGenerator/>          |
 | RAWS         | <https://raws.dri.edu/>                                  |
@@ -54,12 +53,12 @@ prepare them for the temperature model using
 We then model the air temperature at each location using four methods in
 the `analysis/met_modeling/mros_air_temperature_model.R` script:
 
-  - Inverse distance weighting (IDW), plus a constant lapse rate of
+-   Inverse distance weighting (IDW), plus a constant lapse rate of
     -0.005°C/m
-  - IDW, plus a variable lapse rate computed from air temperature
+-   IDW, plus a variable lapse rate computed from air temperature
     observations
-  - Nearest met station, plus a constant lapse rate of -0.005°C/m
-  - Nearest met station, plus a variable lapse rate computed from air
+-   Nearest met station, plus a constant lapse rate of -0.005°C/m
+-   Nearest met station, plus a variable lapse rate computed from air
     temperature observations
 
 As a result of its higher performance in terms of mean bias and
@@ -158,21 +157,21 @@ observations.
 By state:
 
 | state      |    n |
-| :--------- | ---: |
+|:-----------|-----:|
 | California | 1069 |
 | Nevada     | 1179 |
 
 By US EPA Level III Ecoregion:
 
-| eco\_l3                 |    n |
-| :---------------------- | ---: |
+| eco_l3                  |    n |
+|:------------------------|-----:|
 | Central Basin and Range |  827 |
 | Sierra Nevada           | 1421 |
 
 And by US EPA Level IV Ecoregion:
 
-| eco\_l4                                            |    n |
-| :------------------------------------------------- | ---: |
+| eco_l4                                             |    n |
+|:---------------------------------------------------|-----:|
 | Central Sierra Lower Montane Forests               |   41 |
 | Central Sierra Mid-Montane Forests                 |   10 |
 | Lahontan Salt Shrub Basin                          |   10 |
@@ -210,7 +209,7 @@ was the most frequent phase in both water years, but both rain and mixed
 precipitation increased in relative proportion in 2021.
 
 |   wy | phase |   n |  pct |
-| ---: | :---- | --: | ---: |
+|-----:|:------|----:|-----:|
 | 2020 | Rain  | 151 | 15.8 |
 | 2020 | Mixed | 134 | 14.1 |
 | 2020 | Snow  | 668 | 70.1 |
@@ -218,18 +217,33 @@ precipitation increased in relative proportion in 2021.
 | 2021 | Mixed | 204 | 15.8 |
 | 2021 | Snow  | 770 | 59.5 |
 
-![](README_files/figure-gfm/unnamed-chunk-11-1.png)<!-- --> \#\#
-Observations by air temperature
+![](README_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
+
+## Observations by air temperature
 
 Modeled meteorological data show volunteers submitted precipitation
 phase reports from a minimum air temperature value of -10.2°C to a
 maximum of 25.7°C with a median value of 1.1°C. What’s more, the vast
 majority of reports came from a relatively narrow air temperature range.
 Our data show 95% of observations corresponded to air temperatures
-between -5.0601094°C and 9.5923782°C.
+between -5.1°C and 9.6°C.
 
-![](README_files/figure-gfm/unnamed-chunk-12-1.png)<!-- --> \#\#
-Rain-snow partitioning
+We also found differing patterns when examining the distributions of the
+precipitation phase types by air, wet bulb, and dew point temperature.
+In each case, there was marked overlap in the phase distributions by
+temperature, underscoring the difficulty in using near-surface
+meteorological data to partition rain, snow, and mixed precipitation.
+The distributions for rain and snow, for example, overlapped by 52.8%,
+43.8%, and 45.7% for air, wet bulb, and dew point temperature,
+respectively. This suggests wet bulb temperature is a more sensitive
+predictor of rain versus snow relative to the other temperature types,
+while air temperature is the least sensitive. Similarly, air temperature
+had the highest percent overlap between snow and mixed (72.8%) and rain
+and mixed phases (75.3%).
+
+![](README_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->
+
+## Rain-snow partitioning
 
 Using the observations and modeled meteorological data, we can compute
 snowfall probability curves and 50% snowfall probability temperatures,
@@ -240,7 +254,7 @@ temperature in 1°C increments from -10°C to 20°C and wet bulb
 temperature in 1°C increments from -12°C to 16°C. We then compute the
 probability of snowfall occurring in each air and wet bulb temperature
 bin. Those data are next fit with a hyperbolic tangent as in Dai (2008)
-and Jennings et al. (2018) to create snowfall probability curves. The
+and Jennings et al. (2018) to create snowfall probability curves. The
 50% snowfall probability air and wet bulb temperature thresholds are
 where the fitted curves pass the 50% mark.
 
@@ -253,15 +267,15 @@ rs_p <- readRDS("../data/processed/mros_obs_rs_partitioning_2020_2021.RDS")
 
 We can then look at the air temperature snowfall probability plot:
 
-![](README_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-15-1.png)<!-- -->
 
 The wet bulb temperature snowfall probability plot:
 
-![](README_files/figure-gfm/unnamed-chunk-15-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-16-1.png)<!-- -->
 
 And the two of them combined:
 
-![](README_files/figure-gfm/unnamed-chunk-16-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-17-1.png)<!-- -->
 
 We notice the 50% threshold is a fair bit higher for air temperature
 verus wet bulb temperature, which is expected because the former is
@@ -269,8 +283,8 @@ always warmer than the latter when relative humidity is less than 100%.
 We also see a fair bit more noise in the curve for air temperature
 between approximately 25% and 50%.
 
-| phase | mean\_rh | temp     |
-| :---- | -------: | :------- |
+| phase |  mean_rh | temp     |
+|:------|---------:|:---------|
 | Rain  | 79.73312 | air      |
 | Mixed | 72.74908 | air      |
 | Snow  | 65.55655 | air      |
@@ -280,13 +294,29 @@ between approximately 25% and 50%.
 
 ## 
 
-![](README_files/figure-gfm/unnamed-chunk-18-1.png)<!-- -->
-
 ![](README_files/figure-gfm/unnamed-chunk-19-1.png)<!-- -->
 
 ![](README_files/figure-gfm/unnamed-chunk-20-1.png)<!-- -->
 
 ![](README_files/figure-gfm/unnamed-chunk-21-1.png)<!-- -->
+
+![](README_files/figure-gfm/unnamed-chunk-22-1.png)<!-- -->
+
+## Precipitation phase partitioning method comparison
+
+Import the summary data produced in
+`analysis/rain_snow/mros_method_comparison.R`
+
+``` r
+# import the summary and summary by tair data
+method_summary <- readRDS("../data/processed/mros_obs_sim_summary.RDS")
+method_summary_byTair <- readRDS("../data/processed/mros_obs_sim_summary_byTair.RDS")
+```
+
+And make a tri-panel plot showing method success rate by air temperature
+for the three evaluation scenarios
+
+![](README_files/figure-gfm/unnamed-chunk-24-1.png)<!-- -->
 
 ## GPM IMERG comparison
 
@@ -358,9 +388,16 @@ gpm_summary_noMIXED <- obsGPM %>%
 
 Then plot the analyzed results:
 
-![](README_files/figure-gfm/unnamed-chunk-23-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-26-1.png)<!-- -->
 
 ## Rain-snow line comparison
+
+TODO: Add the following:
+
+``` r
+# valid_dates = filter(rain_snow_line, note == "valid" & n > 10)$date
+# ggplot(filter(obs_by_elev_date, date %in% valid_dates), aes(elev, snow_prob)) + geom_point() + geom_vline(data = filter(rain_snow_line, date %in% valid_dates), aes(xintercept = rs_line)) + facet_wrap(~date) + xlim(min(obs_by_elev_date$elev), max(obs_by_elev_date$elev)) + geom_hline(yintercept = 50)
+```
 
 Import the data
 
@@ -388,4 +425,4 @@ all <- left_join(gpm, flr, by = "datetime")
 
 Plot an event:
 
-![](README_files/figure-gfm/unnamed-chunk-25-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-29-1.png)<!-- -->

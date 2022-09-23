@@ -96,6 +96,9 @@ obsPass <- filter(obs, tair_flag == "Pass" &
 # Add elevation info
 obsPass <- obsPass %>% 
    mutate(elev_bin = cut_width(elev, width = 500))
+
+# Summarize by day
+obsDaily <- obsPass %>% group_by(date) %>% summarize(n = n(), snow_pct = sum(phase == "Snow")/n() * 100, rain_pct = sum(phase == "Rain")/n() * 100, mixed_pct = sum(phase == "Mixed")/n() * 100 )
 ```
 
 ## Observations by elevation
@@ -224,7 +227,7 @@ ggplot(obsPass, aes(dowy, n_cumulative, color = phase)) +
 
 ## Observations by air temperature
 
-Modeled meteorological data show volunteers submitted precipitation phase reports from a minimum air temperature value of `r round(min(obsPass$tair), digits = 1)`°C to a maximum of `r round(max(obsPass$tair), digits = 1)`°C with a median value of `r round(median(obsPass$tair), digits = 1)`°C. The vast majority of reports came from a relatively narrow air temperature range. Our data show 95% of observations corresponded to air temperatures between `r round(quantile(obsPass$tair, probs = c(0.025, 0.975))[1], digits = 1)`°C and `r round(quantile(obsPass$tair, probs = c(0.025, 0.975))[2], digits = 1)`°C. `r round(sum(obsPass$tair >= 0 & obsPass$tair <= 4)/length(obsPass$tair) * 100, 1)`% of reported precipitation fell between 0°C and 4°C, the air temperature range identified by previous research to have the greatest rain-snow partitioning uncertainty. 
+According to modeled air temperature data, volunteers submitted precipitation phase reports from a minimum air temperature value of `r round(min(obsPass$tair), digits = 1)`°C to a maximum of `r round(max(obsPass$tair), digits = 1)`°C with a median value of `r round(median(obsPass$tair), digits = 1)`°C. The vast majority of reports came from a relatively narrow air temperature range. Our data show 95% of observations corresponded to air temperatures between `r round(quantile(obsPass$tair, probs = c(0.025, 0.975))[1], digits = 1)`°C and `r round(quantile(obsPass$tair, probs = c(0.025, 0.975))[2], digits = 1)`°C. `r round(sum(obsPass$tair >= 0 & obsPass$tair <= 4)/length(obsPass$tair) * 100, 1)`% of reported precipitation fell between 0°C and 4°C, the air temperature range identified by previous research to have the greatest rain-snow partitioning uncertainty. 
 
 ```{r echo = FALSE, warning = FALSE, message = FALSE}
 # Compute a whole mess of distributions and their overlaps
@@ -302,7 +305,7 @@ tdew_all_overlap = (sum(tdew_all_joint)/sum(tdew_rainDens$y) +
                       sum(tdew_all_joint)/sum(tdew_snowDens$y))/3
 ```
 
-We also found differing patterns when examining the distributions of the precipitation phase types. In each case, there was marked overlap in the phase distributions by temperature, underscoring the difficulty in using near-surface meteorological data to partition rain, snow, and mixed precipitation. The distributions for rain and snow, for example, overlapped by `r round(tair_snowRain_overlap * 100, 1)`%, `r round(twet_snowRain_overlap * 100, 1)`%, and `r round(tdew_snowRain_overlap * 100, 1)`% for air, wet bulb, and dew point temperature, respectively. This suggests wet bulb temperature is a more sensitive predictor of rain versus snow relative to the other temperature types, while air temperature is the least sensitive. Similarly, air temperature had the highest percent overlap between snow and mixed (`r round(tair_snowMix_overlap * 100, 1)`%) and rain and mixed phases (`r round(tair_rainMix_overlap * 100, 1)`%). 
+We also found marked overlap in the phase distributions by temperature, underscoring the difficulty in using near-surface meteorological data to partition rain, snow, and mixed precipitation (FIG XXXX). The distributions for rain and snow, for example, overlapped by `r round(tair_snowRain_overlap * 100, 1)`%, `r round(twet_snowRain_overlap * 100, 1)`%, and `r round(tdew_snowRain_overlap * 100, 1)`% for air, wet bulb, and dew point temperature, respectively. This suggests wet bulb temperature is a more sensitive predictor of rain versus snow relative to the other temperature types, while air temperature is the least sensitive. Air temperature also had the highest percent overlap between snow and mixed (`r round(tair_snowMix_overlap * 100, 1)`%) and rain and mixed phases (`r round(tair_rainMix_overlap * 100, 1)`%). The minimum overlap between mixed precipitation and another phase was `r round(twet_snowMix_overlap * 100, 1)`%, indicating the near-surface meteorological conditions favoring mixed precipitation are often indistinguishable from rain and snow.
 
 ```{r echo = FALSE, warning = FALSE, message = FALSE}
 plot_grid(
@@ -373,7 +376,23 @@ ggplot(rs_p[["snow_pred_twet"]], aes(twet_bin_num, snow_prob_pred * 100)) +
            color = "gray27", hjust = 0, vjust = -.5)
 ```
 
-And the two of them combined:
+The dew point temperature snowfall probability plot:
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.dim= c(6,4)}
+ggplot(rs_p[["snow_pred_tdew"]], aes(tdew_bin_num, snow_prob_pred * 100)) + 
+  geom_line(lwd = 1) + 
+  geom_hline(yintercept = 50, color = "gray", lty = "dashed", lwd = 1) +
+  geom_line(data = rs_p[["snow_prob_tdew"]], aes(tdew_bin_num, snow_prob * 100), 
+             color = "darkolivegreen3", lwd = 1) +
+  labs(x = expression("Dew Point Temperature ("*degree*C*")"),
+       y = "Snowfall Probability (%)") +
+  annotate(geom = "text", x = -10, y = 25, label = "Fitted curve", hjust = 0) +
+  annotate(geom = "text", x = -10, y = 15, label = "Probability by bin", color = "darkolivegreen3", hjust = 0) +
+  annotate(geom = "text", x = 6, y = 50, label = paste0("50% probability = ", round(rs_p[["temp50_tdew"]], digits = 1), "°C"), 
+           color = "gray27", hjust = 0, vjust = -.5)
+```
+
+And the three of them combined:
 
 ```{r echo = FALSE, warning = FALSE, message = FALSE, fig.dim= c(6,4)}
 ggplot() + 
@@ -382,13 +401,50 @@ ggplot() +
              color = "darkgreen", lwd = 1) +
   geom_line(data = rs_p[["snow_prob_twet"]], aes(twet_bin_num, snow_prob * 100), 
              color = "aquamarine3", lwd = 1) +
+   geom_line(data = rs_p[["snow_prob_tdew"]], aes(tdew_bin_num, snow_prob * 100), 
+             color = "darkolivegreen3", lwd = 1) +
   labs(x = expression("Temperature ("*degree*C*")"),
        y = "Snowfall Probability (%)") +
   annotate(geom = "text", x = -10, y = 25, label = "Air temperature", color = "darkgreen", hjust = 0) +
-  annotate(geom = "text", x = -10, y = 15, label = "Wet bulb temperature", color = "aquamarine3", hjust = 0)
+  annotate(geom = "text", x = -10, y = 15, label = "Wet bulb temperature", color = "aquamarine3", hjust = 0)+
+  annotate(geom = "text", x = -10, y = 5, label = "Dew point temperature", color = "darkolivegreen3", hjust = 0)
 ```
 
-We notice the 50% threshold is a fair bit higher for air temperature verus wet bulb temperature, which is expected because the former is always warmer than the latter when relative humidity is less than 100%. We also see a fair bit more noise in the curve for air temperature between approximately 25% and 50%.
+When evaluating snowfall probability from the crowdsourced data by air, wet bulb, and dew point temperature, we see the expected reverse sigmoid curve (Fig. XXXX). In all cases probability is near 100% for the coldest temperatures before decreasing as temperature warms. There are two noticeable features of the air temperature curves: 1) the observed curve has a greater amount of noise than the curves for wet bulb and dew point temperature and 2) the fitted probability curve has a shallower gradient near 50%, confirming the metric's reduced sensitivity to rain-snow partitioning. The 50% snowfall probability thresholds derived from hyperbolic tangent curves fit to the citizen science data are `r round(rs_p[["temp50_tair"]], 1)`°C, `r round(rs_p[["temp50_twet"]], 1)`°C, and `r round(rs_p[["temp50_tdew"]], 1)`°C for air, wet bulb, and dew point temperature, respectively. We expect threshold values to follow this trend as T<sub>dew</sub> < T<sub>wet</sub> < T<sub>air</sub> when relative humidity is less than 100%. 
+
+```{r echo = FALSE, warning = FALSE, message = FALSE}
+# Bind the data into long form for easier plotting
+rs_p_df <- bind_rows(
+  rs_p[["snow_prob_tair"]] %>% rename(temp_val = tair_bin_num) %>%
+    mutate(temp_type = "tair", eval_type = "obs"),
+  rs_p[["snow_pred_tair"]] %>% rename(temp_val = tair_bin_num, snow_prob = snow_prob_pred) %>%
+    mutate(temp_type = "tair", eval_type = "sim"),
+  rs_p[["snow_prob_twet"]] %>% rename(temp_val = twet_bin_num) %>%
+    mutate(temp_type = "twet", eval_type = "obs"),
+  rs_p[["snow_pred_twet"]] %>% rename(temp_val = twet_bin_num, snow_prob = snow_prob_pred) %>%
+    mutate(temp_type = "twet", eval_type = "sim"),
+  rs_p[["snow_prob_tdew"]] %>% rename(temp_val = tdew_bin_num) %>%
+    mutate(temp_type = "tdew", eval_type = "obs"),
+  rs_p[["snow_pred_tdew"]] %>% rename(temp_val = tdew_bin_num, snow_prob = snow_prob_pred) %>%
+    mutate(temp_type = "tdew", eval_type = "sim")
+) %>% 
+  mutate(temp_type = factor(temp_type, levels = c("tair", "twet", "tdew")))
+```
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.dim= c(6,4)}
+ggplot() + 
+  geom_hline(yintercept = 50, color = "gray", lty = "dashed", lwd = 1) +
+  geom_line(data = rs_p_df, aes(temp_val, snow_prob * 100, color = temp_type, lty = eval_type),
+            lwd = 1) +
+  scale_color_manual(values = c("darkgreen", "aquamarine3", "darkolivegreen3"),
+                     labels = c(expression(T[air]), expression(T[wet]), expression(T[dew])),
+                     name = "Temperature") +
+  scale_linetype_discrete(labels = c("Observed", "Fitted"),
+                     name = "Data Source") +
+  labs(x = expression("Temperature ("*degree*C*")"),
+       y = "Snowfall Probability (%)") + 
+  theme(legend.text.align = 0)
+```
 
 ```{r echo = FALSE, warning = FALSE, message = FALSE}
 tmp <- filter(obsPass, tair >= min(filter(rs_p[["snow_prob_tair"]],snow_prob <= .50 & snow_prob >= .25)$tair_bin_num) &
@@ -448,6 +504,37 @@ p +  geom_area(data = filter(d, x>tair_thresh), aes(x=x,y=y), fill = "darkred", 
            label = paste0(round(pct_incorrect, digits = 1), "% of snow misidentified"), color = "darkred",
            hjust = 0)
 ```
+## Rain-snow lines from the citizen science data
+```{r message = FALSE}
+# Import processed rain-snow line data
+rain_snow_line <- readRDS("../data/processed/mros_obs_rain_snow_line_2020-2021.RDS")
+
+# Import the probabilities by elevation bin
+rain_snow_prob_elev <- readRDS("../data/processed/mros_obs_rain_snow_prob_elev_2020-2021.RDS")
+
+# Get valid dates from data
+valid_dates = filter(rain_snow_line, note == "valid" &
+                       n >= 10 &
+                       rs_line <= max(obsPass$elev) &
+                       rs_line >= min(obsPass$elev))$date
+
+# Plot
+ggplot(filter(rain_snow_prob_elev, date %in% valid_dates), 
+       aes(snow_prob, elev)) + 
+  geom_point() + 
+  geom_hline(data = filter(rain_snow_line, date %in% valid_dates), aes(yintercept = rs_line)) + 
+  facet_wrap(~date) 
+```
+During the study period, we had `r length(valid_dates)` days when we could estimate a valid rain-snow line elevation from the citizen science data. We did not consider values above the maximum or below the minimum observation elevation to be valid. That means of the `r length(filter(obsDaily, n >= 10)$date)` days with at least 10 observations, we could compute daily rain-snow lines on `r round(length(valid_dates) / length(filter(obsDaily, n >= 10)$date) * 100, 1)`% of them. There were `r length(filter(rain_snow_line, note == "above" & n >= 10)$date)` days when the maximum snowfall probability was less than 50% and `r length(filter(rain_snow_line, note == "below" & n >= 10)$date)` days when the minimum was above 50%. In these cases we would estimate the rain-line elevation to be above or below the study domain, respectively, indicating rain or snow dominance. On days with valid values, daily rain-snow line elevations ranged from a minimum of `r round(min(filter(rain_snow_line, date %in% valid_dates)$rs_line), 0)` m to a maximum of `r round(max(filter(rain_snow_line, date %in% valid_dates)$rs_line), 0)` m, with a median value of `r round(median(filter(rain_snow_line, date %in% valid_dates)$rs_line), 0)` m.
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.dim= c(4,4)}
+ggplot(filter(rain_snow_line, date %in% valid_dates), aes(rs_line)) + 
+  geom_histogram(fill = "lavender", color = "black", binwidth = 50) + 
+  coord_flip() +
+  labs(x = "Daily Rain-Snow Line Elevation (m)", y = "Count")
+```
+
+Instances of valid daily rain-snow line estimates occurring in succession where relatively rare during our study period. 
 
 ## Precipitation phase partitioning method comparison
 
@@ -455,16 +542,152 @@ Import the summary data produced in `analysis/rain_snow/mros_method_comparison.R
 
 ```{r message = FALSE}
 # import the summary and summary by tair data
-method_summary <- readRDS("../data/processed/mros_obs_sim_summary.RDS")
-method_summary_byTair <- readRDS("../data/processed/mros_obs_sim_summary_byTair.RDS")
+method_summary <- readRDS("../data/processed/mros_obs_sim_summary.RDS") %>% 
+  filter(scenario != "thresh_tair_0" & scenario != "thresh_tair_0.5")
+method_summary_byTair <- readRDS("../data/processed/mros_obs_sim_summary_byTair.RDS") %>% 
+  filter(scenario != "thresh_tair_0" & scenario != "thresh_tair_0.5")
 ```
 
-And make a tri-panel plot showing method success rate by air temperature for the three evaluation scenarios
+```{r echo = FALSE, warning = FALSE, message = FALSE}
+# Compute a bunch of values for analysis text
+snowPct_obs = round(sum(obsPass$phase == "Snow") / length(obsPass$phase) * 100, 1)
+rainPct_obs = round(sum(obsPass$phase == "Rain") / length(obsPass$phase) * 100, 1)
+mixedPct_obs = round(sum(obsPass$phase == "Mixed") / length(obsPass$phase) * 100, 1)
+
+methSummary <- method_summary %>% 
+  group_by(eval_type) %>% 
+  summarize(snowPct_sim_av = mean(snow_pct * (1 + snow_bias_pct/100)),
+            snowPct_sim_sd = sd(snow_pct * (1 + snow_bias_pct/100)),
+            snowPct_sim_min = min(snow_pct * (1 + snow_bias_pct/100)),
+            snowPct_sim_max = max(snow_pct * (1 + snow_bias_pct/100)),
+            rainPct_sim_av = mean(rain_pct * (1 + rain_bias_pct/100)),
+            rainPct_sim_sd = sd(rain_pct * (1 + rain_bias_pct/100)),
+            rainPct_sim_min = min(rain_pct * (1 + rain_bias_pct/100)),
+            rainPct_sim_max = max(rain_pct * (1 + rain_bias_pct/100)),
+            mixedPct_sim_av = mean(mixed_pct * (1 + mixed_bias_pct/100), na.rm = T),
+            mixedPct_sim_sd = sd(mixed_pct * (1 + mixed_bias_pct/100), na.rm = T),
+            mixedPct_sim_min = min(mixed_pct * (1 + mixed_bias_pct/100), na.rm = T),
+            mixedPct_sim_max = max(mixed_pct * (1 + mixed_bias_pct/100), na.rm = T)) %>% 
+  mutate_if(is.numeric, round, digits = 1)
+```
+
+The different precipitation phase partitioning methods applied to the modeled meteorological data produced marked variability in the predicted snow, rain, and mixed proportions relative to the observations. Over our study period, crowdsourced precipitation phase reports were comprised of `r snowPct_obs`% snow, `r rainPct_obs`% rain, and `r mixedPct_obs`% mixed. In comparison, the precipitation phase partitioning methods tended to underpredict snow and mixed precipitation, while overpredicting rain. Snowfall frequency estimates from the different methods ranged from a minimum of `r methSummary %>% filter(eval_type == "all") %>% pull(snowPct_sim_min)`% to a maximum of `r methSummary %>% filter(eval_type == "all") %>% pull(snowPct_sim_max)`%, with an average of `r methSummary %>% filter(eval_type == "all") %>% pull(snowPct_sim_av)`% and standard deviation of `r methSummary %>% filter(eval_type == "all") %>% pull(snowPct_sim_sd)`%. Rainfall frequency estimates were similarly varied, ranging from a minimum of `r methSummary %>% filter(eval_type == "all") %>% pull(rainPct_sim_min)`% to a maximum of `r methSummary %>% filter(eval_type == "all") %>% pull(rainPct_sim_max)`%, with an average of `r methSummary %>% filter(eval_type == "all") %>% pull(rainPct_sim_av)`% and standard deviation of `r methSummary %>% filter(eval_type == "all") %>% pull(rainPct_sim_sd)`%. Only the two air temperature ranges predicted mixed precipitation, with frequency estimates of 14.4% and 48.1%. The other methods do not assign mixed precipitation, bringing down the average to `r methSummary %>% filter(eval_type == "all") %>% pull(mixedPct_sim_av)`%.
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.dim= c(6,4)}
+method_summary_toPlot <- method_summary %>% 
+  filter(eval_type == "all") %>% 
+  transmute(Snow = snow_pct * (1 + snow_bias_pct/100),
+         Rain = rain_pct * (1 + rain_bias_pct/100),
+         Mixed = mixed_pct * (1 + mixed_bias_pct/100)) %>% 
+  pivot_longer(Snow:Mixed, values_to = "percent", names_to = "phase") %>% 
+  mutate(phase = factor(phase, levels = c("Rain", "Mixed", "Snow")))
+obs_pct_toPlot <- data.frame(percent = c(snowPct_obs, rainPct_obs, mixedPct_obs),
+                             phase = c("Snow", "Rain", "Mixed")) %>% 
+  mutate(phase = factor(phase, levels = c("Rain", "Mixed", "Snow")))
+ggplot(method_summary_toPlot, aes(phase, percent, fill = phase)) + 
+  geom_boxplot() + 
+  geom_point(data = obs_pct_toPlot, shape = 24, size = 3) +
+  phase_fill_scale +
+  labs(x = "Precipitation Phase", y = "Estimated Frequency (%)") +
+  theme(legend.position = "none")
+```
+
+Besides the variability in the estimated frequency of the different phases, we also quantified the performance of the methods. Although refining their output was not the goal of this research, we do note some relevant results here. Method success rate, where 100% equals all precipitation phase observations correctly predicted, ranged from `r round(min(filter(method_summary, eval_type == "all")$perf_pct), 1)`% for R<sub>a1.0</sub> to `r round(max(filter(method_summary, eval_type == "all")$perf_pct), 1)`% for T<sub>d0.0</sub>. The top six methods compared to the observations all incorporated humidity in some form and, notably, none could predict mixed precipitation as they were the wet bulb and dew point thresholds along with the binary logistic regression model. This meant, in practice, the best they could perform was `r 100 - mixedPct_obs`%. Even though the range methods could predict mixed precipitation, they performed poorly overall. The best-performing air temperature method was the optimized T<sub>a4.2</sub> from our previous study. Additionally, there were no methods that had both snow and rain relative biases less than 10%. In general, the methods that had low snow biases had higher rain biases and vice versa.
+
+For comparison sake we also reassigned mixed precipitation to be rain as in the IMERG PLP product, which only considers precipitation to be in the liquid or solid phase. Applying this assumption widened the range of method success rates, which now stretched from a minimum of `r round(min(filter(method_summary, eval_type == "mixRain")$perf_pct), 1)`% for R<sub>a1.0</sub> to `r round(max(filter(method_summary, eval_type == "mixRain")$perf_pct), 1)`% for T<sub>d0.0</sub>. Again, the top six methods were all of the ones that incorporated humidity. In this analysis, there were two methods, Bin<sub>log</sub> and T<sub>w0.5</sub>, that had rain and snow frequency relative bias magnitudes <= 10%.
+
+```{r}
+method_summary_4table <-
+  left_join(filter(method_summary, eval_type == "all"),
+            filter(method_summary, eval_type == "mixRain"),
+                   by = "scenario") %>% 
+  mutate(scenario = factor(scenario, 
+                           levels=c("thresh_tair_1",
+                                    "thresh_tair_1.5",
+                                    "thresh_tair_1.8",
+                                    "thresh_tair_1.9",
+                                    "thresh_tair_2.7",
+                                    "thresh_tair_4.2",
+                                    "thresh_twet_0",
+                                    "thresh_twet_0.5",
+                                    "thresh_twet_1", 
+                                    "thresh_tdew_0",
+                                    "thresh_tdew_0.5",
+                                    "range_tair_-0.5_0.5",
+                                    "range_tair_-1_3",
+                                    "binlog"))) %>% 
+  arrange(scenario) %>% 
+  mutate_if(is.numeric, round, digits = 1) %>% 
+  as.data.frame()
+rownames(method_summary_4table) <- c("T~a1.0~",
+                               "T~a1.5~",
+                               "T~a1.8~",
+                               "T~a1.9~",
+                               "T~a2.7~",
+                               "T~a4.2~",
+                               "T~w0.0~",
+                               "T~w0.5~",
+                               "T~w1.0~",
+                               "T~d0.0~",
+                               "T~d0.5~",
+                               "R~a0.0~",
+                               "R~a1.0~",
+                               "Bin~log~")
+method_summary_4table %>% 
+  #filter(eval_type == "all" | eval_type == "mixRain") %>% 
+  select(`Success Rate A` = perf_pct.x, `Snow Bias A` = snow_bias_pct.x, 
+         `Rain Bias A` = rain_bias_pct.x, `Mixed Bias A` = mixed_bias_pct.x,
+         `Success Rate MR` = perf_pct.y, `Snow Bias MR` = snow_bias_pct.y, 
+         `Rain Bias MR` = rain_bias_pct.y, `Mixed Bias MR` = mixed_bias_pct.y) %>% 
+  knitr::kable()
+```
+
+As expected, we saw method performance vary by air temperature with the lowest success rates between 0°C and 10°C. All methods could reliably predict snowfall at air temperatures below freezing, while the air temperature thresholds and ranges struggled to provide accurate snowfall predictions above 0°C. None of the methods could accurately predict freezing rain. The six methods incorporating humidity provided more consistent performance across the range of modelled air temperatures with T<sub>d0.0</sub> and T<sub>d0.5</sub> most capable of correctly predicting the snow falling at warm temperatures. However, these methods did this at the expense of underpredicting rain above 7.5°C. T<sub>d0.0</sub>, the best-performing method in both analysis cases, had a minimum success rate of `r round(min(filter(method_summary_byTair, scenario == "thresh_tdew_0" & n >= 10 & eval_type == "all")$perf_pct), 1)`% at `r filter(method_summary_byTair, scenario == "thresh_tdew_0" & n >= 10 & eval_type == "all") %>% arrange(perf_pct) %>% slice(1) %>% pull(tair_bin_num)`°C. Although concerning, it is still quantifiably better than the sub 20% minimum success rates of the air temperature range methods.
 
 ```{r echo = FALSE, warning = FALSE, message = FALSE, fig.dim= c(7,4.5)}
-ggplot(method_summary_byTair, aes(tair_bin_num, scenario, fill = perf_pct)) + 
+testLabs <- method_summary_byTair %>% 
+  mutate(scenario = factor(scenario, 
+                           levels=c("thresh_tair_1",
+                                    "thresh_tair_1.5",
+                                    "thresh_tair_1.8",
+                                    "thresh_tair_1.9",
+                                    "thresh_tair_2.7",
+                                    "thresh_tair_4.2",
+                                    "thresh_twet_0",
+                                    "thresh_twet_0.5",
+                                    "thresh_twet_1", 
+                                    "thresh_tdew_0",
+                                    "thresh_tdew_0.5",
+                                    "range_tair_-0.5_0.5",
+                                    "range_tair_-1_3",
+                                    "binlog")))
+levels(testLabs$scenario) <- c("T[a1.0]",
+                               "T[a1.5]",
+                               "T[a1.8]",
+                               "T[a1.9]",
+                               "T[a2.7]",
+                               "T[a4.2]",
+                               "T[w0.0]",
+                               "T[w0.5]",
+                               "T[w1.0]",
+                               "T[d0.0]",
+                               "T[d0.5]",
+                               "R[a0.0]",
+                               "R[a1.0]",
+                               "Bin[log]")
+testLabs %>% 
+  filter(n >= 10) %>% 
+  filter(eval_type == "all" | eval_type == "mixRain") %>% 
+  mutate(eval_type = ifelse(eval_type == "all", "All Obs.", "Mixed = Rain")) %>% 
+  ggplot(aes(tair_bin_num, scenario, fill = perf_pct)) + 
   geom_raster() + 
-  facet_wrap(~eval_type)
+  facet_wrap(~eval_type) +
+  scale_fill_viridis_c(option = "plasma", name = "Method\nSuccess\nRate (%)") +
+  scale_y_discrete("Method", labels = rev(parse(text = levels(testLabs$scenario))),
+                   limits = rev) +
+  labs(x = "Air Temperature (°C)") +
+  theme(strip.background = element_blank())
+
 ```
 
 ## GPM IMERG comparison
@@ -554,13 +777,6 @@ reshape2::melt(select(gpm_summary_noMIXED, -n_obs), id.vars = "tair_bin_num2",
 ```
 
 ## Rain-snow line comparison
-
-TODO: Add the following:
-
-```{r message = FALSE}
-# valid_dates = filter(rain_snow_line, note == "valid" & n > 10)$date
-# ggplot(filter(obs_by_elev_date, date %in% valid_dates), aes(elev, snow_prob)) + geom_point() + geom_vline(data = filter(rain_snow_line, date %in% valid_dates), aes(xintercept = rs_line)) + facet_wrap(~date) + xlim(min(obs_by_elev_date$elev), max(obs_by_elev_date$elev)) + geom_hline(yintercept = 50)
-```
 
 Import the data
 

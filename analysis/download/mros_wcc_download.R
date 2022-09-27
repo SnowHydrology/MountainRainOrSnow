@@ -20,6 +20,11 @@
 # Load package
 library(tidyverse)
 
+# User input
+export.file = "data/NOSHARE/mros_met_wcc_20220927.RDS"
+# Create vector of water years to download (Oct. 1 through Sept. 30)
+wyears <- 2022 # use c(WY1, WY2,...) for multiple wyears
+
 # Import metadata
 meta <- read_csv("data/metadata/wcc_station_metadata.csv") %>% 
   group_by(Id) %>% 
@@ -27,9 +32,6 @@ meta <- read_csv("data/metadata/wcc_station_metadata.csv") %>%
 
 # Identify SNOTEL sites of interest
 sites <- meta$id
-
-# Create vector of water years to download (Oct. 1 through Sept. 30)
-wyears <- 2022 # use c(WY1, WY2,...) for multiple wyears
 
 # Download strings
 dl1 = "https://wcc.sc.egov.usda.gov/nwcc/view?intervalType=Historic+&report=ALL&timeseries=Hourly&format=copy&sitenum="
@@ -113,7 +115,7 @@ met_select <- met_select %>%
 
 # Save file
 saveRDS(met_select,
-        "data/NOSHARE/met_wcc_20220503.RDS")
+        export.file)
 
 # NOTE: SNOTEL can also be downloaded by state and sensor:
 # User options

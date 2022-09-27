@@ -6,7 +6,7 @@ library(tidyverse)
 # User input
 baseURL = "https://www.ncei.noaa.gov/data/local-climatological-data/access/"
 years = c("2021", "2022")
-export.file = "data/NOSHARE/mros_met_lcd_20220503.RDS"
+export.file = "data/NOSHARE/mros_met_lcd_20220927.RDS"
 
 # Import station metadata
 meta <- read.csv("data/metadata/lcd_station_metadata.csv") %>% 

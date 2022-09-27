@@ -7,6 +7,7 @@ library(tidyverse)
 # List the metadata files
 meta.dir <- "data/metadata/hads_stations_byState/"
 meta.files <- paste0(meta.dir, list.files(meta.dir))
+export.file = "data/NOSHARE/mros_met_hads_20220927.RDS"
 
 # Bind the files
 meta <- meta.files %>% 
@@ -103,3 +104,6 @@ for(i in seq_along(chunks$chunk)){
     met <- bind_rows(met, tmp.met)
   }
 }
+
+# Export the met data
+saveRDS(met, export.file)

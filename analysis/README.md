@@ -512,28 +512,9 @@ obsGPM <- left_join(obsPass,
                     gpm,
                     by = "id")
 
+
 ###############################################################################
 # Summarize correct observations by temp bin
-
-# Make wider bins for analysis
-tair_max = 14
-tair_min = -7
-tair_bin_width = 1
-obsGPM$tair_bin2 <- cut(obsGPM$tair, 
-                     breaks = seq(tair_min, 
-                                  tair_max, 
-                                  by = tair_bin_width))
-
-
-# Add numeric version of each bin
-tair_cuts_to_number2 <- data.frame("tair_bin2" = levels(obsGPM$tair_bin2),
-                                   "tair_bin_num2" = seq(tair_min + (0.5 * tair_bin_width),
-                                                         tair_max - (0.5 * tair_bin_width), 
-                                                         by = tair_bin_width))
-
-# Join
-obsGPM <- left_join(obsGPM, tair_cuts_to_number2, by = "tair_bin2")
-
 
 # Add GPM probability thresholds for rain, snow, mixed
 prob_thresh_upper_rain = 100
@@ -543,35 +524,115 @@ prob_thresh_lower_snow = 0
 prob_thresh_upper_mixed = prob_thresh_lower_rain
 prob_thresh_lower_mixed = prob_thresh_upper_snow
 
-# Denote whether phase designation was correct or not
-obsGPM$phase2 <- as.character(obsGPM$phase)
+# Add tair bin number and GPM phase
 obsGPM <- obsGPM %>% 
-  mutate(phase_noMIXED = case_when(phase2 == "Mixed" ~ "Rain",
-                                   TRUE ~ phase2),
+  mutate(tair_bin_num = floor(tair) + 0.5,
          gpm_phase = case_when(gpm_prob <= prob_thresh_upper_snow &
                                  gpm_prob >= prob_thresh_lower_snow ~ "Snow",
                                gpm_prob <= prob_thresh_upper_rain &
                                  gpm_prob >= prob_thresh_lower_rain ~ "Rain",
                                gpm_prob < prob_thresh_upper_mixed &
-                                 gpm_prob > prob_thresh_lower_mixed~ "Mixed"),
-         gpm_score = case_when(gpm_phase == phase2 ~ 1,
-                               gpm_phase != phase2 ~ 0),
-         gpm_score_noMIXED = case_when(gpm_phase == phase_noMIXED ~ 1,
-                                       gpm_phase != phase_noMIXED ~ 0))
+                                 gpm_prob > prob_thresh_lower_mixed~ "Mixed"))
+
+# Denote whether phase designation was correct or not
+obsGPM_analyze <- bind_rows(
+  select(obsGPM, tair_bin_num, phase, gpm_phase) %>% 
+    mutate(eval_type = "all"),
+  select(obsGPM, tair_bin_num, phase, gpm_phase) %>% 
+    mutate(eval_type = "mixRain",
+           phase = ifelse(phase == "Mixed", "Rain", as.character(phase)))
+)
+
+# Summarize over all obs
+gpm_summary <- obsGPM_analyze %>% 
+  group_by(eval_type) %>% 
+  summarize(perf_pct = sum(phase == gpm_phase) / length(phase) * 100,
+            snow_pct = sum(gpm_phase == "Snow") / length(phase) * 100,
+            rain_pct = sum(gpm_phase == "Rain") / length(phase) * 100,
+            mixed_pct = sum(gpm_phase == "Mixed") / length(phase) * 100,
+            snow_bias_pct = (sum(gpm_phase == "Snow" ) / sum(phase == "Snow") - 1) * 100,
+            rain_bias_pct = (sum(gpm_phase == "Rain" ) / sum(phase == "Rain") - 1) * 100,
+            mixed_bias_pct = (sum(gpm_phase == "Mixed" ) / sum(phase == "Mixed") - 1) * 100)
 
 # Summarize by tair bin
-gpm_summary_noMIXED <- obsGPM %>% 
-  filter(!is.na(gpm_score_noMIXED)) %>% 
-  group_by(tair_bin_num2) %>% 
-  summarize(n_obs = length(gpm_score_noMIXED), 
-            gpm_perf_pct = (sum(gpm_score_noMIXED) / n_obs) * 100,
-            snow_pct_obs = (sum(phase == "Snow") / n_obs) * 100,
-            snow_pct_gpm = (sum(gpm_phase == "Snow") / n_obs) * 100)
+gpm_summary_byTair <- obsGPM_analyze %>% 
+  group_by(eval_type, tair_bin_num) %>% 
+  summarize(n = n(),
+            perf_pct = sum(phase == gpm_phase) / length(phase) * 100,
+            snow_pct = sum(gpm_phase == "Snow") / length(phase) * 100,
+            rain_pct = sum(gpm_phase == "Rain") / length(phase) * 100,
+            mixed_pct = sum(gpm_phase == "Mixed") / length(phase) * 100,
+            snow_bias_pct = (sum(gpm_phase == "Snow" ) / sum(phase == "Snow") - 1) * 100,
+            rain_bias_pct = (sum(gpm_phase == "Rain" ) / sum(phase == "Rain") - 1) * 100,
+            mixed_bias_pct = (sum(gpm_phase == "Mixed" ) / sum(phase == "Mixed") - 1) * 100)
+
+# Summarize
+snowPct_gpm = round(filter(gpm_summary, eval_type == "mixRain")$snow_pct, 1)
 ```
 
-Then plot the analyzed results:
+Overall, the IMERG PLP product slightly underpredicted snowfall with an
+estimated frequency of 57.5% compared to 64% as computed from the
+crowdsourced data. This gives the product a negative bias of -10.1% in
+our study domain. As expected, the negative snow bias was complemented
+by a positive rain bias of 17.9%. Again, the IMERG PLP does not consider
+mixed precipitation, so these comparisons are made after first
+converting all mixed observations to rainfall. In terms of performance,
+IMERG would rank 7th out of the precipitation phase partitioning methods
+previously examined with a success rate of 71.4% when compared to the
+citizen science observations. Similar to the other methods, the PLP
+decreased in performance at air temperatures near and above freezing.
 
 ![](README_files/figure-gfm/unnamed-chunk-34-1.png)<!-- -->
+
+``` r
+dpr <- readRDS("../data/processed/mros_dpr_processed_2020.RDS") %>% 
+  pivot_longer(cols = c(dpr_hs_phase, dpr_ms_phase, dpr_ns_phase), 
+               values_to = "phase_int", names_to = "instrument") %>% 
+  mutate(phase_dpr = case_when(phase_int == 255 ~ "None",
+                           phase_int <= 100 ~ "Snow",
+                           phase_int > 100 & phase_int <= 200 ~ "Mixed",
+                           phase_int > 200 ~ "Rain")) %>% 
+  left_join(.,
+            select(obsPass, id, phase, tair, twet, tdew, date), by = "id") %>% 
+  filter(!is.na(phase)) # remove DPR data with no passing cit sci obs
+
+dpr_summary <- left_join(
+  dpr %>% 
+    group_by(instrument) %>% 
+    summarize(n = n(),
+              n_valid = sum(phase_int != 255 & !is.na(phase_int))),
+  dpr %>% 
+    group_by(instrument) %>% 
+    summarize(perf_pct = sum(phase == phase_dpr) / sum(phase_dpr != "None") * 100,
+            snow_pct = sum(phase_dpr == "Snow") / sum(phase_dpr != "None") * 100,
+            rain_pct = sum(phase_dpr == "Rain") / sum(phase_dpr != "None") * 100,
+            mixed_pct = sum(phase_dpr == "Mixed") / sum(phase_dpr != "None") * 100,
+            snow_bias_pct = (sum(phase_dpr == "Snow" ) / sum(phase == "Snow" & phase_dpr != "None") - 1) * 100,
+            rain_bias_pct = (sum(phase_dpr == "Rain" ) / sum(phase == "Rain" & phase_dpr != "None") - 1) * 100,
+            mixed_bias_pct = (sum(phase_dpr == "Mixed" ) / sum(phase == "Mixed" & phase_dpr != "None") - 1) * 100),
+  by = "instrument"
+)
+
+dpr_date_min = min(dpr$date)
+dpr_date_max = max(dpr$date)
+n_obs_in_dpr_dates = length(filter(obsPass, date >= dpr_date_min & date <= dpr_date_max)$id)
+```
+
+Unfortunately, the DPR PNS product provided little useful information in
+our first study year. Between 2020-01-21 and 2020-05-17, the first and
+last day of concurrent DPR overpasses that we examined, there were only
+90 citizen science observations that were submitted within a DPR grid
+cell. This is just 11% of the 818 total observations submitted in that
+time period. What’s more, only 7 of the 90 DPR grid cells for the MS and
+NS instruments contained phase data. There were no valid HS data points
+and the remaining MS and NS grid cells contained NA values. All 7 MS and
+NS measurements were snow, giving the instrument a 57.1% success rate,
+75% snow bias, and -100% rain bias. Caution should be taken in
+interpreting these values because of the small sample size.
+
+Plot of GPM IMERG PLP values by citizen science phase as a histogram.
+
+![](README_files/figure-gfm/unnamed-chunk-36-1.png)<!-- -->
 
 ## Rain-snow line comparison
 
@@ -581,24 +642,88 @@ Import the data
 library(lubridate) # for datetime handling
 
 # Import data
-gpm <- readRDS("../data/processed/gpm_rain_snow_line_2020_2021.RDS") %>% 
-  mutate(datetime = with_tz(datetime, "Etc/Gmt+8")) # convert to PST
-flr <- read.csv("../data/processed/CFF_2019_2021.csv", na.strings = " NaN") %>% 
+# gpm_rs <- readRDS("../data/processed/gpm_rain_snow_line_2020_2021.RDS") %>% 
+#   mutate(datetime = with_tz(datetime, "Etc/Gmt+8")) # convert to PST
+
+# Import freezing level radar and summarize to daily
+flr_rs <- read.csv("../data/processed/CFF_2019_2021.csv", na.strings = " NaN") %>% 
   mutate(datetime = with_tz(as.POSIXct(paste0(year, "-", month, "-", day, " ", hour),
                                format = "%Y-%m-%d %H",
                                tz = "GMT"),
                             "Etc/Gmt+8"), # convert to PST
-         rain_snow_line = BBH * 1000) # convert from km to m
-obs <- readRDS("../data/processed/mros_obs_rain_snow_line_2020-2021.RDS") %>% 
+         rain_snow_line = BBH * 1000,
+         date = as.Date(datetime, tz = "Etc/Gmt+8")) # convert from km to m
+flr_rs_summary <- flr_rs %>% 
+  filter(!is.na(rain_snow_line)) %>% 
+  group_by(date) %>% 
+  summarize(n = n(),
+            rs_line = mean(rain_snow_line, na.rm = T),
+            rs_line_sd = sd(rain_snow_line, na.rm = T),
+            rs_line_min = min(rain_snow_line, na.rm = T),
+            rs_line_max = max(rain_snow_line, na.rm = T),
+            rs_line_range = rs_line_max - rs_line_min)
+
+# Import observed rain-snow lines
+obs_rs <- readRDS("../data/processed/mros_obs_rain_snow_line_2020-2021.RDS") %>% 
   mutate(datetime_min = as.POSIXct(paste0(date, " 08:00"), 
                                    tz = "Etc/Gmt+8"),
          datetime_max = as.POSIXct(paste0(date, " 20:00"), 
                                    tz = "Etc/Gmt+8"))
 
 # Join data
-all <- left_join(gpm, flr, by = "datetime")
+#all <- left_join(gpm_rs, flr_rs, by = "datetime")
+rs_line_daily <- left_join(obs_rs, flr_rs_summary, by = "date") %>% 
+  filter(date %in% valid_dates)
+
+# Get some info on the two datasets
+rs_line_bias = round(with(rs_line_daily, mean(rs_line.y - rs_line.x, na.rm = T)), 1)
+rs_line_r2 = round(summary(lm(rs_line.x ~ rs_line.y, rs_line_daily))$r.squared, 2)
+rs_line_count = length(filter(rs_line_daily, !is.na(rs_line.y))$rs_line.y)
+rs_line_hrly_range_av = mean(filter(flr_rs_summary, date %in% valid_dates)$rs_line_range)
+rs_line_hrly_range_max = max(filter(flr_rs_summary, n > 5, date %in% valid_dates)$rs_line_range)
+rs_line_hrly_range_min = min(filter(flr_rs_summary, n > 5, date %in% valid_dates)$rs_line_range)
 ```
+
+Of the 32 days with a valid rain-snow line estimate from the citizen
+science data, there were 25 days with corresponding measurements of the
+brightband elevation from the freezing-level radar. There was a
+reasonable relationship between the two datasets with an r<sup>2</sup>
+of 0.51 (Fig XXXXa). When comparing the daily data, there was a slight
+negative bias in the radar-derived values of -162.3 m. This pattern can
+be seen in the example shown in Fig. XXXXb, where the hourly
+freezing-level radar measurements are typically below the daily
+estimates from the crowdsourced data. In general, the fluctuation in the
+brightband elevation was relatively small on days of overlapping data,
+with an average range of 361.9 m. The day with the greatest difference
+between minimum and maximum elevations was 2021-01-04 at 951 m and the
+day with the minimum difference was 2020-03-07 at 90 m.
+
+![](README_files/figure-gfm/unnamed-chunk-38-1.png)<!-- -->
 
 Plot an event:
 
-![](README_files/figure-gfm/unnamed-chunk-36-1.png)<!-- -->
+# Discussion points
+
+## Meteorological modeling accuracy
+
+``` r
+tair_model_validation <- readRDS("../data/processed/tair_model_validation.RDS")
+tair_mean_bias = round(with(tair_model_validation, mean(tair_idw_lapse_var - tair, na.rm = T)), 2)
+tair_r2 = round(summary(lm(tair ~ tair_idw_lapse_var, tair_model_validation))$r.squared, 2)
+```
+
+We found a mean bias of 0.03°C and an r<sup>2</sup> of 0.88 when we
+compared the imputed air temperature values to the originally recorded
+observations. The error metrics for modeled wet bulb and dew point
+temperature and relative humidity were all similarly encouraging.
+However, we do note that small errors in the meteorological data can
+propogate into uncertainty in the amounts of rain versus snow predicted
+by the different precipitation phase partitioning methods.
+
+## Time of observations
+
+We found that volunteers generally submitted observations during typical
+waking hours. 86.3% of reports arrived between the hours of 9AM and 9PM
+(0900 and 2100) Pacific Standard Time.
+
+![](README_files/figure-gfm/unnamed-chunk-41-1.png)<!-- -->

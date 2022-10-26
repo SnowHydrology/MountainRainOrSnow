@@ -71,6 +71,13 @@ library(tidyverse)
 library(cowplot); theme_set(theme_cowplot())
 source("functions/mros_plot_formats.R")
 
+# Make a second fill scale to be colorblind friendly
+phase_fill_scale2 = scale_fill_manual(name = "Type", 
+                                      values = c("#56B4E9", "#CC79A7", "white"))
+
+phase_color_scale2 = scale_color_manual(name = "Type", 
+                                      values = c("#56B4E9", "#CC79A7", "black"))
+
 # Lubridate for date handling tools
 library(lubridate)
 
@@ -110,7 +117,8 @@ The elevational breakdown of precipitation phase looks like this:
 ```{r echo = FALSE}
 ggplot(obsPass, aes(elev_bin, fill = phase)) +
   geom_bar(position = "fill", color = "black") +
-  phase_fill_scale +
+  #phase_fill_scale +
+  phase_fill_scale2 +
   labs(x = "Elevation Bin (m)",
        y = "Type Proportion (%)") +
   scale_y_continuous(breaks = seq(0, 1, by = 0.25),
@@ -128,7 +136,7 @@ ggplot(obsPass, aes(elev, fill = phase)) +
   geom_histogram(color = "black") + 
   facet_wrap(~phase) + 
   coord_flip() + 
-  phase_fill_scale +
+  phase_fill_scale2 +
   labs(y = "Number of Observations", 
        x = "Elevation (m)") +
   theme(strip.background = element_rect(fill = "white", color = "black"),
@@ -138,14 +146,19 @@ ggplot(obsPass, aes(elev, fill = phase)) +
 Or grouped together:
 
 ```{r echo = FALSE, warning = FALSE, message = FALSE, fig.dim= c(6,6)}
-ggplot(obsPass, aes(elev, fill = phase)) + 
+phase_by_elev_plot <- 
+  ggplot(obsPass, aes(elev, fill = phase)) + 
   geom_histogram(color = "black") + 
   coord_flip() + 
-  phase_fill_scale +
+  phase_fill_scale2 +
   labs(y = "Number of Observations", 
        x = "Elevation (m)") +
   theme(strip.background = element_rect(fill = "white", color = "black"),
         legend.position = c(0.8, 0.8))
+phase_by_elev_plot
+save_plot(filename = "figures/uncert_fig03_phase_by_elev.png",
+          plot = phase_by_elev_plot, 
+          base_width = 6, base_height = 4)
 ```
 
 ## Observations by state and ecoregion
@@ -213,16 +226,23 @@ obsPass %>%
 ```
 
 ```{r echo = FALSE, warning = FALSE, message = FALSE, fig.dim= c(6,4)}
-ggplot(obsPass, aes(dowy, n_cumulative, color = phase)) + 
+cumulative_rs_plot <-
+  obsPass %>% 
+  mutate(wy2 = paste0("Water Year ", wy)) %>% 
+  ggplot(aes(dowy, n_cumulative, color = phase)) + 
   geom_line(lwd = 1) + 
   labs(x = "Date",
        y = "Cumulative Observations") +
-  theme(legend.position = c(0.1, 0.9), legend.title = element_blank(),
+  theme(legend.position = c(0.08, 0.8), legend.title = element_blank(),
         strip.background = element_rect(fill = NA, color = "black")) +
-  scale_color_manual(values = c("blue", "purple", "black")) +
-  facet_wrap(~wy, ncol = 1) +
+  phase_color_scale2 +
+  facet_wrap(~wy2, ncol = 1) +
   scale_x_continuous(breaks = c(1, 93, 183, 274), 
                      labels = c("Oct. 1", "Jan. 1", "Apr. 1", "Jul. 1"))
+cumulative_rs_plot
+save_plot(filename = "figures/uncert_fig02_cumulative_rs.png",
+          plot = cumulative_rs_plot, 
+          base_width = 6, base_height = 3.5)
 ```
 
 ## Observations by air temperature
@@ -308,27 +328,32 @@ tdew_all_overlap = (sum(tdew_all_joint)/sum(tdew_rainDens$y) +
 We also found marked overlap in the phase distributions by temperature, underscoring the difficulty in using near-surface meteorological data to partition rain, snow, and mixed precipitation (FIG XXXX). The distributions for rain and snow, for example, overlapped by `r round(tair_snowRain_overlap * 100, 1)`%, `r round(twet_snowRain_overlap * 100, 1)`%, and `r round(tdew_snowRain_overlap * 100, 1)`% for air, wet bulb, and dew point temperature, respectively. This suggests wet bulb temperature is a more sensitive predictor of rain versus snow relative to the other temperature types, while air temperature is the least sensitive. Air temperature also had the highest percent overlap between snow and mixed (`r round(tair_snowMix_overlap * 100, 1)`%) and rain and mixed phases (`r round(tair_rainMix_overlap * 100, 1)`%). The minimum overlap between mixed precipitation and another phase was `r round(twet_snowMix_overlap * 100, 1)`%, indicating the near-surface meteorological conditions favoring mixed precipitation are often indistinguishable from rain and snow.
 
 ```{r echo = FALSE, warning = FALSE, message = FALSE}
-plot_grid(
+temperature_phase_density_plot <-
+  plot_grid(
   ggplot(obsPass, aes(tair, color = phase)) +
     geom_density(lwd = 1)+
-    scale_color_manual(values = c("blue", "purple", "black")) +
+    phase_color_scale2 +
     labs(x = "Air Temperature (°C)", y = "Density") +
     theme(legend.position = c(0.8,0.8), legend.title = element_blank()) +
     xlim(-15, 10),
   ggplot(obsPass, aes(twet, color = phase)) +
     geom_density(lwd = 1)+
-    scale_color_manual(values = c("blue", "purple", "black")) +
+    phase_color_scale2 +
     labs(x = "Wet Bulb Temperature (°C)", y = "Density") +
     theme(legend.position = "none") +
     xlim(-15, 10),
   ggplot(obsPass, aes(tdew, color = phase)) +
     geom_density(lwd = 1)+
-    scale_color_manual(values = c("blue", "purple", "black")) +
+    phase_color_scale2 +
     labs(x = "Dew Point Temperature (°C)", y = "Density") +
     theme(legend.position = "none") +
     xlim(-15, 10),
   cols = 1, align = "vh", labels = "auto"
 )
+temperature_phase_density_plot
+save_plot(filename = "figures/uncert_fig04_temperature_phase_density.png",
+          plot = temperature_phase_density_plot, 
+          base_width = 6, base_height = 6)
 ```
 
 ## Rain-snow partitioning
@@ -432,7 +457,8 @@ rs_p_df <- bind_rows(
 ```
 
 ```{r echo = FALSE, warning = FALSE, message = FALSE, fig.dim= c(6,4)}
-ggplot() + 
+cond_prob_plot <- 
+  ggplot() + 
   geom_hline(yintercept = 50, color = "gray", lty = "dashed", lwd = 1) +
   geom_line(data = rs_p_df, aes(temp_val, snow_prob * 100, color = temp_type, lty = eval_type),
             lwd = 1) +
@@ -444,6 +470,11 @@ ggplot() +
   labs(x = expression("Temperature ("*degree*C*")"),
        y = "Snowfall Probability (%)") + 
   theme(legend.text.align = 0)
+cond_prob_plot
+save_plot(filename = "figures/uncert_fig05_conditional_probability.png",
+          plot = cond_prob_plot, 
+          base_width = 6, base_height = 4)
+
 ```
 
 ```{r echo = FALSE, warning = FALSE, message = FALSE}
@@ -528,10 +559,15 @@ ggplot(filter(rain_snow_prob_elev, date %in% valid_dates),
 During the study period, we had `r length(valid_dates)` days when we could estimate a valid rain-snow line elevation from the citizen science data. We did not consider values above the maximum or below the minimum observation elevation to be valid. That means of the `r length(filter(obsDaily, n >= 10)$date)` days with at least 10 observations, we could compute daily rain-snow lines on `r round(length(valid_dates) / length(filter(obsDaily, n >= 10)$date) * 100, 1)`% of them. There were `r length(filter(rain_snow_line, note == "above" & n >= 10)$date)` days when the maximum snowfall probability was less than 50% and `r length(filter(rain_snow_line, note == "below" & n >= 10)$date)` days when the minimum was above 50%. In these cases we would estimate the rain-line elevation to be above or below the study domain, respectively, indicating rain or snow dominance. On days with valid values, daily rain-snow line elevations ranged from a minimum of `r round(min(filter(rain_snow_line, date %in% valid_dates)$rs_line), 0)` m to a maximum of `r round(max(filter(rain_snow_line, date %in% valid_dates)$rs_line), 0)` m, with a median value of `r round(median(filter(rain_snow_line, date %in% valid_dates)$rs_line), 0)` m.
 
 ```{r echo = FALSE, warning = FALSE, message = FALSE, fig.dim= c(4,4)}
-ggplot(filter(rain_snow_line, date %in% valid_dates), aes(rs_line)) + 
+rs_line_hist_plot <- 
+  ggplot(filter(rain_snow_line, date %in% valid_dates), aes(rs_line)) + 
   geom_histogram(fill = "lavender", color = "black", binwidth = 50) + 
   coord_flip() +
   labs(x = "Daily Rain-Snow Line Elevation (m)", y = "Count")
+rs_line_hist_plot
+save_plot(filename = "figures/uncert_fig06_rs_line_hist.png",
+          plot = rs_line_hist_plot, 
+          base_width = 4, base_height = 4)
 ```
 
 Instances of valid daily rain-snow line estimates occurring in succession where relatively rare during our study period. 
@@ -584,12 +620,17 @@ method_summary_toPlot <- method_summary %>%
 obs_pct_toPlot <- data.frame(percent = c(snowPct_obs, rainPct_obs, mixedPct_obs),
                              phase = c("Snow", "Rain", "Mixed")) %>% 
   mutate(phase = factor(phase, levels = c("Rain", "Mixed", "Snow")))
-ggplot(method_summary_toPlot, aes(phase, percent, fill = phase)) + 
+phase_freq_plot <-
+  ggplot(method_summary_toPlot, aes(phase, percent, fill = phase)) + 
   geom_boxplot() + 
   geom_point(data = obs_pct_toPlot, shape = 24, size = 3) +
-  phase_fill_scale +
+  phase_fill_scale2 +
   labs(x = "Precipitation Phase", y = "Estimated Frequency (%)") +
   theme(legend.position = "none")
+phase_freq_plot
+save_plot(filename = "figures/uncert_fig07_phase_freq.png",
+          plot = phase_freq_plot, 
+          base_width = 6, base_height = 4)
 ```
 
 Besides the variability in the estimated frequency of the different phases, we also quantified the performance of the methods. Although refining their output was not the goal of this research, we do note some relevant results here. Method success rate, where 100% equals all precipitation phase observations correctly predicted, ranged from `r round(min(filter(method_summary, eval_type == "all")$perf_pct), 1)`% for R<sub>a1.0</sub> to `r round(max(filter(method_summary, eval_type == "all")$perf_pct), 1)`% for T<sub>d0.0</sub>. The top six methods compared to the observations all incorporated humidity in some form and, notably, none could predict mixed precipitation as they were the wet bulb and dew point thresholds along with the binary logistic regression model. This meant, in practice, the best they could perform was `r 100 - mixedPct_obs`%. Even though the range methods could predict mixed precipitation, they performed poorly overall. The best-performing air temperature method was the optimized T<sub>a4.2</sub> from our previous study. Additionally, there were no methods that had both snow and rain relative biases less than 10%. In general, the methods that had low snow biases had higher rain biases and vice versa.
@@ -675,7 +716,8 @@ levels(testLabs$scenario) <- c("T[a1.0]",
                                "R[a0.0]",
                                "R[a1.0]",
                                "Bin[log]")
-testLabs %>% 
+method_success_plot <- 
+  testLabs %>% 
   filter(n >= 10) %>% 
   filter(eval_type == "all" | eval_type == "mixRain") %>% 
   mutate(eval_type = ifelse(eval_type == "all", "All Obs.", "Mixed = Rain")) %>% 
@@ -687,6 +729,10 @@ testLabs %>%
                    limits = rev) +
   labs(x = "Air Temperature (°C)") +
   theme(strip.background = element_blank())
+method_success_plot
+save_plot(filename = "figures/uncert_fig08_method_success.png",
+          plot = method_success_plot, 
+          base_width = 6, base_height = 4)
 
 ```
 
@@ -782,16 +828,21 @@ gpm_method_toPlot <- bind_rows(
 ) %>% 
   pivot_longer(cols = perf_pct:snow_pct, values_to = "value", names_to = "metric")
 
-ggplot(gpm_method_toPlot, aes(tair_bin_num, value, color = method, lty = metric)) +
+gpm_success_plot <- 
+  ggplot(gpm_method_toPlot, aes(tair_bin_num, value, color = method, lty = metric)) +
   geom_line(lwd = 1) +
   labs(x = "Air Temperature (°C)",
-       y = "Success Rate and Snowfall Frequency (%)") +
+       y = "Success Rate and\nSnowfall Frequency (%)") +
   scale_color_manual(values = c("deepskyblue3", "black", "aquamarine3"),
                      labels = c("IMERG", "Obs.", expression(T[w0.5])),
                      name = "Method") +
   scale_linetype_discrete(labels = c("Success\nRate", "Snowfall\nFrequency"),
                           name = "Metric") +
   theme(legend.position = c(0.8, 0.4))
+gpm_success_plot
+save_plot(filename = "figures/uncert_fig09_gpm_success.png",
+          plot = gpm_success_plot, 
+          base_width = 6, base_height = 4)
 ```
 
 ```{r message = FALSE}
@@ -833,12 +884,18 @@ Unfortunately, the DPR PNS product provided little useful information in our fir
 Plot of GPM IMERG PLP values by citizen science phase as a histogram.
 
 ```{r echo = FALSE, warning = FALSE, message = FALSE, fig.dim= c(7,4.5)}
-ggplot(obsGPM, aes(gpm_prob, fill = phase)) +
+gpm_phase_plp_plot <- 
+  ggplot(obsGPM, aes(gpm_prob, fill = phase)) +
   geom_histogram(color = "black") + 
   facet_wrap(~phase, scales = "free_y") + 
-  phase_fill_scale +
-  theme(legend.position = "none") +
+  phase_fill_scale2 +
+  theme(legend.position = "none",
+        strip.background = element_rect(fill = "white", color = "black")) +
   labs(x = "IMERG PLP (%)", y = "Count")
+gpm_phase_plp_plot
+save_plot(filename = "figures/uncert_fig12_gpm_phase_plp.png",
+          plot = gpm_phase_plp_plot, 
+          base_width = 6, base_height = 3)
 ```
 
 ## Rain-snow line comparison
@@ -899,7 +956,8 @@ Of the `r length(valid_dates)` days with a valid rain-snow line estimate from th
 min_datetime = as.POSIXct("2020-04-04 05:00", tz = "Etc/Gmt+8")
 max_datetime = as.POSIXct("2020-04-07 00:00", tz = "Etc/Gmt+8")
 
-plot_grid(
+rs_line_fit_event_plot <- 
+  plot_grid(
   ggplot(rs_line_daily, aes(rs_line.x, rs_line.y)) + 
     geom_point() + 
     geom_smooth(method = "lm", se = F, color = "darkblue") + 
@@ -927,6 +985,10 @@ plot_grid(
        y = "Rain-Snow Line Elev. (m)"), 
   labels = "auto"
 )
+rs_line_fit_event_plot
+save_plot(filename = "figures/uncert_fig10_rs_line_fit_event.png",
+          plot = rs_line_fit_event_plot, 
+          base_width = 8, base_height = 4)
 ```
 
 Plot an event:
@@ -965,7 +1027,12 @@ We found a mean bias of `r tair_mean_bias`°C and an r<sup>2</sup> of `r tair_r2
 We found that volunteers generally submitted observations during typical waking hours. `r round(length(filter(obsPass, hour >= 9 & hour <= 21)$id) / length(obsPass$id) * 100, 1)`% of reports arrived between the hours of 9AM and 9PM (0900 and 2100) Pacific Standard Time. 
 
 ```{r echo = FALSE, warning = FALSE, message = FALSE}
-ggplot(obsPass, aes(hour)) + 
+obs_time_plot <- 
+  ggplot(obsPass, aes(hour)) + 
   geom_histogram(binwidth = 1, fill = "lavender", color = "black") +
   labs(x = "Hour of the Day", y = "Count")
+obs_time_plot
+save_plot(filename = "figures/uncert_fig11_obs_time.png",
+          plot = obs_time_plot, 
+          base_width = 6, base_height = 4)
 ```

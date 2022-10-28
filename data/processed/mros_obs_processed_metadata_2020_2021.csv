@@ -1,0 +1,27 @@
+variable,description,unit
+latitude,latitude of observation truncated to two decimal places,°
+longitude,longitude of observation truncated to two decimal places,°
+phase,precipitaion phase of observation as rain or snow or mix,-
+datetime,local date and time of observation (Pacific Standard Time),-
+date,local time date of observation,-
+time,local time hour and minute of observation,-
+hour,local time hour of observation,-
+day_of_week,local time day of week of observation,-
+id,numeric id of observation,-
+elev,elevation of observation derived from USGS 3DEP data,m
+eco_l4,EPA Level IV ecoregion of observation,-
+eco_l3,EPA Level III ecoregion of observation,-
+eco_l2,EPA Level II ecoregion of observation,-
+state,US state of observation,-
+tair,modeled air temperature of observation,°C
+twet,modeled wet bulb temperature of observation,°C
+tdew,modeled dew point temperature of observation,°C
+rh,modeled relative humidity of observation,%
+avg_dist,average distance between observation and met stations used in modeling,m
+ppt_airport,daily precipitation recorded at nearby airport met stations,mm
+tair_flag,air temperature quality control flag,-
+ppt_flag,daily precipitation quality control flag,-
+rh_flag,relative humidity quality control flag,-
+dist_flag,average distance to met stations quality control flag,-
+dupe_flag,duplicate observation quality control flag,-
+gpm_prob,GPM IMERG probabilityLiquidPrecipitation value for grid cell containing observation,%

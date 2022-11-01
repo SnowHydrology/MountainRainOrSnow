@@ -1018,10 +1018,89 @@ Plot an event:
 tair_model_validation <- readRDS("../data/processed/tair_model_validation.RDS")
 tair_mean_bias = round(with(tair_model_validation, mean(tair_idw_lapse_var - tair, na.rm = T)), 2)
 tair_r2 = round(summary(lm(tair ~ tair_idw_lapse_var, tair_model_validation))$r.squared, 2)
+tdew_model_validation <- readRDS("../data/processed/tdew_model_validation.RDS")
+tdew_mean_bias = round(with(tdew_model_validation, mean(tdew_idw_lapse_var - tdew, na.rm = T)), 2)
+tdew_r2 = round(summary(lm(tdew ~ tdew_idw_lapse_var, tdew_model_validation))$r.squared, 2)
+tdew_equation_validation <- readRDS("../data/processed/tdew_equation_validation.RDS")
+tdew_eq_mean_bias = round(with(tdew_equation_validation, mean(tdew_est - tdew, na.rm = T)), 2)
+tdew_eq_r2 = round(summary(lm(tdew ~ tdew_est, tdew_equation_validation))$r.squared, 2)
+twet_equation_validation <- readRDS("../data/processed/twet_equation_validation.RDS")
+twet_eq_mean_bias = round(with(twet_equation_validation, mean(twet_est - twet, na.rm = T)), 2)
+twet_eq_r2 = round(summary(lm(twet ~ twet_est, twet_equation_validation))$r.squared, 2)
 ```
 
 We found a mean bias of `r tair_mean_bias`°C and an r<sup>2</sup> of `r tair_r2` when we compared the imputed air temperature values to the originally recorded observations. The error metrics for modeled wet bulb and dew point temperature and relative humidity were all similarly encouraging. However, we do note that small errors in the meteorological data can propogate into uncertainty in the amounts of rain versus snow predicted by the different precipitation phase partitioning methods. 
 
+We found a mean bias of `r tair_mean_bias`°C and an r<sup>2</sup> of `r tair_r2` when we compared the imputed air temperature values to the originally recorded observations. The error metrics for modeled wet bulb and dew point temperature and relative humidity were all similarly encouraging. However, we do note that small errors in the meteorological data can propogate into uncertainty in the amounts of rain versus snow predicted by the different precipitation phase partitioning methods. 
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.dim= c(5,5)}
+tair_dis_val_plot <- 
+  ggplot(tair_model_validation, aes(tair, tair_idw_lapse_var)) +
+  geom_point(alpha = 0.2) +
+  geom_abline(slope = 1, intercept = 0, lwd = 1, lty = "dashed", color = "darkred") +
+  annotate(geom = "text", x = -10, y = -18, 
+             label = "1:1 Line", color = "darkred", hjust = 1) + 
+  geom_smooth(method = "lm", se = F, color = "darkblue") + 
+  annotate(geom = "text", x = 20, y = 32, 
+             label = "Fit Line", color = "darkblue", hjust = 0) + 
+  labs(x = "Observed Air Temperature (°C)",
+       y = "Modeled Air Temperature (°C)")
+tair_dis_val_plot
+
+tdew_dis_val_plot <- 
+  ggplot(tdew_model_validation, aes(tdew, tdew_idw_lapse_var)) +
+  geom_point(alpha = 0.2) +
+  geom_abline(slope = 1, intercept = 0, lwd = 1, lty = "dashed", color = "darkred") +
+  annotate(geom = "text", x = -20, y = -24, 
+             label = "1:1 Line", color = "darkred", hjust = 0) + 
+  geom_smooth(method = "lm", se = F, color = "darkblue") + 
+  annotate(geom = "text", x = -21, y = -18, 
+             label = "Fit Line", color = "darkblue", hjust = 1) + 
+  labs(x = "Observed Dew Point Temperature (°C)",
+       y = "Modeled Dew Point Temperature (°C)")
+tdew_dis_val_plot
+
+tdew_eq_val_plot <- 
+  ggplot(tdew_equation_validation, aes(tdew, tdew_est)) +
+  geom_point(alpha = 0.2) +
+  geom_abline(slope = 1, intercept = 0, lwd = 1, lty = "dashed", color = "darkred") +
+  annotate(geom = "text", x = -20, y = -24, 
+             label = "1:1 Line", color = "darkred", hjust = 0) + 
+  geom_smooth(method = "lm", se = F, color = "darkblue") + 
+  annotate(geom = "text", x = -21, y = -18, 
+             label = "Fit Line", color = "darkblue", hjust = 1) + 
+  labs(x = "Observed Dew Point Temperature (°C)",
+       y = "Modeled Dew Point Temperature (°C)")
+tdew_eq_val_plot
+
+twet_eq_val_plot <- 
+  ggplot(twet_equation_validation, aes(twet, twet_est)) +
+  geom_point(alpha = 0.2) +
+  geom_abline(slope = 1, intercept = 0, lwd = 1, lty = "dashed", color = "darkred") +
+  annotate(geom = "text", x = -15, y = -18, 
+             label = "1:1 Line", color = "darkred", hjust = 0) + 
+  geom_smooth(method = "lm", se = F, color = "darkblue") + 
+  annotate(geom = "text", x = -15, y = -11, 
+             label = "Fit Line", color = "darkblue", hjust = 1) + 
+  labs(x = "Observed Wet Bulb Temperature (°C)",
+       y = "Modeled Wet Bulb Temperature (°C)")
+twet_eq_val_plot
+
+# Save the figs
+save_plot(filename = "figures/uncert_figs01_tair_dis_val.png",
+          plot = tair_dis_val_plot,
+          base_width = 5, base_height = 5)
+save_plot(filename = "figures/uncert_figs02_tdew_dis_val.png",
+          plot = tdew_dis_val_plot,
+          base_width = 5, base_height = 5)
+save_plot(filename = "figures/uncert_figs03_tdew_eq_val.png",
+          plot = tdew_eq_val_plot,
+          base_width = 5, base_height = 5)
+save_plot(filename = "figures/uncert_figs04_twet_eq_val.png",
+          plot = twet_eq_val_plot,
+          base_width = 5, base_height = 5)
+
+```
 
 ## Time of observations
 We found that volunteers generally submitted observations during typical waking hours. `r round(length(filter(obsPass, hour >= 9 & hour <= 21)$id) / length(obsPass$id) * 100, 1)`% of reports arrived between the hours of 9AM and 9PM (0900 and 2100) Pacific Standard Time. 

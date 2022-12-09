@@ -1,0 +1,159 @@
+---
+title: "Mountain Rain or Snow AGU 2022 Analysis"
+author: "Keith Jennings"
+date: "2022-12-09"
+output: github_document
+--- 
+ 
+```{r message = FALSE}
+# Load the tidyverse and tidymodels
+library(tidyverse)
+library(tidymodels)
+# Use cowplot for plot formatting and import plot styles
+library(cowplot); theme_set(theme_cowplot())
+library(vip) # variable importance plots
+
+# Lubridate for date handling tools
+library(lubridate)
+
+# Import data
+summary_byTair <- readRDS("../../data/processed/prediction/summary_output_byTair.RDS")
+summary_allList <- readRDS("../../data/processed/prediction/summary_output_allList.RDS")
+
+```
+
+Make a success plot by tair
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.dim= c(7,4.5)}
+testLabs <- summary_byTair %>% 
+  filter(scenario != "thresh_tair_0" & scenario != "thresh_tair_0.5") %>% 
+  mutate(scenario = factor(scenario, 
+                           levels=c("thresh_tair_1",
+                                    "thresh_tair_1.5",
+                                    "thresh_tair_1.8",
+                                    "thresh_tair_1.9",
+                                    "thresh_tair_2.7",
+                                    "thresh_tair_4.2",
+                                    "thresh_twet_0",
+                                    "thresh_twet_0.5",
+                                    "thresh_twet_1", 
+                                    "thresh_tdew_0",
+                                    "thresh_tdew_0.5",
+                                    "range_tair_-0.5_0.5",
+                                    "range_tair_-1_3",
+                                    "binlog",
+                                    "randomForest",
+                                    "IMERG")))
+levels(testLabs$scenario) <- c("T[a1.0]",
+                               "T[a1.5]",
+                               "T[a1.8]",
+                               "T[a1.9]",
+                               "T[a2.7]",
+                               "T[a4.2]",
+                               "T[w0.0]",
+                               "T[w0.5]",
+                               "T[w1.0]",
+                               "T[d0.0]",
+                               "T[d0.5]",
+                               "R[a0.0]",
+                               "R[a1.0]",
+                               "Bin[log]",
+                               "RandForest",
+                               "IMERG")
+method_success_plot <- 
+  testLabs %>% 
+  filter(n >= 10) %>% 
+  filter(eval_type == "all" | eval_type == "mixRain") %>% 
+  mutate(eval_type = ifelse(eval_type == "all", "All Obs.", "Mixed = Rain")) %>% 
+  ggplot(aes(tair_bin_num, scenario, fill = perf_pct)) + 
+  geom_raster() + 
+  facet_wrap(~eval_type) +
+  scale_fill_viridis_c(option = "plasma", name = "Method\nSuccess\nRate (%)") +
+  scale_y_discrete("Method", labels = rev(parse(text = levels(testLabs$scenario))),
+                   limits = rev) +
+  labs(x = "Air Temperature (°C)") +
+  theme(strip.background = element_blank())
+method_success_plot
+save_plot(filename = "figures/method_success_byTair.pdf",
+          plot = method_success_plot, 
+          base_width = 8, base_height = 4)
+```
+ 
+Make a variable importance plot
+ 
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.dim= c(7,4.5)}
+
+
+ rf_vip <- 
+  summary_allList[["randomForestAll"]][[3]] %>% 
+  extract_fit_parsnip() %>% 
+  vip(num_features = 10, mapping = aes(fill = Importance)) + 
+  labs(x = "Variable") + 
+  scale_fill_viridis_c(option = "magma", end = 0.8) +
+  scale_x_discrete(labels = c("EcoL3", "RH", "DOWY", "Elev.", 
+                              expression(T[air]), expression(T[dew]),
+                              expression(T[wet])))
+rf_vip
+ # summary_allList[["randomForestRainMix"]][[3]] %>% 
+ #  extract_fit_parsnip() %>% 
+ #  vip(num_features = 10, mapping = aes(fill = Importance)) + 
+ #  labs(x = "Variable") + 
+ #  scale_fill_viridis_c(option = "magma", end = 0.8) +
+ #  scale_x_discrete(labels = c("EcoL3", "RH", "DOWY", "Elev.", 
+ #                              expression(T[air]), expression(T[dew]),
+ #                              expression(T[wet])))
+
+save_plot(filename = "figures/randomForest_varImportance.pdf",
+          plot = rf_vip, 
+          base_width = 8, base_height = 3)
+```
+ 
+Explore var relationships from Random Forest
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.dim= c(7,4.5)}
+
+rf_twet_sensitivity <- bind_rows(
+  summary_allList[["randomForestAll"]][[1]] %>% 
+    rename(pred = pred_snow) %>% 
+    mutate(predType = "Prob. Snow"),
+  summary_allList[["randomForestAll"]][[1]] %>% 
+    rename(pred = pred_rain) %>% 
+    mutate(predType = "Prob. Rain"),
+) %>% 
+  ggplot(aes(twet, pred, color = eco_l3)) + 
+  geom_point(alpha = 0.4) +
+  facet_wrap(~predType, ncol = 1) +
+  theme(legend.title = element_blank()) +
+  labs(x = expression(T[wet]~degree*C),
+       y = "Probability")
+rf_twet_sensitivity
+
+
+save_plot(filename = "figures/rf_twet_sensitivity.pdf",
+          plot = rf_twet_sensitivity, 
+          base_width = 8, base_height = 3)
+```
+Make confusion matrices
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.dim= c(7,4.5)}
+
+conf_matrix_all <- summary_allList[["randomForestAll"]][[3]] %>% 
+  collect_predictions() %>% 
+  conf_mat(truth = phase, estimate = .pred_class) %>% 
+  autoplot(type = "heatmap" ) 
+conf_matrix_all
+conf_matrix_mixRain <- summary_allList[["randomForestRainMix"]][[3]] %>% 
+  collect_predictions() %>% 
+  conf_mat(truth = phase, estimate = .pred_class) %>% 
+  autoplot(type = "heatmap" )
+conf_matrix_mixRain
+
+save_plot(filename = "figures/conf_matrix_all.pdf",
+          plot = conf_matrix_all, 
+          base_width = 5, base_height = 5)
+save_plot(filename = "figures/conf_matrix_mixRain.pdf",
+          plot = conf_matrix_mixRain, 
+          base_width = 3.5, base_height = 3.5)
+```
+
+

@@ -16,11 +16,11 @@ library(lutz) # time zone calculations
 ################################################################################
 ########################  Data Import and Preparation  #########################
 ################################################################################
-raw.file = "data/NOSHARE/mros_obs_raw_20220503.csv" # 2021-2022 data
+raw.file = "data/NOSHARE/mros_obs_raw_20220927.csv" # 2021-2022 data
 # 2020-2021 data: "data/NOSHARE/Tahoe__Rain_or_Snow_Export_06012021.csv"
-export.file = "data/NOSHARE/mros_obs_cit_sci_processed_20220503.RDS"
+export.file = "data/NOSHARE/mros_obs_cit_sci_processed_20220927.RDS"
 export.shape.dsn = "data/geospatial/"
-export.shape.layer = "mros_obs_cit_sci_shp_20220503"
+export.shape.layer = "mros_obs_cit_sci_shp_20220927"
 
 # Import the citizen science data 
 obs <- read.csv(raw.file,
@@ -38,8 +38,10 @@ obs <- read.csv(raw.file,
 # Then compute local time info, convert to UTC and join everything back together
 obs <- lapply(obs, function(x){
   data.frame(x) %>% 
-    mutate(datetime = with_tz(time = x$createdAt, 
-                              tzone = x[[1, "timezone"]]),
+    mutate(#datetime = with_tz(time = x$createdAt, 
+            #                  tzone = x[[1, "timezone"]]),
+           datetime = as.POSIXct(x = x$createdAt,
+                                 tz = x[[1, "timezone"]]),
            date = as.Date(datetime, tz = x[[1, "timezone"]]),
            year = year(date),
            month = month(date),

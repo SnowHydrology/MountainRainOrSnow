@@ -24,11 +24,15 @@ library(lutz) # time zone calculations
     # mros_lcd_download.R
     
 # Import the RDS files
-hads <- bind_rows(readRDS("data/NOSHARE/TEMP1_met_hads_20220503.RDS"),
-                  readRDS("data/NOSHARE/TEMP2_met_hads_20220503.RDS"),
-                  readRDS("data/NOSHARE/TEMP3_met_hads_20220503.RDS"))
-wcc <- readRDS("data/NOSHARE/met_wcc_20220503.RDS")
-lcd <- readRDS("data/NOSHARE/mros_met_lcd_20220503.RDS")
+hads <- readRDS("data/NOSHARE/mros_met_hads_20220927.RDS")
+  # bind_rows(readRDS("data/NOSHARE/TEMP1_met_hads_20220503.RDS"),
+  #                 readRDS("data/NOSHARE/TEMP2_met_hads_20220503.RDS"),
+  #                 readRDS("data/NOSHARE/TEMP3_met_hads_20220503.RDS"))
+wcc <- readRDS("data/NOSHARE/mros_met_wcc_20220927.RDS")
+lcd <- readRDS("data/NOSHARE/mros_met_lcd_20220927.RDS")
+
+# Name the export file (to save all aggregated met data)
+export_file = "data/processed/mros_met_all_20220927.RDS"
 
 ###############################################################################
 #                                 HADS data                                   #
@@ -63,7 +67,7 @@ hads <- hads %>%
 # Import HADS metadata
 # List the metadata files
 meta.dir <- "data/metadata/hads_stations_byState/"
-meta.files <- paste0(meta.dir, list.files(meta.dir))
+meta.files <- paste0(meta.dir, list.files(meta.dir, pattern = "*.csv"))
 
 # Bind the files
 hads_meta <- meta.files %>% 
@@ -102,7 +106,7 @@ rgdal::writeOGR(hads_sp,
 
 ######## RUN ELEVATION SCRIPT IN GEE, THEN REIMPORT #################
 # Read in elevation data for HADS stations
-hads_elev <- read.csv("data/metadata/hads_stations_byState/hads_2022_elev_3dep_pts.csv")
+hads_elev <- read.csv("data/metadata/hads_stations_byState/elevation/hads_2022_elev_3dep_pts.csv")
 
 # Bind
 hads_meta_valid <- left_join(hads_meta_valid, select(hads_elev, nwsli, elevation),
@@ -111,10 +115,6 @@ hads_meta_valid <- left_join(hads_meta_valid, select(hads_elev, nwsli, elevation
 ###############################################################################
 #                               WCC data                                   #
 ###############################################################################
-
-# Import the SNOTEL, SNOLITE, and SCAN data
-wcc <- readRDS("data/NOSHARE/met_wcc_20220503.RDS")
-
 
 # Import SNOTEL metadata
 wcc_meta <- read_csv("data/metadata/wcc_station_metadata.csv") %>% 
@@ -178,9 +178,6 @@ wcc_meta_valid$Elev <- wcc_meta_valid$Elev / 3.28
 ###############################################################################
 #                               Local Climatological Data                                  #
 ###############################################################################
-
-# Import data from LCD
-lcd <- readRDS("data/NOSHARE/mros_met_lcd_20220503.RDS")
 
 # Extract unique ids from LCD data to match in metadata
 lcd_ids <- data.frame(id_full = unique(lcd$STATION)) %>%
@@ -261,25 +258,28 @@ hads_meta_valid2 <- hads_meta_valid %>%
          lat = latitude_d,
          lon = longitude_d,
          elev = elevation) %>% 
-  mutate(network = "hads")
+  mutate(network = "hads") %>% 
+  filter(!is.na(elev)) # fail-safe to remove entries with missing elevation
 wcc_meta_valid2 <- wcc_meta_valid %>% 
   select(name = `Site Name`, 
          id, 
          lat = Lat,
          lon = Lon,
          elev = Elev,
-         network)
+         network) %>% 
+  filter(!is.na(elev)) # fail-safe to remove entries with missing elevation
 lcd_meta_valid2 <- lcd_meta_valid %>% 
   select(name = STATION, 
          id = id_full, 
          lat = LATITUDE,
          lon = LONGITUDE,
          elev = ELEVATION_.M.) %>% 
-  mutate(network = "lcd")
+  mutate(network = "lcd") %>% 
+  filter(!is.na(elev)) # fail-safe to remove entries with missing elevation
 
 # Bind all together
 all_meta_valid <- bind_rows(hads_meta_valid2, wcc_meta_valid2,
-                            lcd_meta_valid2)
+                            lcd_meta_valid2) 
 
 # Export the metadata
 write.csv(x = all_meta_valid,
@@ -322,7 +322,8 @@ hads_valid <- hads_valid %>%
 
 # Select only the appropriate columns and rename
 wcc_valid <- wcc %>%  
-  select(id, datetime = utc_datetime, tair, tdew, rh)
+  select(id, datetime = utc_datetime, tair, tdew, rh) %>% 
+  filter(id %in% wcc_meta_valid2$id)
 
 #######################################
 # LCD
@@ -330,7 +331,7 @@ wcc_valid <- wcc %>%
 # Select only the appropriate columns and rename
 # But first filter to only the FM-15 reports
 lcd_valid <- lcd %>% 
-  filter(REPORT_TYPE == "FM-15") %>% 
+  filter(REPORT_TYPE == "FM-15" & STATION %in% lcd_meta_valid2$id) %>% 
   select(id = STATION, datetime = utc_datetime, 
          tair = HourlyDryBulbTemperature, tdew = HourlyDewPointTemperature,
          rh = HourlyRelativeHumidity, twet = HourlyWetBulbTemperature, 
@@ -348,7 +349,8 @@ lcd_valid <- lcd_valid %>%
          ppt2  = case_when(grepl("s", ppt) ~ NA_real_,
                            TRUE ~ as.numeric(as.character(ppt))),
          rh2   = case_when(grepl("s", rh) ~ NA_real_,
-                           TRUE ~ as.numeric(as.character(rh))))
+                           TRUE ~ as.numeric(as.character(rh)))) %>% 
+  mutate(ppt2 = ifelse(ppt == "T", 0.0001, ppt2))
 
 # Convert temp to celsius and ppt to mm
 lcd_valid <- lcd_valid %>%
@@ -366,5 +368,5 @@ met_all <- bind_rows(hads_valid,
                      lcd_valid)
 
 # Export 
-saveRDS(object = met_all, file = "data/processed/mros_met_all_20220503.RDS")
+saveRDS(object = met_all, file = export_file)
 

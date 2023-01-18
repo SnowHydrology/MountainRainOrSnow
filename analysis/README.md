@@ -20,9 +20,9 @@ during the 2020 and 2021 campaigns.
 The `mros_cit_sci_obs_preprocess.R` script in `analysis/pre_processing`
 associates the following geospatial data with each observation:
 
--   Level II, III, and IV Ecoregions
--   US State
--   Elevation (m)
+- Level II, III, and IV Ecoregions
+- US State
+- Elevation (m)
 
 The script also formats the time data and removes all observations
 submitted without geolocation info.
@@ -53,13 +53,13 @@ prepare them for the temperature model using
 We then model the air temperature at each location using four methods in
 the `analysis/met_modeling/mros_air_temperature_model.R` script:
 
--   Inverse distance weighting (IDW), plus a constant lapse rate of
-    -0.005°C/m
--   IDW, plus a variable lapse rate computed from air temperature
-    observations
--   Nearest met station, plus a constant lapse rate of -0.005°C/m
--   Nearest met station, plus a variable lapse rate computed from air
-    temperature observations
+- Inverse distance weighting (IDW), plus a constant lapse rate of
+  -0.005°C/m
+- IDW, plus a variable lapse rate computed from air temperature
+  observations
+- Nearest met station, plus a constant lapse rate of -0.005°C/m
+- Nearest met station, plus a variable lapse rate computed from air
+  temperature observations
 
 As a result of its higher performance in terms of mean bias and
 r<sup>2</sup>, we use the IDW plus variable lapse rate method when
@@ -97,6 +97,13 @@ library(tidyverse)
 # Use cowplot for plot formatting and import plot styles
 library(cowplot); theme_set(theme_cowplot())
 source("functions/mros_plot_formats.R")
+
+# Make a second fill scale to be colorblind friendly
+phase_fill_scale2 = scale_fill_manual(name = "Type", 
+                                      values = c("#56B4E9", "#CC79A7", "white"))
+
+phase_color_scale2 = scale_color_manual(name = "Type", 
+                                      values = c("#56B4E9", "#CC79A7", "black"))
 
 # Lubridate for date handling tools
 library(lubridate)
@@ -229,7 +236,7 @@ precipitation phase reports from a minimum air temperature value of
 -10.2°C to a maximum of 25.7°C with a median value of 1.1°C. The vast
 majority of reports came from a relatively narrow air temperature range.
 Our data show 95% of observations corresponded to air temperatures
-between -5.1°C and 9.6°C. 45.6% of reported precipitation fell between
+between -5.1°C and 9.6°C. 45.2% of reported precipitation fell between
 0°C and 4°C, the air temperature range identified by previous research
 to have the greatest rain-snow partitioning uncertainty.
 
@@ -237,12 +244,12 @@ We also found marked overlap in the phase distributions by temperature,
 underscoring the difficulty in using near-surface meteorological data to
 partition rain, snow, and mixed precipitation (FIG XXXX). The
 distributions for rain and snow, for example, overlapped by 52.8%,
-43.8%, and 45.7% for air, wet bulb, and dew point temperature,
+43.8%, and 45.5% for air, wet bulb, and dew point temperature,
 respectively. This suggests wet bulb temperature is a more sensitive
 predictor of rain versus snow relative to the other temperature types,
 while air temperature is the least sensitive. Air temperature also had
-the highest percent overlap between snow and mixed (72.8%) and rain and
-mixed phases (75.3%). The minimum overlap between mixed precipitation
+the highest percent overlap between snow and mixed (72.9%) and rain and
+mixed phases (75.1%). The minimum overlap between mixed precipitation
 and another phase was 67.5%, indicating the near-surface meteorological
 conditions favoring mixed precipitation are often indistinguishable from
 rain and snow.
@@ -306,12 +313,12 @@ humidity is less than 100%.
 
 | phase |  mean_rh | temp     |
 |:------|---------:|:---------|
-| Rain  | 79.73312 | air      |
-| Mixed | 72.74908 | air      |
-| Snow  | 65.55655 | air      |
-| Rain  | 82.74519 | wet bulb |
-| Mixed | 77.43236 | wet bulb |
-| Snow  | 69.99865 | wet bulb |
+| Rain  | 79.76564 | air      |
+| Mixed | 72.78463 | air      |
+| Snow  | 65.64661 | air      |
+| Rain  | 82.96879 | wet bulb |
+| Mixed | 77.73126 | wet bulb |
+| Snow  | 70.02283 | wet bulb |
 
 ## 
 
@@ -383,11 +390,11 @@ study period, crowdsourced precipitation phase reports were comprised of
 64% snow, 21% rain, and 15% mixed. In comparison, the precipitation
 phase partitioning methods tended to underpredict snow and mixed
 precipitation, while overpredicting rain. Snowfall frequency estimates
-from the different methods ranged from a minimum of 23.5% to a maximum
-of 84.7%, with an average of 60.7% and standard deviation of 18%.
+from the different methods ranged from a minimum of 23.8% to a maximum
+of 84.5%, with an average of 60.9% and standard deviation of 18%.
 Rainfall frequency estimates were similarly varied, ranging from a
-minimum of 15.3% to a maximum of 57.3%, with an average of 34.9% and
-standard deviation of 12.3%. Only the two air temperature ranges
+minimum of 15.5% to a maximum of 56.9%, with an average of 34.6% and
+standard deviation of 12.2%. Only the two air temperature ranges
 predicted mixed precipitation, with frequency estimates of 14.4% and
 48.1%. The other methods do not assign mixed precipitation, bringing
 down the average to 4.5%.
@@ -398,8 +405,8 @@ Besides the variability in the estimated frequency of the different
 phases, we also quantified the performance of the methods. Although
 refining their output was not the goal of this research, we do note some
 relevant results here. Method success rate, where 100% equals all
-precipitation phase observations correctly predicted, ranged from 41.5%
-for R<sub>a1.0</sub> to 71.4% for T<sub>d0.0</sub>. The top six methods
+precipitation phase observations correctly predicted, ranged from 41.9%
+for R<sub>a1.0</sub> to 71.7% for T<sub>d0.0</sub>. The top six methods
 compared to the observations all incorporated humidity in some form and,
 notably, none could predict mixed precipitation as they were the wet
 bulb and dew point thresholds along with the binary logistic regression
@@ -414,8 +421,8 @@ rain biases and vice versa.
 For comparison sake we also reassigned mixed precipitation to be rain as
 in the IMERG PLP product, which only considers precipitation to be in
 the liquid or solid phase. Applying this assumption widened the range of
-method success rates, which now stretched from a minimum of 38.5% for
-R<sub>a1.0</sub> to 75.6% for T<sub>d0.0</sub>. Again, the top six
+method success rates, which now stretched from a minimum of 38.7% for
+R<sub>a1.0</sub> to 75.9% for T<sub>d0.0</sub>. Again, the top six
 methods were all of the ones that incorporated humidity. In this
 analysis, there were two methods, Bin<sub>log</sub> and
 T<sub>w0.5</sub>, that had rain and snow frequency relative bias
@@ -469,20 +476,20 @@ method_summary_4table %>%
 
 |                   | Success Rate A | Snow Bias A | Rain Bias A | Mixed Bias A | Success Rate MR | Snow Bias MR | Rain Bias MR | Mixed Bias MR |
 |:------------------|---------------:|------------:|------------:|-------------:|----------------:|-------------:|-------------:|--------------:|
-| T<sub>a1.0</sub>  |           58.8 |       -24.7 |       146.8 |       -100.0 |            68.3 |        -24.7 |         43.8 |           NaN |
-| T<sub>a1.5</sub>  |           60.7 |       -14.3 |       115.0 |       -100.0 |            68.8 |        -14.3 |         25.3 |           NaN |
-| T<sub>a1.8</sub>  |           61.0 |        -7.9 |        95.6 |       -100.0 |            68.3 |         -7.9 |         14.0 |           NaN |
-| T<sub>a1.9</sub>  |           61.4 |        -6.7 |        92.2 |       -100.0 |            68.5 |         -6.7 |         12.0 |           NaN |
-| T<sub>a2.7</sub>  |           63.6 |         6.2 |        52.8 |       -100.0 |            69.4 |          6.2 |        -11.0 |           NaN |
-| T<sub>a4.2</sub>  |           65.7 |        28.2 |       -14.4 |       -100.0 |            68.8 |         28.2 |        -50.1 |           NaN |
-| T<sub>w0.0</sub>  |           66.5 |        -6.6 |        91.7 |       -100.0 |            74.9 |         -6.6 |         11.7 |           NaN |
-| T<sub>w0.5</sub>  |           68.4 |         4.3 |        58.5 |       -100.0 |            75.1 |          4.3 |         -7.7 |           NaN |
-| T<sub>w1.0</sub>  |           69.2 |        16.0 |        22.9 |       -100.0 |            74.3 |         16.0 |        -28.4 |           NaN |
-| T<sub>d0.0</sub>  |           71.4 |        22.3 |         3.6 |       -100.0 |            75.6 |         22.3 |        -39.6 |           NaN |
-| T<sub>d0.5</sub>  |           70.9 |        32.3 |       -26.9 |       -100.0 |            73.8 |         32.3 |        -57.4 |           NaN |
-| R<sub>a0.0</sub>  |           46.8 |       -55.7 |       172.9 |         -4.4 |            55.1 |        -55.7 |         59.0 |           Inf |
-| R<sub>a1.0</sub>  |           41.5 |       -63.2 |        35.2 |        219.8 |            38.5 |        -63.2 |        -21.2 |           Inf |
-| Bin<sub>log</sub> |           66.6 |        -2.7 |        79.9 |       -100.0 |            74.1 |         -2.7 |          4.8 |           NaN |
+| T<sub>a1.0</sub>  |           58.9 |       -24.0 |       144.7 |       -100.0 |            68.4 |        -24.0 |         42.6 |           NaN |
+| T<sub>a1.5</sub>  |           60.8 |       -13.5 |       112.7 |       -100.0 |            68.9 |        -13.5 |         24.0 |           NaN |
+| T<sub>a1.8</sub>  |           61.1 |        -7.5 |        94.5 |       -100.0 |            68.2 |         -7.5 |         13.3 |           NaN |
+| T<sub>a1.9</sub>  |           61.3 |        -6.2 |        90.5 |       -100.0 |            68.4 |         -6.2 |         11.0 |           NaN |
+| T<sub>a2.7</sub>  |           63.6 |         6.7 |        51.3 |       -100.0 |            69.3 |          6.7 |        -11.9 |           NaN |
+| T<sub>a4.2</sub>  |           65.7 |        28.7 |       -15.7 |       -100.0 |            68.8 |         28.7 |        -50.9 |           NaN |
+| T<sub>w0.0</sub>  |           66.7 |        -6.2 |        90.5 |       -100.0 |            74.9 |         -6.2 |         11.0 |           NaN |
+| T<sub>w0.5</sub>  |           68.5 |         4.8 |        57.0 |       -100.0 |            75.1 |          4.8 |         -8.5 |           NaN |
+| T<sub>w1.0</sub>  |           69.2 |        16.5 |        21.4 |       -100.0 |            74.2 |         16.5 |        -29.3 |           NaN |
+| T<sub>d0.0</sub>  |           71.7 |        22.3 |         3.8 |       -100.0 |            75.9 |         22.3 |        -39.5 |           NaN |
+| T<sub>d0.5</sub>  |           71.0 |        32.1 |       -26.3 |       -100.0 |            74.0 |         32.1 |        -57.0 |           NaN |
+| R<sub>a0.0</sub>  |           47.1 |       -55.1 |       171.0 |         -4.1 |            55.3 |        -55.1 |         57.9 |           Inf |
+| R<sub>a1.0</sub>  |           41.9 |       -62.8 |        34.3 |        219.2 |            38.7 |        -62.8 |        -21.7 |           Inf |
+| Bin<sub>log</sub> |           66.5 |        -2.6 |        79.7 |       -100.0 |            73.8 |         -2.6 |          4.7 |           NaN |
 
 As expected, we saw method performance vary by air temperature with the
 lowest success rates between 0°C and 10°C. All methods could reliably
@@ -708,17 +715,48 @@ Plot an event:
 
 ``` r
 tair_model_validation <- readRDS("../data/processed/tair_model_validation.RDS")
-tair_mean_bias = round(with(tair_model_validation, mean(tair_idw_lapse_var - tair, na.rm = T)), 2)
-tair_r2 = round(summary(lm(tair ~ tair_idw_lapse_var, tair_model_validation))$r.squared, 2)
+tair_model_validation_table <- tair_model_validation %>% 
+  group_by(scenario) %>% 
+  summarise(cor = cor(tair, tair_idw_lapse_var),
+            bias = mean(tair_idw_lapse_var - tair, na.rm = T)) %>% 
+  mutate(r2 = cor^2)
+tair_mean_bias_all = tair_model_validation_table %>% 
+  slice(which(scenario == "all")) %>%
+  pull(bias) %>% round(digits = 2)
+tair_mean_bias_neg05_10_ppt = tair_model_validation_table %>% 
+  slice(which(scenario == "neg05_10_ppt")) %>%
+  pull(bias) %>% round(digits = 2)
+tair_r2_all = tair_model_validation_table %>% 
+  slice(which(scenario == "all")) %>%
+  pull(r2) %>% round(digits = 2)
+tair_r2_neg05_10_ppt = tair_model_validation_table %>% 
+  slice(which(scenario == "neg05_10_ppt")) %>%
+  pull(r2) %>% round(digits = 2)
+tdew_model_validation <- readRDS("../data/processed/tdew_model_validation.RDS")
+tdew_model_validation_table <- tdew_model_validation %>% 
+  group_by(scenario) %>% 
+  summarise(cor = cor(tdew, tdew_idw_lapse_var),
+            bias = mean(tdew_idw_lapse_var - tdew, na.rm = T)) %>% mutate(r2 = cor^2)
+tdew_equation_validation <- readRDS("../data/processed/tdew_equation_validation.RDS")
+tdew_eq_mean_bias = round(with(tdew_equation_validation, mean(tdew_est - tdew, na.rm = T)), 2)
+tdew_eq_r2 = round(summary(lm(tdew ~ tdew_est, tdew_equation_validation))$r.squared, 2)
+twet_equation_validation <- readRDS("../data/processed/twet_equation_validation.RDS")
+twet_eq_mean_bias = round(with(twet_equation_validation, mean(twet_est - twet, na.rm = T)), 2)
+twet_eq_r2 = round(summary(lm(twet ~ twet_est, twet_equation_validation))$r.squared, 2)
 ```
 
-We found a mean bias of 0.03°C and an r<sup>2</sup> of 0.88 when we
+We found a mean bias of 0.29°C and an r<sup>2</sup> of 0.94 when we
 compared the imputed air temperature values to the originally recorded
-observations. The error metrics for modeled wet bulb and dew point
-temperature and relative humidity were all similarly encouraging.
-However, we do note that small errors in the meteorological data can
-propogate into uncertainty in the amounts of rain versus snow predicted
-by the different precipitation phase partitioning methods.
+observations using all available data. When examining only air
+temperature values between -5°C and 10°C on days with crowdsourced
+observations, we found a mean bias of 0.05°C and an r<sup>2</sup> of
+0.84. The error metrics for modeled wet bulb and dew point temperature
+and relative humidity were all similarly encouraging. However, we do
+note that small errors in the meteorological data can propogate into
+uncertainty in the amounts of rain versus snow predicted by the
+different precipitation phase partitioning methods.
+
+![](README_files/figure-gfm/unnamed-chunk-41-1.png)<!-- -->![](README_files/figure-gfm/unnamed-chunk-41-2.png)<!-- -->![](README_files/figure-gfm/unnamed-chunk-41-3.png)<!-- -->![](README_files/figure-gfm/unnamed-chunk-41-4.png)<!-- -->
 
 ## Time of observations
 
@@ -726,4 +764,65 @@ We found that volunteers generally submitted observations during typical
 waking hours. 86.3% of reports arrived between the hours of 9AM and 9PM
 (0900 and 2100) Pacific Standard Time.
 
-![](README_files/figure-gfm/unnamed-chunk-41-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-42-1.png)<!-- -->
+
+# Analyses for review response
+
+## Updated rain-snow line
+
+![](README_files/figure-gfm/unnamed-chunk-43-1.png)<!-- -->
+
+``` r
+flr_rs_summary_trim <- flr_rs %>% 
+  filter(!is.na(rain_snow_line) &
+           hour %in% c(17:23, 0:5)) %>% 
+  group_by(date) %>% 
+  summarize(n = n(),
+            rs_line = mean(rain_snow_line, na.rm = T),
+            rs_line_sd = sd(rain_snow_line, na.rm = T),
+            rs_line_min = min(rain_snow_line, na.rm = T),
+            rs_line_max = max(rain_snow_line, na.rm = T),
+            rs_line_range = rs_line_max - rs_line_min)
+
+# Join data
+#all <- left_join(gpm_rs, flr_rs, by = "datetime")
+rs_line_daily_trim <- left_join(obs_rs, flr_rs_summary_trim, by = "date") %>% 
+  filter(date %in% valid_dates)
+
+# Get some info on the two datasets
+rs_line_bias_trim = round(with(rs_line_daily_trim, mean(rs_line.y - rs_line.x, na.rm = T)), 1)
+rs_line_r2_trim = round(summary(lm(rs_line.x ~ rs_line.y, rs_line_daily_trim))$r.squared, 2)
+rs_line_count_trim = length(filter(rs_line_daily_trim, !is.na(rs_line.y))$rs_line.y)
+rs_line_hrly_range_av_trim = mean(filter(flr_rs_summary_trim, date %in% valid_dates)$rs_line_range)
+rs_line_hrly_range_max_trim = max(filter(flr_rs_summary_trim, n > 5, date %in% valid_dates)$rs_line_range)
+rs_line_hrly_range_min_trim = min(filter(flr_rs_summary_trim, n > 5, date %in% valid_dates)$rs_line_range)
+```
+
+Of the 32 days with a valid rain-snow line estimate from the citizen
+science data, there were 25 days with corresponding measurements of the
+brightband elevation from the freezing-level radar. There was a
+reasonable relationship between the two datasets with an r<sup>2</sup>
+of 0.66 (Fig XXXXa). When comparing the daily data, there was a slight
+negative bias in the radar-derived values of -165.4 m. This pattern can
+be seen in the example shown in Fig. XXXXb, where the hourly
+freezing-level radar measurements are typically below the daily
+estimates from the crowdsourced data. In general, the fluctuation in the
+brightband elevation was relatively small on days of overlapping data,
+with an average range of 242 m. The day with the greatest difference
+between minimum and maximum elevations was 2020-04-05 at 677 m and the
+day with the minimum difference was 2020-04-06 at 88 m.
+
+![](README_files/figure-gfm/unnamed-chunk-45-1.png)<!-- -->
+
+## Updated phase elevation plot with hypsometry
+
+``` r
+# Import study domain elevation within bounding box
+# -120.4216660613333403,38.7408337936675693 : 
+# -119.6199993946674027,39.7350004603333318
+domain_elev <- read.csv("../data/NOSHARE/tros_domain_elev.csv")
+```
+
+Add hypsometry to plot
+
+![](README_files/figure-gfm/unnamed-chunk-47-1.png)<!-- -->

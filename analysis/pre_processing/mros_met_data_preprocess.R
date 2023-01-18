@@ -281,7 +281,7 @@ hads_valid <- hads_valid %>%
          ppt = in_to_mm(ppt))
 
 # Remove stations with few valid data points
-hads_remove <- c("FOIC1", "GKSC1", "HYSC1", "SEYC1")
+hads_remove <- c("FOIC1", "GKSC1", "HYSC1", "SEYC1", "CNLC1")
 hads_valid <- filter(hads_valid, !id %in% hads_remove)
 
 #######################################

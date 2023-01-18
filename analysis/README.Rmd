@@ -1016,11 +1016,28 @@ Plot an event:
 ## Meteorological modeling accuracy
 ```{r}
 tair_model_validation <- readRDS("../data/processed/tair_model_validation.RDS")
-tair_mean_bias = round(with(tair_model_validation, mean(tair_idw_lapse_var - tair, na.rm = T)), 2)
-tair_r2 = round(summary(lm(tair ~ tair_idw_lapse_var, tair_model_validation))$r.squared, 2)
+tair_model_validation_table <- tair_model_validation %>% 
+  group_by(scenario) %>% 
+  summarise(cor = cor(tair, tair_idw_lapse_var),
+            bias = mean(tair_idw_lapse_var - tair, na.rm = T)) %>% 
+  mutate(r2 = cor^2)
+tair_mean_bias_all = tair_model_validation_table %>% 
+  slice(which(scenario == "all")) %>%
+  pull(bias) %>% round(digits = 2)
+tair_mean_bias_neg05_10_ppt = tair_model_validation_table %>% 
+  slice(which(scenario == "neg05_10_ppt")) %>%
+  pull(bias) %>% round(digits = 2)
+tair_r2_all = tair_model_validation_table %>% 
+  slice(which(scenario == "all")) %>%
+  pull(r2) %>% round(digits = 2)
+tair_r2_neg05_10_ppt = tair_model_validation_table %>% 
+  slice(which(scenario == "neg05_10_ppt")) %>%
+  pull(r2) %>% round(digits = 2)
 tdew_model_validation <- readRDS("../data/processed/tdew_model_validation.RDS")
-tdew_mean_bias = round(with(tdew_model_validation, mean(tdew_idw_lapse_var - tdew, na.rm = T)), 2)
-tdew_r2 = round(summary(lm(tdew ~ tdew_idw_lapse_var, tdew_model_validation))$r.squared, 2)
+tdew_model_validation_table <- tdew_model_validation %>% 
+  group_by(scenario) %>% 
+  summarise(cor = cor(tdew, tdew_idw_lapse_var),
+            bias = mean(tdew_idw_lapse_var - tdew, na.rm = T)) %>% mutate(r2 = cor^2)
 tdew_equation_validation <- readRDS("../data/processed/tdew_equation_validation.RDS")
 tdew_eq_mean_bias = round(with(tdew_equation_validation, mean(tdew_est - tdew, na.rm = T)), 2)
 tdew_eq_r2 = round(summary(lm(tdew ~ tdew_est, tdew_equation_validation))$r.squared, 2)
@@ -1029,9 +1046,7 @@ twet_eq_mean_bias = round(with(twet_equation_validation, mean(twet_est - twet, n
 twet_eq_r2 = round(summary(lm(twet ~ twet_est, twet_equation_validation))$r.squared, 2)
 ```
 
-We found a mean bias of `r tair_mean_bias`°C and an r<sup>2</sup> of `r tair_r2` when we compared the imputed air temperature values to the originally recorded observations. The error metrics for modeled wet bulb and dew point temperature and relative humidity were all similarly encouraging. However, we do note that small errors in the meteorological data can propogate into uncertainty in the amounts of rain versus snow predicted by the different precipitation phase partitioning methods. 
-
-We found a mean bias of `r tair_mean_bias`°C and an r<sup>2</sup> of `r tair_r2` when we compared the imputed air temperature values to the originally recorded observations. The error metrics for modeled wet bulb and dew point temperature and relative humidity were all similarly encouraging. However, we do note that small errors in the meteorological data can propogate into uncertainty in the amounts of rain versus snow predicted by the different precipitation phase partitioning methods. 
+We found a mean bias of `r tair_mean_bias_all`°C and an r<sup>2</sup> of `r tair_r2_all` when we compared the imputed air temperature values to the originally recorded observations using all available data. When examining only air temperature values between -5°C and 10°C on days with crowdsourced observations, we found a mean bias of `r tair_mean_bias_neg05_10_ppt`°C and an r<sup>2</sup> of `r tair_r2_neg05_10_ppt`. The error metrics for modeled wet bulb and dew point temperature and relative humidity were all similarly encouraging. However, we do note that small errors in the meteorological data can propogate into uncertainty in the amounts of rain versus snow predicted by the different precipitation phase partitioning methods. 
 
 ```{r echo = FALSE, warning = FALSE, message = FALSE, fig.dim= c(5,5)}
 tair_dis_val_plot <- 
@@ -1115,3 +1130,136 @@ save_plot(filename = "figures/uncert_fig11_obs_time.png",
           plot = obs_time_plot, 
           base_width = 6, base_height = 4)
 ```
+
+# Analyses for review response
+
+## Updated rain-snow line
+
+```{r echo = FALSE, warning = FALSE, message = FALSE}
+# Import the rain-snow probability by elevation data
+rs_line_by_elev <- readRDS("../data/processed/mros_obs_rain_snow_prob_elev_2020-2021.RDS")
+
+rs_line_example_plot <- 
+  ggplot(filter(rs_line_by_elev, date == as.Date("2021-01-28")),
+         aes(elev, snow_prob)) + 
+    geom_point() +
+    geom_smooth(method = "lm", se = F) + 
+    geom_hline(yintercept = 50, lty = "dashed") +
+    labs(x = "Elevation (m)", y = "Snowfall Probability (%)") +
+    annotate(geom = "text", x = 1100, y = 15, 
+             label = "Fit Line", color = "darkblue", hjust = 1)
+rs_line_example_plot
+save_plot(filename = "figures/uncert_figs05_rs_line_example.png",
+          plot = rs_line_example_plot,
+          base_width = 5, base_height = 5)
+```
+
+```{r message = FALSE}
+
+
+flr_rs_summary_trim <- flr_rs %>% 
+  filter(!is.na(rain_snow_line) &
+           hour %in% c(17:23, 0:5)) %>% 
+  group_by(date) %>% 
+  summarize(n = n(),
+            rs_line = mean(rain_snow_line, na.rm = T),
+            rs_line_sd = sd(rain_snow_line, na.rm = T),
+            rs_line_min = min(rain_snow_line, na.rm = T),
+            rs_line_max = max(rain_snow_line, na.rm = T),
+            rs_line_range = rs_line_max - rs_line_min)
+
+# Join data
+#all <- left_join(gpm_rs, flr_rs, by = "datetime")
+rs_line_daily_trim <- left_join(obs_rs, flr_rs_summary_trim, by = "date") %>% 
+  filter(date %in% valid_dates)
+
+# Get some info on the two datasets
+rs_line_bias_trim = round(with(rs_line_daily_trim, mean(rs_line.y - rs_line.x, na.rm = T)), 1)
+rs_line_r2_trim = round(summary(lm(rs_line.x ~ rs_line.y, rs_line_daily_trim))$r.squared, 2)
+rs_line_count_trim = length(filter(rs_line_daily_trim, !is.na(rs_line.y))$rs_line.y)
+rs_line_hrly_range_av_trim = mean(filter(flr_rs_summary_trim, date %in% valid_dates)$rs_line_range)
+rs_line_hrly_range_max_trim = max(filter(flr_rs_summary_trim, n > 5, date %in% valid_dates)$rs_line_range)
+rs_line_hrly_range_min_trim = min(filter(flr_rs_summary_trim, n > 5, date %in% valid_dates)$rs_line_range)
+
+```
+Of the `r length(valid_dates)` days with a valid rain-snow line estimate from the citizen science data, there were `r rs_line_count` days with corresponding measurements of the brightband elevation from the freezing-level radar. There was a reasonable relationship between the two datasets with an r<sup>2</sup> of `r rs_line_r2_trim` (Fig XXXXa). When comparing the daily data, there was a slight negative bias in the radar-derived values of `r rs_line_bias_trim` m. This pattern can be seen in the example shown in Fig. XXXXb, where the hourly freezing-level radar measurements are typically below the daily estimates from the crowdsourced data. In general, the fluctuation in the brightband elevation was relatively small on days of overlapping data, with an average range of `r round(rs_line_hrly_range_av_trim, 1)` m. The day with the greatest difference between minimum and maximum elevations was `r flr_rs_summary_trim %>% slice(which(rs_line_range == rs_line_hrly_range_max_trim)) %>% pull(date)` at `r rs_line_hrly_range_max_trim` m  and the day with the minimum difference was `r flr_rs_summary_trim %>% slice(which(rs_line_range == rs_line_hrly_range_min_trim)) %>% pull(date)` at `r rs_line_hrly_range_min_trim` m.
+
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.dim= c(9,4.5)}
+min_datetime = as.POSIXct("2020-04-04 05:00", tz = "Etc/Gmt+8")
+max_datetime = as.POSIXct("2020-04-07 00:00", tz = "Etc/Gmt+8")
+
+rs_line_fit_event_plot_trim <- 
+  plot_grid(
+  ggplot(rs_line_daily_trim, aes(rs_line.x, rs_line.y)) + 
+    geom_point() + 
+    geom_smooth(method = "lm", se = F, color = "darkblue") + 
+    geom_abline(slope = 1, intercept = 0, lwd = 1, lty = "dashed", color = "gray") +
+    annotate(geom = "text", x = 2000, y = 1650, 
+             label = "Fit Line", color = "darkblue", hjust = 0) + 
+    annotate(geom = "text", x = 2000, y = 2100, 
+             label = "1:1 Line", color = "gray", hjust = 1) + 
+    labs(x = "Cit. Sci. Rain-Snow Line Elev. (m)",
+         y = "FLR Rain-Snow Line Elev. (m)"),
+  filter(flr_rs, datetime >= min_datetime & 
+         datetime <= max_datetime) %>% 
+  ggplot() + 
+  geom_point(aes(datetime, rain_snow_line), color = "darkorange3") + 
+  ylim(900, 2000) + 
+  geom_segment(data = filter(obs_rs, datetime_min >= min_datetime &
+                               datetime_max <= max_datetime), 
+               aes(x = datetime_min, y = rs_line, xend = datetime_max, yend = rs_line), 
+               color = "darkorchid3", lwd = 1)  +
+    annotate(geom = "text", x = as.POSIXct("2020-04-05 12:00", tz = "Etc/Gmt+8"), y = 1050, 
+             label = "FLR", color = "darkorange3", hjust = 1) + 
+    annotate(geom = "text", x = as.POSIXct("2020-04-06 14:00", tz = "Etc/Gmt+8"), y = 1700, 
+             label = "Cit. Sci.", color = "darkorchid3", hjust = 0.5) + 
+  labs(x = "Date",
+       y = "Rain-Snow Line Elev. (m)"), 
+  labels = "auto"
+)
+rs_line_fit_event_plot_trim
+save_plot(filename = "figures/uncert_fig10_rs_line_fit_event_trim.png",
+          plot = rs_line_fit_event_plot_trim, 
+          base_width = 8, base_height = 4)
+```
+
+## Updated phase elevation plot with hypsometry
+```{r message = FALSE}
+# Import study domain elevation within bounding box
+# -120.4216660613333403,38.7408337936675693 : 
+# -119.6199993946674027,39.7350004603333318
+domain_elev <- read.csv("../data/NOSHARE/tros_domain_elev.csv")
+```
+
+Add hypsometry to plot
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.dim= c(6,6)}
+phase_by_elev_plot_hyp <- 
+  plot_grid(
+    ggplot(obsPass, aes(elev, fill = phase)) + 
+        geom_histogram(color = "black") + 
+        coord_flip() + 
+        phase_fill_scale2 +
+        labs(y = "Number of Observations", 
+             x = "Elevation (m)") +
+        theme(strip.background = element_rect(fill = "white", color = "black"),
+              legend.position = c(0.8, 0.8)) +
+        xlim(min(domain_elev$elev_m), max(obsPass$elev)),
+    ggplot(domain_elev, aes(elev_m)) + 
+        stat_ecdf(geom = "step") +
+        coord_flip()+
+        xlim(min(domain_elev$elev_m), max(obsPass$elev)) +
+        theme(axis.title.y = element_blank(),
+              axis.text.y = element_blank(),
+              axis.ticks.length.y = unit(.25, "cm")) +
+        labs(y = "Domain Fraction"),
+    rel_widths = c(0.7, 0.3), labels = "auto"
+)
+phase_by_elev_plot_hyp
+save_plot(filename = "figures/uncert_fig03_phase_by_elev_hyp.png",
+          plot = phase_by_elev_plot_hyp, 
+          base_width = 7, base_height = 4.5)
+```
+
+

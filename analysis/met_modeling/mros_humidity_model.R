@@ -18,22 +18,22 @@ library(humidity) # devtools::install_github("SnowHydrology/humidity")
 ########## User input
 
 # Input files
-met.input = "data/NOSHARE/mros_met_all_20220503.RDS"
+met.input = "data/NOSHARE/mros_met_all_20220927.RDS"
 meta.input = "data/metadata/all_metadata_valid.csv"
-citsci.input = "data/NOSHARE/mros_cit_sci_obs_processed_with_tair_20220503_v2.RDS"
-elev.input = "data/NOSHARE/mros_elev_3dep_pts_20220503.csv"
+citsci.input = "data/NOSHARE/mros_cit_sci_obs_processed_with_tair_20220927.RDS"
+elev.input = "data/NOSHARE/mros_elev_3dep_pts_20220927.RDS"
 
 # Output files
-citsci.output = "data/NOSHARE/mros_cit_sci_obs_processed_with_met_all_20220503_v2.RDS"
-model.output = "data/processed/tdew_model_data_full_20220503_v2.RDS"
-validation.output = "data/processed/tdew_model_validation_20220503.RDS"
-all.validation.output = "data/NOSHARE/met_equation_validation_20220503.RDS"
+citsci.output = "data/NOSHARE/mros_cit_sci_obs_processed_with_met_all_20220927.RDS"
+model.output = "data/processed/tdew_model_data_full_20220927.RDS"
+validation.output = "data/processed/tdew_model_validation_20220927.RDS"
+all.validation.output = "data/NOSHARE/met_equation_validation_20220927.RDS"
 
 # Other
 met.search.radius = 100000 # search radius for met stations (m)
 n.station.thresh = 5 # threshold for the number of met stations in search radius to perform temp modeling
 n.remove = 50000 # number of random tair obs to remove for model validation
-stations.remove <- c("WRSV1", "XONC1", "DPHC1", "DKKC2" ) # bad data
+stations.remove <- c("WRSV1", "XONC1", "DPHC1", "DKKC2", "CNLC1" ) # bad data
 
 # Assign cores for parallelization
 registerDoMC(cores = 4)
@@ -52,7 +52,8 @@ met <- readRDS(file = met.input) %>%
          twet = case_when(twet < -40 | twet > 45 ~ NA_real_,
                           TRUE ~ twet),
          rh = case_when(rh < 5 | rh > 100 ~ NA_real_,
-                        TRUE ~ rh))
+                        TRUE ~ rh)) %>% 
+  distinct(id, datetime, .keep_all = TRUE)
 
 # Import the station metadata
 meta <- read.csv(meta.input) %>% 
@@ -76,8 +77,8 @@ met <- met %>%
 # Validate TWET estimates at stations with TWET obs
 twet_validation <- met %>% 
   filter(!is.na(twet))
-summary(lm(twet ~ twet_est, twet_validation)) # r2 = 0.9972
-mean(twet_validation$twet_est - twet_validation$twet, na.rm = T) # bias = -0.179°C
+summary(lm(twet ~ twet_est, twet_validation)) # r2 = 0.9973
+mean(twet_validation$twet_est - twet_validation$twet, na.rm = T) # bias = -0.2498°C
 
 # # Plot
 # ggplot(twet_validation, aes(twet, twet_est)) + 
@@ -91,7 +92,7 @@ mean(twet_validation$twet_est - twet_validation$twet, na.rm = T) # bias = -0.179
 tdew_validation <- met %>% 
   filter(!is.na(tdew))
 summary(lm(tdew ~ tdew_est, tdew_validation)) # r2 = 0.9979
-mean(tdew_validation$tdew_est - tdew_validation$tdew, na.rm = T) # bias = -0.041°C
+mean(tdew_validation$tdew_est - tdew_validation$tdew, na.rm = T) # bias = 0.0196°C
 
 # # Plot
 # ggplot(tdew_validation, aes(tdew, tdew_est)) + 
@@ -104,8 +105,8 @@ mean(tdew_validation$tdew_est - tdew_validation$tdew, na.rm = T) # bias = -0.041
 # Validate RH estimates at stations with RH obs
 rh_validation <- met %>% 
   filter(!is.na(rh))
-summary(lm(rh ~ rh_est, rh_validation)) # r2 = 0.9988
-mean(rh_validation$rh_est - rh_validation$rh, na.rm = T) # bias = -0.189%
+summary(lm(rh ~ rh_est, rh_validation)) # r2 = 0.9977
+mean(rh_validation$rh_est - rh_validation$rh, na.rm = T) # bias = -0.112%
 
 # # Plot
 # ggplot(rh_validation, aes(rh, rh_est)) + 

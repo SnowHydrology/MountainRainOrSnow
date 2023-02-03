@@ -23,16 +23,26 @@ library(lutz) # time zone calculations
     # Can be downloaded programmatically using URL builder in
     # mros_lcd_download.R
     
-# Import the RDS files
-hads <- readRDS("data/NOSHARE/mros_met_hads_20220927.RDS")
-  # bind_rows(readRDS("data/NOSHARE/TEMP1_met_hads_20220503.RDS"),
-  #                 readRDS("data/NOSHARE/TEMP2_met_hads_20220503.RDS"),
-  #                 readRDS("data/NOSHARE/TEMP3_met_hads_20220503.RDS"))
-wcc <- readRDS("data/NOSHARE/mros_met_wcc_20220927.RDS")
-lcd <- readRDS("data/NOSHARE/mros_met_lcd_20220927.RDS")
+# Name the files
+hads_files <- c("data/NOSHARE/mros_met_hads_20220927.RDS",
+                "data/NOSHARE/mros_met_hads_20220503.RDS")
+wcc_files <- c("data/NOSHARE/mros_met_wcc_20220927.RDS",
+               "data/NOSHARE/mros_met_wcc_20220503.RDS")
+lcd_files <- c("data/NOSHARE/mros_met_lcd_20220927.RDS",
+               "data/NOSHARE/mros_met_lcd_20220503.RDS")
 
 # Name the export file (to save all aggregated met data)
-export_file = "data/processed/mros_met_all_20220927.RDS"
+# File has to go to NOSHARE b/c it's too big
+export_file = "data/NOSHARE/mros_met_all_20220927.RDS"
+
+# Import the RDS files
+hads <- lapply(hads_files, readRDS) %>% 
+  plyr::ldply(., bind_rows) 
+wcc <- lapply(wcc_files, readRDS) %>% 
+  plyr::ldply(., bind_rows) 
+lcd <- lapply(lcd_files, readRDS) %>% 
+  plyr::ldply(., bind_rows) 
+
 
 ###############################################################################
 #                                 HADS data                                   #
@@ -50,9 +60,10 @@ export_file = "data/processed/mros_met_all_20220927.RDS"
 # Positions 4+5 = source code (RG = GOES, RZ = nonspecified)
 # Positions 6+7 = extremum and probability codes (we just want the null values, ZZ)
 
-hads <- hads %>% 
-  select(station, utc_valid, TAIRGZZ, TDIRGZZ, XRIRGZZ) %>% 
-  mutate(across(3:5, as.numeric))
+# Below moved to mros_hads_reprocess.R for data efficiency
+# hads <- hads %>% 
+#   select(station, utc_valid, TAIRGZZ, TDIRGZZ, XRIRGZZ) %>% 
+#   mutate(across(3:5, as.numeric))
 
 # Format datetime
 # All hads data are given in UTC
@@ -99,10 +110,10 @@ hads_sp <- sp::SpatialPointsDataFrame(coords = coords,
                                  proj4string = crs_obs)
 
 # Export
-rgdal::writeOGR(hads_sp, 
-                dsn = "data/geospatial/", 
-                layer = "hads_stations_2022", 
-                driver = "ESRI Shapefile")
+# rgdal::writeOGR(hads_sp, 
+#                 dsn = "data/geospatial/", 
+#                 layer = "hads_stations_2022", 
+#                 driver = "ESRI Shapefile")
 
 ######## RUN ELEVATION SCRIPT IN GEE, THEN REIMPORT #################
 # Read in elevation data for HADS stations
@@ -159,7 +170,7 @@ wcc.l <- lapply(wcc.l, function(x){
   data.frame(x) %>% 
     mutate(datetime = as.POSIXct(x = paste(x$date, x$time), 
                               tz = x[[1, "timezone_lst"]],
-                              format = "%Y-%d-%m %H:%M"),
+                              format = "%Y-%m-%d %H:%M"),
            utc_datetime = with_tz(time = datetime, 
                                   tzone = "UTC"), 
            datetime = NULL)
@@ -186,7 +197,8 @@ lcd_ids <- data.frame(id_full = unique(lcd$STATION)) %>%
 # Import the LCD metadata
 lcd_meta <- read.csv("data/metadata/lcd_station_metadata.csv",
                            stringsAsFactors = F) %>% 
-  mutate(id = str_sub(STATION_ID, 6, 10))
+  mutate(id = str_sub(STATION_ID, 6, 10),
+         STATION = str_extract(STATION, ".*(?=\\,)")) # extract only text before the ","
 
 # Join the full and partial IDs
 lcd_meta <- left_join(lcd_meta, lcd_ids,
@@ -226,7 +238,7 @@ lcd.l <- lapply(lcd.l, function(x){
   data.frame(x) %>% 
     mutate(datetime = as.POSIXct(x = x$DATE, 
                                  tz = x[[1, "timezone_lst"]],
-                                 format = "%Y-%d-%mT%H:%M:%S"),
+                                 format = "%Y-%m-%dT%H:%M:%S"),
            utc_datetime = with_tz(time = datetime, 
                                   tzone = "UTC"), 
            datetime = NULL)

@@ -20,14 +20,14 @@ library(geosphere) # used for computing distances between points
 ########## User input
 
 # Input files
-citsci.input = "data/NOSHARE/mros_cit_sci_obs_processed_with_met_all_20220503_v2.RDS"
-dist.input = "data/processed/tair_model_data_full_20220503_v2.RDS" # for met station distance
-lcd.input = "data/NOSHARE/mros_met_lcd_20220503.RDS"
+citsci.input = "data/NOSHARE/mros_cit_sci_obs_processed_with_met_all_20220927.RDS"
+dist.input = "data/processed/tair_model_data_full_20220927.RDS" # for met station distance
+lcd.input = "data/NOSHARE/mros_met_lcd_20220927.RDS"
 meta.input = "data/metadata/all_metadata_valid.csv"
 
 # Output files
-noshare.output = "data/NOSHARE/mros_cit_sci_obs_processed_with_tair_QCflags_20220503_v2.RDS"
-share.output = "data/processed/mros_obs_processed_20220503.RDS"
+noshare.output = "data/NOSHARE/mros_cit_sci_obs_processed_with_tair_QCflags_20220927.RDS"
+share.output = "data/processed/mros_obs_processed_20220927.RDS"
 
 # Import data
 obs <- 
@@ -118,19 +118,26 @@ pval_thresh = 0.05 # maximum pval for lapse rate calc
 obs <- obs %>% 
   mutate(tair_flag = case_when(tair >= tair_snow_max & phase == "Snow" ~ "WarmSnow",
                                tair <= tair_rain_min & phase == "Rain" ~ "CoolRain",
+                               is.na(tair) ~ "NoMet",
                                TRUE ~ "Pass"),
          ppt_flag = case_when(ppt == ppt_thresh ~ "NoPrecip",
+                              is.na(ppt) ~ "NoMet",
                               TRUE ~ "Pass"),
          rh_flag = case_when(rh < rh_thresh ~ "LowRH",
+                             is.na(rh) ~ "NoMet",
                              TRUE ~ "Pass"),
          dist_flag = case_when(avg_dist >= avgdist_thresh ~ "TooFar",
+                               is.na(avg_dist) ~ "NoMet",
                                TRUE ~ "Pass"),
          closest_flag = case_when(nearest_dist >= closest_thresh ~ "TooFar",
+                                  is.na(nearest_dist) ~ "NoMet",
                                   TRUE ~ "Pass"),
          nstation_flag = case_when(n_stations < nstation_thresh ~ "FewStations",
-                                  TRUE ~ "Pass"),
+                                   is.na(n_stations) ~ "NoMet",
+                                   TRUE ~ "Pass"),
          pval_flag = case_when(lapse_var_pval > pval_thresh ~ "PoorLapse",
-                                   TRUE ~ "Pass"))
+                               is.na(lapse_var_pval) ~ "NoMet",
+                               TRUE ~ "Pass"))
 
 ################################################################################
 # Check for duplicate time stamps

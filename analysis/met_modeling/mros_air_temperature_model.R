@@ -15,22 +15,24 @@ library(sp)
 ########## User input
 
 # Input files
-met.input = "data/NOSHARE/mros_met_all_20220503.RDS"
+met.inputs = "data/NOSHARE/mros_met_all_20220927.RDS"
+  # c("data/NOSHARE/mros_met_all_20220927.RDS",
+  #              "data/NOSHARE/mros_met_all_20220503.RDS")
 meta.input = "data/metadata/all_metadata_valid.csv"
-citsci.input = "data/NOSHARE/mros_obs_cit_sci_processed_20220503.RDS"
-elev.input = "data/NOSHARE/mros_elev_3dep_pts_20220503.csv"
+citsci.input = "data/NOSHARE/mros_obs_cit_sci_processed_20220927.RDS"
+elev.input = "data/NOSHARE/mros_elev_3dep_pts_20220927.RDS"
 
 # Output files
-citsci.output = "data/NOSHARE/mros_cit_sci_obs_processed_with_tair_20220503_v2.RDS"
-model.output = "data/processed/tair_model_data_full_20220503_v2.RDS"
-validation.output = "data/processed/tair_model_validation_20220503_v2.RDS"
+citsci.output = "data/NOSHARE/mros_cit_sci_obs_processed_with_tair_20220927.RDS"
+model.output = "data/processed/tair_model_data_full_20220927.RDS"
+validation.output = "data/processed/tair_model_validation_20220927.RDS"
 
   
 # Other
 met.search.radius = 100000 # search radius for met stations (m)
 n.station.thresh = 5 # threshold for the number of met stations in search radius to perform temp modeling
 n.remove = 50000 # number of random tair obs to remove for model validation
-stations.remove <- c("WRSV1", "XONC1", "DPHC1", "DKKC2" ) # bad data
+stations.remove <- c("WRSV1", "XONC1", "DPHC1", "DKKC2", "CNLC1" ) # bad data
 
 # Assign cores for parallelization
 registerDoMC(cores = 4)
@@ -39,10 +41,12 @@ registerDoMC(cores = 4)
 
 # Import the air temperature data
 # Remove extreme values
-tair <- readRDS(file = met.input) %>% 
+tair <- lapply(met.inputs, readRDS) %>% 
+  plyr::ldply(., bind_rows) %>% 
   mutate(tair = case_when(tair < -30 | tair > 45 ~ NA_real_,
                           TRUE ~ tair)) %>% 
-  filter(!(id %in% stations.remove))
+  filter(!(id %in% stations.remove)) %>% 
+  distinct(id, datetime, .keep_all = TRUE)
 
 # Import the station metadata
 meta <- read.csv(meta.input) %>% 
@@ -51,10 +55,15 @@ meta <- read.csv(meta.input) %>%
 # Import the citizen science observations
 # These were already pre-processed & filtered once
 obs <- readRDS(citsci.input) %>% 
-  mutate(phase = str_trim(phase)) %>% 
-  left_join(.,
-            select(read.csv(elev.input), id, elev = elevation),
-            by = "id")
+  mutate(phase = str_trim(phase)) 
+elev <- readRDS(elev.input) %>% 
+  mutate(longitude = sf::st_coordinates(geometry)[, "X"],
+         latitude = sf::st_coordinates(geometry)[, "Y"])
+obs <- left_join(obs,
+                  select(elev, utc_datetime, latitude, longitude, phase,
+                         elev = USGS_Seamless_DEM_10m), 
+                  by = c("utc_datetime", "latitude", "longitude", "phase")) %>% 
+  mutate(geometry = NULL)
 
 #Spatial interpolations
 
@@ -73,7 +82,7 @@ t_lapse_const = -0.005
 # Loop through each observation
 rain_snow.l <-
   foreach(i = seq_along(obs$id), .errorhandling = "pass") %dopar% {
-    
+      
     # Extract single phase observation
     # Plus other relevant data
     tmp.phase = obs[i, "phase"]

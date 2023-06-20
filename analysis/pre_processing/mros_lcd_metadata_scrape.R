@@ -2,6 +2,7 @@
 
 library(tidyverse)
 library(rvest)
+library(lutz) # time zone calculations
 
 # First access the metadata from NOAA
 # https://www.ncei.noaa.gov/maps/lcd/ 
@@ -76,6 +77,37 @@ lcd_meta_withID <- left_join(lcd_meta,
                              info,
                              by = c("short_id", "STATION" = "name"))
 
+
+# Add timezone info
+lcd_meta_withID <- lcd_meta_withID %>% 
+  mutate(timezone = tz_lookup_coords(lat = LATITUDE, 
+                                     lon = LONGITUDE, 
+                                     method = "accurate"))
+tz_table <- data.frame(
+  timezone     = c("America/Los_Angeles",
+                   "America/Denver",
+                   "America/Boise",
+                   "America/Phoenix", 
+                   "America/Chicago",
+                   "Etc/GMT+6",
+                   "America/New_York",
+                   "America/Detroit",
+                   "America/Indiana/Indianapolis",
+                   "America/Indiana/Vincennes"),
+  timezone_lst = c("Etc/GMT+8",
+                   "Etc/GMT+7", 
+                   "Etc/GMT+7", 
+                   "Etc/GMT+7", 
+                   "Etc/GMT+6",
+                   "Etc/GMT+6",
+                   "Etc/GMT+5",
+                   "Etc/GMT+5",
+                   "Etc/GMT+5",
+                   "Etc/GMT+5")
+)
+lcd_meta_withID <- left_join(lcd_meta_withID,
+                             tz_table,
+                             by = "timezone")
 
 # Export the met data
 write.csv(lcd_meta_withID, export.file)

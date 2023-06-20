@@ -78,4 +78,4 @@ lcd_meta_withID <- left_join(lcd_meta,
 
 
 # Export the met data
-saveRDS(lcd_meta_withID, export.file)
+write.csv(lcd_meta_withID, export.file)

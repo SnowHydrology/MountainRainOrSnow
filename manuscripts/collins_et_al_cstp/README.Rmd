@@ -1,0 +1,68 @@
+---
+title: "Analysis for Collins et al. Citizen Science Theory and Practice manuscript"
+author: "Keith Jennings"
+date: "`r Sys.Date()`"
+output: github_document
+---
+
+Import the tidyverse package and the study data.
+
+```{r}
+library(tidyverse)
+df <- read.csv("../../data/processed/mros_obs_gpm_processed_20220503.csv")
+```
+
+Filter to just the study domain and obs that pass QC.
+
+```{r}
+studyDomain = data.frame(ecoregions = c("High Plains", 
+                                        "Southern Rockies", 
+                                        "Colorado Plateaus",   # Colorado
+                                        "Central Basin and Range", 
+                                        "Sierra Nevada",               # Sierra
+                                        "Willamette Valley", 
+                                        "Cascades",                          # Oregon
+                                        "Eastern Great Lakes Lowlands", 
+                                        "Northeastern Highlands"), # Northeast
+                         regions = c(rep("Colorado", 3),
+                                   rep("Sierra", 2),
+                                   rep("Oregon", 2),
+                                   rep("Northeast", 2)))
+
+obsStudy <- filter(df, 
+                   eco_l3 %in% studyDomain$ecoregion)
+obsPass <- filter(obsStudy, 
+                  tair_flag == "Pass" &
+                  ppt_flag == "Pass" & 
+                  rh_flag == "Pass" &
+                  dist_flag == "Pass" & 
+                  dupe_flag == "Pass") %>% 
+  left_join(., studyDomain,
+            by = c("eco_l3" = "ecoregions"))
+```
+
+Some summary info:
+
+- There were `r length(df$id)` observations during the study period from `r min(df$date)` to `r max(df$date)`
+- Of those observations, `r length(obsStudy$id)` were in the targeted study regions
+- `r length(obsPass$id)` observations (`r round(length(obsPass$id)/length(obsStudy$id) * 100, digits = 1)`%) in the study regions passed our quality control checks
+
+Observations by Level 3 Ecoregion
+
+```{r echo = FALSE, warning = FALSE, message = FALSE}
+obsPass %>% 
+  group_by(eco_l3) %>% 
+  summarise(n = n()) %>% 
+  arrange(desc(n)) %>% 
+  knitr::kable()
+```
+
+Observations by study region
+
+```{r echo = FALSE, warning = FALSE, message = FALSE}
+obsPass %>% 
+  group_by(regions) %>% 
+  summarise(n = n()) %>% 
+  arrange(desc(n)) %>% 
+  knitr::kable()
+```

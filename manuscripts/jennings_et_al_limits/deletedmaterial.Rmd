@@ -1,0 +1,88 @@
+---
+title: "Deleted material from in-progress Mountain Rain or Snow Manuscript"
+author: "Keith Jennings"
+date: "Sys.Date()"
+output:
+  github_document: default
+---
+
+# Info
+
+This markdown file will not run on its own, but I'm using it to save code that I removed from `README.Rmd`.
+
+## Add ecoregion information
+
+```{r}
+# eco_inclusion_diff <- summary_all %>% 
+#   filter(ppm %in% c("rf", "xg") & source == "cs") %>% 
+#   mutate(scenario_type_eco = ifelse(str_detect(scenario, "eco"),
+#                                 "eco", "noeco"),
+#          scenario_type_mix = ifelse(str_detect(scenario, "allphase"),
+#                                     "mix", "nomix")) %>% 
+#   pivot_wider(id_cols = c(scenario_type_mix, ppm),
+#               names_from = scenario_type_eco,
+#               values_from = c(accuracy_pct, snow_bias_pct, rain_bias_pct)) %>% 
+#   mutate(accuracy_pct_diff = (accuracy_pct_eco - accuracy_pct_noeco) /
+#            accuracy_pct_noeco * 100,
+#          rain_bias_pct_diff_abs = (abs(rain_bias_pct_eco) - abs(rain_bias_pct_noeco)) /
+#            abs(rain_bias_pct_noeco) * 100,
+#          snow_bias_pct_diff_abs = (abs(snow_bias_pct_eco) - abs(snow_bias_pct_noeco)) /
+#            abs(snow_bias_pct_noeco) * 100)
+```
+
+While the benchmark methods can only utilize near-surface meteorology, the machine learning methods can incorporate other ancillary data. We therefore evaluated whether an additional predictor variable—ecoregions in this case—would improve random forest and XGBoost performance by enabling them to learn regionally specific patterns in precipitation phase partitioning. We found that including ecoregions as a predictor generally increased accuracy and decreased bias, but to such a small degree as to be negligible (Figure 5). The average relative increase in accuracy was just `r mean(eco_inclusion_diff$accuracy_pct_diff) %>%  round(digits = 1)`% when comparing the machine learning models with ecoregion as a predictor variable to those without. It was a similar story for the biases, with average relative reductions of `r mean(eco_inclusion_diff$rain_bias_pct_diff_abs) %>%  round(digits = 1)`% and `r mean(eco_inclusion_diff$snow_bias_pct_diff_abs) %>%  round(digits = 1)`% in rain and snow bias, respectively. 
+
+
+
+```{r}
+# summary_all %>% 
+#   filter(ppm %in% c("rf", "xg") & source == "cs") %>% 
+#   select(ppm, scenario, accuracy_pct, snow_bias_pct, rain_bias_pct) %>% 
+#   pivot_longer(cols = c(accuracy_pct, snow_bias_pct, rain_bias_pct),
+#                names_to = "metric") %>% 
+#   mutate(metric_lab = ifelse(metric == "accuracy_pct",
+#                              "Accuracy",
+#                              ifelse(metric == "rain_bias_pct",
+#                                     "Rain bias",
+#                                     "Snow bias"))) %>% 
+#   ggplot(aes(ppm, value, fill = scenario)) + 
+#   geom_bar(stat = "identity", position = "dodge") + 
+#   geom_hline(yintercept = 0, color = "grey") +
+#   facet_wrap(~metric_lab, ncol =1, scales = "free_y") +
+#     labs(x = "Method", y = "Performance metric value (%)") +
+#   scale_fill_manual(values = c("#F05039", "#EEBAB4",
+#                                "#1F449C", "#7CA1CC"),
+#                     labels = c("All phase, met only",
+#                                "All phase, met + eco",
+#                                "No mix, met only",
+#                                "No mix, met + eco"),
+#                     name = "Scenario") +
+#   scale_x_discrete(labels = c("Random forest", "XGBoost"))
+```
+
+
+```{r}
+# summary_all %>% 
+#   ggplot(aes(accuracy_pct, ppm)) + 
+#   geom_line() +
+#   geom_point(aes(color = scenario, shape = scenario)) +
+#   facet_wrap(~source, ncol =1)
+```
+
+```{r}
+# summary_all %>% 
+#   ggplot(aes(snow_bias_pct, ppm)) + 
+#   geom_line() +
+#   geom_point(aes(color = scenario, shape = scenario)) +
+#   facet_wrap(~source, ncol =1)
+```
+
+```{r}
+# summary_all %>% 
+#   ggplot(aes(rain_bias_pct, ppm)) + 
+#   geom_line() +
+#   geom_point(aes(color = scenario, shape = scenario)) +
+#   facet_wrap(~source, ncol =1)
+```
+
+DELETED Using wet bulb temperature makes the situation slightly better. Across the whole of the crowdsourced dataset, there is a `r (cs_nomix_twet_snowrain_overlap * 100) %>% round(digits = 1)`% overlap in the phase distributions by wet bulb temperature, compared to the previously noted `r (cs_nomix_tair_snowrain_overlap * 100) %>% round(digits = 1)`% for air temperature. The overlap similarly decreases in the synoptic dataset from the `r (nh_nomix_tair_snowrain_overlap * 100) %>% round(digits = 1)`% for air temperature to `r (nh_nomix_twet_snowrain_overlap * 100) %>% round(digits = 1)`% for wet bulb temperature. DELETED

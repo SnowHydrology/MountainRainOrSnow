@@ -13,7 +13,7 @@ library(terra)
 data_pre = "../../data/"
 nh_locs_file = "jennings_et_al_2018_file1_station_locs_elev.csv"
 nh_obs_file = "jennings_et_al_2018_file2_ppt_phase_met_observations.csv"
-cs_locs_file = "mros_met_geog_2023_09_21_all.csv"
+cs_locs_file = "mros_QAQCflags_2024_01_24.csv"
 thresh_binlog_file = "jennings_et_al_2018_file4_temp50_raster.tif"
 thresh_linreg_file = "jennings_et_al_2018_file5_temp50_linregr_raster.tif"
 export_file = "nh_cs_thresh_ta_sv"

@@ -19,19 +19,34 @@ library(humidity)
 # Import data
 # Note this is the local address
 # Full dataset to be posted to web soon (column names and order may vary)
-df_full <- read.csv("../../data/mros_met_geog_2023_09_21_all.csv")
+df_full <- read.csv("../../data/mros_QAQCflags_2024_01_24.csv")
+
+# Remove obs that fail QC
+df_full <- df_full %>% 
+  filter(dupe_flag == "Pass",
+         phase_flag == "Pass",
+         temp_air_flag == "Pass",
+         rh_flag == "Pass",
+         nstation_temp_air_flag == "Pass",
+         nstation_temp_dew_flag == "Pass",
+  )
+
+# Prep dataset for all tuning
+df_full <- df_full %>% 
+  select(phase, 
+         tair = temp_air, 
+         tdew = temp_dew,
+         twet = temp_wet,
+         rh,
+         ecoregion3) %>% 
+  na.omit() # some rows do have NA values
 
 ################################################################################
 # Rain, snow, and mixed, only met variables
 
 # Prep dataset
 df <- df_full %>% 
-  select(phase, 
-         tair = temp_air_idw_lapse_var, 
-         tdew = temp_dew_idw_lapse_var,
-         twet = temp_wet,
-         rh) %>% 
-  na.omit() # some rows do have NA values
+  select(-ecoregion3)
 
 # Set seed so that the analysis is reproducible
 set.seed(6547)
@@ -118,12 +133,7 @@ cs_allphase_onlymet_rf_tune_results <- rf_tune_results %>% collect_metrics()
 # Prep dataset
 df <- df_full %>% 
   filter(phase != "Mix") %>% 
-  select(phase, 
-         tair = temp_air_idw_lapse_var, 
-         tdew = temp_dew_idw_lapse_var,
-         twet = temp_wet,
-         rh) %>% 
-  na.omit() # some rows do have NA values
+  select(-ecoregion3)
 
 # Set seed so that the analysis is reproducible
 set.seed(6547)
@@ -210,14 +220,7 @@ cs_nomix_onlymet_rf_tune_results <- rf_tune_results %>% collect_metrics()
 # Rain, snow, and mixed,met variables and ecoregion
 
 # Prep dataset
-df <- df_full %>% 
-  select(phase, 
-         ecoregion3,
-         tair = temp_air_idw_lapse_var, 
-         tdew = temp_dew_idw_lapse_var,
-         twet = temp_wet,
-         rh) %>% 
-  na.omit() # some rows do have NA values
+df <- df_full
 
 # Get the number of obs per ecoregion
 n_per_eco <- df %>% 
@@ -315,14 +318,7 @@ cs_allphase_meteco_rf_tune_results <- rf_tune_results %>% collect_metrics()
 
 # Prep dataset
 df <- df_full %>% 
-  filter(phase != "Mix") %>% 
-  select(phase, 
-         ecoregion3,
-         tair = temp_air_idw_lapse_var, 
-         tdew = temp_dew_idw_lapse_var,
-         twet = temp_wet,
-         rh) %>% 
-  na.omit() # some rows do have NA values
+  filter(phase != "Mix")
 
 # Get the number of obs per ecoregion
 n_per_eco <- df %>% 
@@ -531,3 +527,28 @@ save(cs_allphase_onlymet_rf_flow_tuned,
      nh_nomix_metonly_rf_param_best,
      nh_nomix_metonly_rf_tune_results,
      file = "../../data/rf_tune_results.rdata")
+
+
+# I redid the CS tuning with updated data
+# To avoid rerunning NH tuning, I had to import and re-export the data
+# hold_list <- list(
+#   cs_allphase_onlymet_rf_flow_tuned = cs_allphase_onlymet_rf_flow_tuned,
+#   cs_allphase_onlymet_rf_param_best = cs_allphase_onlymet_rf_param_best,
+#   cs_allphase_onlymet_rf_tune_results = cs_allphase_onlymet_rf_tune_results,
+#   cs_nomix_onlymet_rf_flow_tuned = cs_nomix_onlymet_rf_flow_tuned,
+#   cs_nomix_onlymet_rf_param_best = cs_nomix_onlymet_rf_param_best,
+#   cs_nomix_onlymet_rf_tune_results = cs_nomix_onlymet_rf_tune_results,
+#   cs_allphase_meteco_rf_flow_tuned = cs_allphase_meteco_rf_flow_tuned,
+#   cs_allphase_meteco_rf_param_best = cs_allphase_meteco_rf_param_best,
+#   cs_allphase_meteco_rf_tune_results = cs_allphase_meteco_rf_tune_results,
+#   cs_nomix_meteco_rf_flow_tuned = cs_nomix_meteco_rf_flow_tuned,
+#   cs_nomix_meteco_rf_param_best = cs_nomix_meteco_rf_param_best,
+#   cs_nomix_meteco_rf_tune_results = cs_nomix_meteco_rf_tune_results
+# )
+# rm(list=setdiff(ls(), "hold_list"))
+# load("../../data/rf_tune_results.rdata")
+# rm(list=setdiff(ls(), c("hold_list", "nh_nomix_metonly_rf_flow_tuned",
+#                         "nh_nomix_metonly_rf_param_best",
+#                         "nh_nomix_metonly_rf_tune_results")))
+# list2env(hold_list, globalenv())
+

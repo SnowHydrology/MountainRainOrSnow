@@ -21,8 +21,8 @@ library(tidymodels)
 library(cowplot); theme_set(theme_cowplot())
 ```
 
-```{r message=FALSE, cache=TRUE, cache.lazy = FALSE}
-
+```{r message=FALSE}
+# removed cache=TRUE, cache.lazy = FALSE
 # `cache=TRUE` keeps the data stored and prevents it from being read in anew each time
 
 # Data directory prefix
@@ -32,8 +32,19 @@ data_pre <- "../../../../data/"
 
 # Load the tuning data
 # These are local files (update document if moved)
-load(paste0(data_pre, "rf_tune_results.rdata"))
-load(paste0(data_pre, "xg_tune_results.rdata"))
+cs_tune_rf <- readRDS(paste0(data_pre, "rf_tune_imbal_CS.RDS"))
+nh_tune_rf <- readRDS(paste0(data_pre, "rf_tune_imbal_NH.RDS"))
+cs_tune_xg <- readRDS(paste0(data_pre, "xg_tune_imbal_CS.RDS"))
+nh_tune_xg <- readRDS(paste0(data_pre, "xg_tune_imbal_NH.RDS"))
+cs_tune_nn <- readRDS(paste0(data_pre, "nn_tune_imbal_CS.RDS"))
+nh_tune_nn <- readRDS(paste0(data_pre, "nn_tune_imbal_NH.RDS"))
+
+# Load the training data
+cs_nomix_train <- readRDS(paste0(data_pre, "cs_nomix_df_train.RDS"))
+cs_allphase_train <- readRDS(paste0(data_pre, "cs_allphase_df_train.RDS"))
+nh_nomix_train <- readRDS(paste0(data_pre, "nh_nomix_df_train.RDS"))
+
+
 
 ```
 
@@ -41,34 +52,300 @@ load(paste0(data_pre, "xg_tune_results.rdata"))
 
 ## Hyperparameter tuning
 
+Both random forest and XGBoost have hyperparameters that can be tuned to optimize model performance. To prevent data leakage, we only used the 75% training split of the crowdsourced and synoptic datasets to tune the hyperparameters for each model. We used all observations from the training split of the crowdsourced dataset (n = `r nrow(cs_nomix_train)` for rain and snow only, and n = `r nrow(cs_allphase_train)` for rain, snow, and mixed) and 1% of the observations from the synoptic dataset (n = `r round(0.01 * nrow(nh_nomix_train), digits = 0) `). We created 10 folds of each dataset to run k-fold cross-validation. We used two performance metrics to evaluate the models: accuracy and area under the curve (AUC). The former represents the proportion of observations correctly predicted and the latter corresponds to the area under the receiver operating characteristic curve, which plots the true positive rate against the false positive rate. Both metrics range from 0 to 1, where 0 equals no observations correctly predicted and 1 equals all observations correctly predicted.
+
 ### Random Forest
 
+Random forest models have a limited set of hyperparameters. For this work, we tuned mtry and trees using the values shown in Supplementary Table 1. With three values of each hyperparameter, we had a total of nine unique combinations of hyperparameters to evaluate. 
 
-For the random forest model, we found that overall performance was insensitive to the choice of hyperparameters. First, we randomly selected 1% of the Jennings et al. dataset (178108 observations) and used those to run a hyperparameter tuning workflow in the tidymodels R package. We used two performance metrics to evaluate the models: accuracy and area under the curve (AUC). The former represents the proportion of observations correctly predicted and the latter corresponds to the area under the receiver operating characteristic curve, which plots the true positive rate against the false positive rate. Both metrics range from 0 to 1, where 0 equals no observations correctly predicted and 1 equals all observations correctly predicted.
+Supplementary Table 1. Hyperparameter values for the random forest tuning exercise. 
 
-In this tuning workflow, we provided three mtry values (3, 4, and 5) and three tree values (100, 300, and 500), giving a total of 9 unique hyperparameter combinations, which we tested across ten folds of the data. Within this hyperparameter space, we found almost no variation, with mean accuracy ranging from `r nh_nomix_metonly_rf_tune_results %>% filter(.metric == "accuracy") %>% pull(mean) %>% min() %>% round(3)` to `r nh_nomix_metonly_rf_tune_results %>% filter(.metric == "accuracy") %>% pull(mean) %>% max() %>% round(3)` and mean AUC similarly ranging from `r nh_nomix_metonly_rf_tune_results %>% filter(.metric == "roc_auc") %>% pull(mean) %>% min() %>% round(3)` to `r nh_nomix_metonly_rf_tune_results %>% filter(.metric == "roc_auc") %>% pull(mean) %>% max() %>% round(3)`. The best-performing hyperparameters were mtry = `r nh_nomix_metonly_rf_param_best %>% pull(mtry)` and trees = `r nh_nomix_metonly_rf_param_best %>% pull(trees)`.
+| Hyperparameter | Value 1 | Value 2 | Value 3 |
+| -------------- |:-------:|:-------:|:-------:|
+| mtry           | 3       | 4       | 5       |
+| trees          | 100     | 300     | 500     |
 
-Next, we performed the tuning using all entries from the crowdsourced precipitation phase dataset in four different scenarios: 1) include mixed precipitation and only use meteorological variables, 2) exclude mixed precipitation and only use meteorological variables, 3) include mixed precipitation and use meteorology plus EPA Level III ecoregions, and 4) exclude mixed precipitation and use meteorology plus EPA Level III ecoregions. In each of these four scenarios we found little sensitivity in the mean accuracy and mean AUC, confirming the results of the tuning exercise on the northern hemisphere dataset. Mean accuracy ranged from `r cs_allphase_onlymet_rf_tune_results %>% filter(.metric == "accuracy") %>% pull(mean) %>% min() %>% round(3)` to `r cs_allphase_onlymet_rf_tune_results %>% filter(.metric == "accuracy") %>% pull(mean) %>% max() %>% round(3)` for scenario 1, `r cs_nomix_onlymet_rf_tune_results %>% filter(.metric == "accuracy") %>% pull(mean) %>% min() %>% round(3)` to `r cs_nomix_onlymet_rf_tune_results %>% filter(.metric == "accuracy") %>% pull(mean) %>% max() %>% round(3)` for scenario 2, `r cs_allphase_meteco_rf_tune_results %>% filter(.metric == "accuracy") %>% pull(mean) %>% min() %>% round(3)` to `r cs_allphase_meteco_rf_tune_results %>% filter(.metric == "accuracy") %>% pull(mean) %>% max() %>% round(3)` for scenario 3, and `r cs_nomix_meteco_rf_tune_results %>% filter(.metric == "accuracy") %>% pull(mean) %>% min() %>% round(3)` to `r cs_nomix_meteco_rf_tune_results %>% filter(.metric == "accuracy") %>% pull(mean) %>% max() %>% round(3)` for scenario 4. Similarly mean AUC ranged from `r cs_allphase_onlymet_rf_tune_results %>% filter(.metric == "roc_auc") %>% pull(mean) %>% min() %>% round(3)` to `r cs_allphase_onlymet_rf_tune_results %>% filter(.metric == "roc_auc") %>% pull(mean) %>% max() %>% round(3)` for scenario 1, `r cs_nomix_onlymet_rf_tune_results %>% filter(.metric == "roc_auc") %>% pull(mean) %>% min() %>% round(3)` to `r cs_nomix_onlymet_rf_tune_results %>% filter(.metric == "roc_auc") %>% pull(mean) %>% max() %>% round(3)` for scenario 2, `r cs_allphase_meteco_rf_tune_results %>% filter(.metric == "roc_auc") %>% pull(mean) %>% min() %>% round(3)` to `r cs_allphase_meteco_rf_tune_results %>% filter(.metric == "roc_auc") %>% pull(mean) %>% max() %>% round(3)` for scenario 3, and `r cs_nomix_meteco_rf_tune_results %>% filter(.metric == "roc_auc") %>% pull(mean) %>% min() %>% round(3)` to `r cs_nomix_meteco_rf_tune_results %>% filter(.metric == "roc_auc") %>% pull(mean) %>% max() %>% round(3)` for scenario 4.
+
+We found that mean accuracy and ROC were insensitive to the choice of hyperparameters in all configurations with almost no variation in either metric. For the crowdsourced dataset with just rain and snow, mean accuracy ranged from `r cs_tune_rf$nomix_imbal$rf_tune_results %>% filter(.metric == "accuracy") %>% pull(mean) %>% min() %>% round(3)` to `r cs_tune_rf$nomix_imbal$rf_tune_results %>% filter(.metric == "accuracy") %>% pull(mean) %>% max() %>% round(3)` and mean AUC ranged from `r cs_tune_rf$nomix_imbal$rf_tune_results %>% filter(.metric == "roc_auc") %>% pull(mean) %>% min() %>% round(3)` to `r cs_tune_rf$nomix_imbal$rf_tune_results %>% filter(.metric == "roc_auc") %>% pull(mean) %>% max() %>% round(3)` (Supplementary Table 2). For the crowdsourced data with mixed precipitation, mean accuracy ranged from `r cs_tune_rf$allphase_imbal$rf_tune_results %>% filter(.metric == "accuracy") %>% pull(mean) %>% min() %>% round(3)` to `r cs_tune_rf$allphase_imbal$rf_tune_results %>% filter(.metric == "accuracy") %>% pull(mean) %>% max() %>% round(3)` and mean AUC ranged from `r cs_tune_rf$allphase_imbal$rf_tune_results %>% filter(.metric == "roc_auc") %>% pull(mean) %>% min() %>% round(3)` to `r cs_tune_rf$allphase_imbal$rf_tune_results %>% filter(.metric == "roc_auc") %>% pull(mean) %>% max() %>% round(3)` (Supplementary Table 3). For the synoptic dataset, mean accuracy ranged from `r nh_tune_rf$nomix_imbal$rf_tune_results %>% filter(.metric == "accuracy") %>% pull(mean) %>% min() %>% round(3)` to `r nh_tune_rf$nomix_imbal$rf_tune_results %>% filter(.metric == "accuracy") %>% pull(mean) %>% max() %>% round(3)` and mean AUC ranged from `r nh_tune_rf$nomix_imbal$rf_tune_results %>% filter(.metric == "roc_auc") %>% pull(mean) %>% min() %>% round(3)` to `r nh_tune_rf$nomix_imbal$rf_tune_results %>% filter(.metric == "roc_auc") %>% pull(mean) %>% max() %>% round(3)` (Supplementary Table 4).
+
+Supplementary Table 2. Mean accuracy and AUC values for the random forest hyperparameter tuning exercise for the crowdsourced dataset with rain and snow only.
+
+```{r}
+# Create a table with summarized values
+cs_tune_rf$nomix_imbal$rf_tune_results %>% 
+  select(mtry:.metric, mean) %>% 
+  pivot_wider(id_cols = c(mtry, trees),
+              names_from = .metric,
+              values_from = mean) %>% 
+  knitr::kable(digits = 3, 
+               col.names = c("mtry", "trees", "Accuracy", "AUC"))
+
+```
+
+Supplementary Table 3. Mean accuracy and AUC values for the random forest hyperparameter tuning exercise for the crowdsourced dataset with rain, snow, and mixed precipitation
+
+```{r}
+# Create a table with summarized values
+cs_tune_rf$allphase_imbal$rf_tune_results %>% 
+  select(mtry:.metric, mean) %>% 
+  pivot_wider(id_cols = c(mtry, trees),
+              names_from = .metric,
+              values_from = mean) %>% 
+  knitr::kable(digits = 3, 
+               col.names = c("mtry", "trees", "Accuracy", "AUC"))
+
+```
+
+Supplementary Table 4. Mean accuracy and AUC values for the random forest hyperparameter tuning exercise for the synoptic dataset with rain and snow only.
+
+```{r}
+# Create a table with summarized values
+nh_tune_rf$nomix_imbal$rf_tune_results %>% 
+  select(mtry:.metric, mean) %>% 
+  pivot_wider(id_cols = c(mtry, trees),
+              names_from = .metric,
+              values_from = mean) %>% 
+  knitr::kable(digits = 3, 
+               col.names = c("mtry", "trees", "Accuracy", "AUC"))
+
+```
+
+We used the optimized hyperparameter values in Supplementary Table 5 to run the random forest models.
+
+Supplementary Table 5. Optimized hyperparameters for the random forest models.
+
+```{r}
+# Create a table of the best parameters
+rf_best_hyperparms <- bind_rows(
+  cs_tune_rf$nomix_imbal$param_best,
+  cs_tune_rf$allphase_imbal$param_best,
+  nh_tune_rf$nomix_imbal$param_best
+) %>% 
+  mutate(dataset = c("Crowdsourced with rain and snow",
+                     "Crowdsourced with rain, snow, and mixed",
+                     "Synoptic with rain and snow")) %>% 
+  select(dataset, mtry, trees)
+rf_best_hyperparms %>% 
+  knitr::kable()
+
+```
 
 ### XGBoost
 
-We also performed hyperparameter tuning on the XGBoost models, which have a greater number of hyperparameters and thus required a slightly different tuning approach. Here, instead of prescribing the hyperparameter values and combinations, we created a 30 element latin hypercube of the hyperparameter space across ten folds of the data. We again started with a 1% sample of the Jennings et al. (2018) dataset and found, at first glance, that output from the XGBoost model appeared to be more sensitive to hyperparameter values than the random forest (FIG S#). However, a closer look at the data showed much of the sensitivity was a result of low learn rate values. For example, if we removed the lowest learn rate value (`r nh_nomix_metonly_xg_tune_results %>% pull(learn_rate) %>% min() %>% formatC(format = "e", digits = 2)`), we found the range in mean accuracy shifted from `r nh_nomix_metonly_xg_tune_results %>% filter(.metric == "accuracy") %>% pull(mean) %>% min() %>% round(3)`&ndash;`r nh_nomix_metonly_xg_tune_results %>% filter(.metric == "accuracy") %>% pull(mean) %>% max() %>% round(3)` to `r nh_nomix_metonly_xg_tune_results %>% filter(.metric == "accuracy") %>% arrange(mean) %>% slice(2)  %>% pull(mean) %>% round(3)`&ndash;`r nh_nomix_metonly_xg_tune_results %>% filter(.metric == "accuracy") %>% pull(mean) %>% max() %>% round(3)` and mean AUC shifted from `r nh_nomix_metonly_xg_tune_results %>% filter(.metric == "roc_auc") %>% pull(mean) %>% min() %>% round(3)`&ndash;`r nh_nomix_metonly_xg_tune_results %>% filter(.metric == "roc_auc") %>% pull(mean) %>% max() %>% round(3)` to `r nh_nomix_metonly_xg_tune_results %>% filter(.metric == "roc_auc") %>% arrange(mean) %>% slice(2)  %>% pull(mean) %>% round(3)`&ndash;`r nh_nomix_metonly_xg_tune_results %>% filter(.metric == "roc_auc") %>% pull(mean) %>% max() %>% round(3)`.
+The XGBoost models utilize a greater number of hyperparameters and thus required a slightly different tuning approach. Here, instead of prescribing the hyperparameter values and combinations as we did for random forest, we created a 30 element latin hypercube (Supplementary Table 6) of the hyperparameter space across ten folds of the data. 
+
+Supplementary Table 6. Minimum, average, and maximum hyperparameter values for the XGBoost tuning exercise. 
 
 ```{r}
-nh_nomix_metonly_xg_tune_results %>%
-    filter(.metric == "roc_auc") %>%
-    select(mean, mtry:sample_size) %>%
-    pivot_longer(mtry:sample_size,
-                 values_to = "value",
-                 names_to = "parameter"
-    ) %>%
-    ggplot(aes(value, mean, color = parameter)) +
-    geom_point(alpha = 0.8, show.legend = FALSE) +
-    facet_wrap(~parameter, scales = "free_x") +
-    labs(x = NULL, y = "AUC")
+# get all of the hyperparameter values
+xg_hyperparams <- bind_rows(
+  cs_tune_xg$nomix_imbal$xg_tune_results,
+  cs_tune_xg$allphase_imbal$xg_tune_results,
+  nh_tune_xg$nomix_imbal$xg_tune_results
+) %>% 
+  select(mtry:loss_reduction) %>% 
+  pivot_longer(cols = mtry:loss_reduction,
+               names_to = "hyperparam") %>% 
+  group_by(hyperparam) %>% 
+  summarize(min = round(min(value), digits = 2),
+            avg = round(mean(value), digits = 2),
+            max = round(max(value), digits = 2))
+
+# make a table
+xg_hyperparams %>% 
+  knitr::kable()
+
 ```
 
-Finally, we performed the XGBoost tuning using the crowdsourced precipitation phase dataset in the four different scenarios we detailed in the random forest subsection above. We again used a 30 element latin hypercube of the hyperparameter space across ten folds of the data. Mean accuracy ranged from `r cs_allphase_onlymet_xg_tune_results %>% filter(.metric == "accuracy") %>% pull(mean) %>% min() %>% round(3)` to `r cs_allphase_onlymet_xg_tune_results %>% filter(.metric == "accuracy") %>% pull(mean) %>% max() %>% round(3)` for scenario 1, `r cs_nomix_onlymet_xg_tune_results %>% filter(.metric == "accuracy") %>% pull(mean) %>% min() %>% round(3)` to `r cs_nomix_onlymet_xg_tune_results %>% filter(.metric == "accuracy") %>% pull(mean) %>% max() %>% round(3)` for scenario 2, `r cs_allphase_meteco_xg_tune_results %>% filter(.metric == "accuracy") %>% pull(mean) %>% min() %>% round(3)` to `r cs_allphase_meteco_xg_tune_results %>% filter(.metric == "accuracy") %>% pull(mean) %>% max() %>% round(3)` for scenario 3, and `r cs_nomix_meteco_xg_tune_results %>% filter(.metric == "accuracy") %>% pull(mean) %>% min() %>% round(3)` to `r cs_nomix_meteco_xg_tune_results %>% filter(.metric == "accuracy") %>% pull(mean) %>% max() %>% round(3)` for scenario 4. Mean AUC ranged from `r cs_allphase_onlymet_xg_tune_results %>% filter(.metric == "roc_auc") %>% pull(mean) %>% min() %>% round(3)` to `r cs_allphase_onlymet_xg_tune_results %>% filter(.metric == "roc_auc") %>% pull(mean) %>% max() %>% round(3)` for scenario 1, `r cs_nomix_onlymet_xg_tune_results %>% filter(.metric == "roc_auc") %>% pull(mean) %>% min() %>% round(3)` to `r cs_nomix_onlymet_xg_tune_results %>% filter(.metric == "roc_auc") %>% pull(mean) %>% max() %>% round(3)` for scenario 2, `r cs_allphase_meteco_xg_tune_results %>% filter(.metric == "roc_auc") %>% pull(mean) %>% min() %>% round(3)` to `r cs_allphase_meteco_xg_tune_results %>% filter(.metric == "roc_auc") %>% pull(mean) %>% max() %>% round(3)` for scenario 3, and `r cs_nomix_meteco_xg_tune_results %>% filter(.metric == "roc_auc") %>% pull(mean) %>% min() %>% round(3)` to `r cs_nomix_meteco_xg_tune_results %>% filter(.metric == "roc_auc") %>% pull(mean) %>% max() %>% round(3)` for scenario 4. 
+XGBoost peformance was more sensitive to the choice of hyperparameter values than random forest. For the crowdsourced dataset with just rain and snow, mean accuracy ranged from `r cs_tune_xg$nomix_imbal$xg_tune_results %>% filter(.metric == "accuracy") %>% pull(mean) %>% min() %>% round(3)` to `r cs_tune_xg$nomix_imbal$xg_tune_results %>% filter(.metric == "accuracy") %>% pull(mean) %>% max() %>% round(3)` and mean AUC ranged from `r cs_tune_xg$nomix_imbal$xg_tune_results %>% filter(.metric == "roc_auc") %>% pull(mean) %>% min() %>% round(3)` to `r cs_tune_xg$nomix_imbal$xg_tune_results %>% filter(.metric == "roc_auc") %>% pull(mean) %>% max() %>% round(3)` (Supplementary Table 7). For the crowdsourced data with mixed precipitation, mean accuracy ranged from `r cs_tune_xg$allphase_imbal$xg_tune_results %>% filter(.metric == "accuracy") %>% pull(mean) %>% min() %>% round(3)` to `r cs_tune_xg$allphase_imbal$xg_tune_results %>% filter(.metric == "accuracy") %>% pull(mean) %>% max() %>% round(3)` and mean AUC ranged from `r cs_tune_xg$allphase_imbal$xg_tune_results %>% filter(.metric == "roc_auc") %>% pull(mean) %>% min() %>% round(3)` to `r cs_tune_xg$allphase_imbal$xg_tune_results %>% filter(.metric == "roc_auc") %>% pull(mean) %>% max() %>% round(3)` (Supplementary Table 8). For the synoptic dataset, mean accuracy ranged from `r nh_tune_xg$nomix_imbal$xg_tune_results %>% filter(.metric == "accuracy") %>% pull(mean) %>% min() %>% round(3)` to `r nh_tune_xg$nomix_imbal$xg_tune_results %>% filter(.metric == "accuracy") %>% pull(mean) %>% max() %>% round(3)` and mean AUC ranged from `r nh_tune_xg$nomix_imbal$xg_tune_results %>% filter(.metric == "roc_auc") %>% pull(mean) %>% min() %>% round(3)` to `r nh_tune_xg$nomix_imbal$xg_tune_results %>% filter(.metric == "roc_auc") %>% pull(mean) %>% max() %>% round(3)` (Supplementary Table 9).
 
-Notably, low learn rate values drove again drove the wide range in performance for the XGBoost models. In this case, removing the 8 lowest learn rate values&mdash;out of 30&mdash;from the latin hypercube produced much narrower ranges in mean accuracy and AUC. When only considering learn rate values greater than 1.67e-8, mean accuracy ranged from `r cs_allphase_onlymet_xg_tune_results %>% filter(.metric == "accuracy" & learn_rate > 1.67e-8) %>% pull(mean) %>% min() %>% round(3)` to `r cs_allphase_onlymet_xg_tune_results %>% filter(.metric == "accuracy" & learn_rate > 1.67e-8) %>% pull(mean) %>% max() %>% round(3)` for scenario 1, `r cs_nomix_onlymet_xg_tune_results %>% filter(.metric == "accuracy" & learn_rate > 1.67e-8) %>% pull(mean) %>% min() %>% round(3)` to `r cs_nomix_onlymet_xg_tune_results %>% filter(.metric == "accuracy" & learn_rate > 1.67e-8) %>% pull(mean) %>% max() %>% round(3)` for scenario 2, `r cs_allphase_meteco_xg_tune_results %>% filter(.metric == "accuracy" & learn_rate > 1.67e-8) %>% pull(mean) %>% min() %>% round(3)` to `r cs_allphase_meteco_xg_tune_results %>% filter(.metric == "accuracy" & learn_rate > 1.67e-8) %>% pull(mean) %>% max() %>% round(3)` for scenario 3, and `r cs_nomix_meteco_xg_tune_results %>% filter(.metric == "accuracy" & learn_rate > 1.67e-8) %>% pull(mean) %>% min() %>% round(3)` to `r cs_nomix_meteco_xg_tune_results %>% filter(.metric == "accuracy" & learn_rate > 1.67e-8) %>% pull(mean) %>% max() %>% round(3)` for scenario 4. Similarly mean AUC ranged from `r cs_allphase_onlymet_xg_tune_results %>% filter(.metric == "roc_auc" & learn_rate > 1.67e-8) %>% pull(mean) %>% min() %>% round(3)` to `r cs_allphase_onlymet_xg_tune_results %>% filter(.metric == "roc_auc" & learn_rate > 1.67e-8) %>% pull(mean) %>% max() %>% round(3)` for scenario 1, `r cs_nomix_onlymet_xg_tune_results %>% filter(.metric == "roc_auc" & learn_rate > 1.67e-8) %>% pull(mean) %>% min() %>% round(3)` to `r cs_nomix_onlymet_xg_tune_results %>% filter(.metric == "roc_auc" & learn_rate > 1.67e-8) %>% pull(mean) %>% max() %>% round(3)` for scenario 2, `r cs_allphase_meteco_xg_tune_results %>% filter(.metric == "roc_auc" & learn_rate > 1.67e-8) %>% pull(mean) %>% min() %>% round(3)` to `r cs_allphase_meteco_xg_tune_results %>% filter(.metric == "roc_auc" & learn_rate > 1.67e-8) %>% pull(mean) %>% max() %>% round(3)` for scenario 3, and `r cs_nomix_meteco_xg_tune_results %>% filter(.metric == "roc_auc" & learn_rate > 1.67e-8) %>% pull(mean) %>% min() %>% round(3)` to `r cs_nomix_meteco_xg_tune_results %>% filter(.metric == "roc_auc" & learn_rate > 1.67e-8) %>% pull(mean) %>% max() %>% round(3)` for scenario 4.
+However, much of the variation in XGBoost output resulted from the poor performance of the lowest learn rate values. If we exclude values of this parameter that are less than 0.001, then the accuracy and AUC ranges become markedly smaller. For the crowdsourced dataset with just rain and snow, mean accuracy ranged from `r cs_tune_xg$nomix_imbal$xg_tune_results %>% filter(.metric == "accuracy" & learn_rate > 0.001) %>% pull(mean) %>% min() %>% round(3)` to `r cs_tune_xg$nomix_imbal$xg_tune_results %>% filter(.metric == "accuracy" & learn_rate > 0.001) %>% pull(mean) %>% max() %>% round(3)` and mean AUC ranged from `r cs_tune_xg$nomix_imbal$xg_tune_results %>% filter(.metric == "roc_auc" & learn_rate > 0.001) %>% pull(mean) %>% min() %>% round(3)` to `r cs_tune_xg$nomix_imbal$xg_tune_results %>% filter(.metric == "roc_auc" & learn_rate > 0.001) %>% pull(mean) %>% max() %>% round(3)` when excluding the lowest learn rate values. It was a similar story for the crowdsourced data with mixed precipitation, where mean accuracy with these data points removed ranged from `r cs_tune_xg$allphase_imbal$xg_tune_results %>% filter(.metric == "accuracy" & learn_rate > 0.001) %>% pull(mean) %>% min() %>% round(3)` to `r cs_tune_xg$allphase_imbal$xg_tune_results %>% filter(.metric == "accuracy" & learn_rate > 0.001) %>% pull(mean) %>% max() %>% round(3)` and mean AUC ranged from `r cs_tune_xg$allphase_imbal$xg_tune_results %>% filter(.metric == "roc_auc" & learn_rate > 0.001) %>% pull(mean) %>% min() %>% round(3)` to `r cs_tune_xg$allphase_imbal$xg_tune_results %>% filter(.metric == "roc_auc" & learn_rate > 0.001) %>% pull(mean) %>% max() %>% round(3)`. It was more of the same for the synoptic dataset with mean accuracy ranging from `r nh_tune_xg$nomix_imbal$xg_tune_results %>% filter(.metric == "accuracy" & learn_rate > 0.001) %>% pull(mean) %>% min() %>% round(3)` to `r nh_tune_xg$nomix_imbal$xg_tune_results %>% filter(.metric == "accuracy" & learn_rate > 0.001) %>% pull(mean) %>% max() %>% round(3)` and mean AUC ranging from `r nh_tune_xg$nomix_imbal$xg_tune_results %>% filter(.metric == "roc_auc" & learn_rate > 0.001) %>% pull(mean) %>% min() %>% round(3)` to `r nh_tune_xg$nomix_imbal$xg_tune_results %>% filter(.metric == "roc_auc" & learn_rate > 0.001) %>% pull(mean) %>% max() %>% round(3)`.
 
+Supplementary Table 7. Mean accuracy and AUC values for the XGBoost hyperparameter tuning exercise for the crowdsourced dataset with rain and snow only.
+
+```{r}
+# Create a table with summarized values
+cs_tune_xg$nomix_imbal$xg_tune_results %>% 
+  select(mtry:.metric, mean) %>% 
+  pivot_wider(id_cols = c(mtry, trees, min_n, tree_depth, learn_rate,
+                          loss_reduction, sample_size),
+              names_from = .metric,
+              values_from = mean) %>% 
+  mutate_if(is.numeric, funs(as.character(signif(., 3)))) %>% 
+  knitr::kable(digits = 3, 
+               col.names = c("mtry", "trees","min_n", "tree depth", "learn rate",
+                             "loss reduction", "sample size", "Accuracy", "AUC"))
+
+```
+
+Supplementary Table 8. Mean accuracy and AUC values for the XGBoost hyperparameter tuning exercise for the crowdsourced dataset with rain, snow, and mixed precipitation
+
+```{r}
+# Create a table with summarized values
+cs_tune_xg$allphase_imbal$xg_tune_results %>% 
+  select(mtry:.metric, mean) %>% 
+  pivot_wider(id_cols = c(mtry, trees, min_n, tree_depth, learn_rate,
+                          loss_reduction, sample_size),
+              names_from = .metric,
+              values_from = mean) %>% 
+  mutate_if(is.numeric, funs(as.character(signif(., 3)))) %>% 
+  knitr::kable(digits = 3, 
+               col.names = c("mtry", "trees","min_n", "tree depth", "learn rate",
+                             "loss reduction", "sample size", "Accuracy", "AUC"))
+
+```
+
+Supplementary Table 9. Mean accuracy and AUC values for the XGBoost hyperparameter tuning exercise for the synoptic dataset with rain and snow only.
+
+```{r}
+# Create a table with summarized values
+nh_tune_xg$nomix_imbal$xg_tune_results %>% 
+  select(mtry:.metric, mean) %>% 
+  pivot_wider(id_cols = c(mtry, trees, min_n, tree_depth, learn_rate,
+                          loss_reduction, sample_size),
+              names_from = .metric,
+              values_from = mean) %>% 
+  mutate_if(is.numeric, funs(as.character(signif(., 3)))) %>% 
+  knitr::kable(digits = 3, 
+               col.names = c("mtry", "trees","min_n", "tree depth", "learn rate",
+                             "loss reduction", "sample size", "Accuracy", "AUC"))
+
+```
+
+We used the optimized hyperparameter values in Supplementary Table 10 to run the XGBoost models.
+
+Supplementary Table 10. Optimized hyperparameters for the XGBoost models.
+
+```{r}
+# Create a table of the best parameters
+xg_best_hyperparms <- bind_rows(
+  cs_tune_xg$nomix_imbal$param_best,
+  cs_tune_xg$allphase_imbal$param_best,
+  nh_tune_xg$nomix_imbal$param_best
+) %>% 
+  mutate(dataset = c("Crowdsourced with rain and snow",
+                     "Crowdsourced with rain, snow, and mixed",
+                     "Synoptic with rain and snow")) %>% 
+  select(dataset, mtry:sample_size)
+xg_best_hyperparms %>% 
+  mutate_if(is.numeric, funs(as.character(signif(., 3)))) %>% 
+  knitr::kable()
+
+```
+
+
+
+
+```{r}
+cs_tune_xg$nomix_imbal$xg_tune_results %>%
+  filter(.metric == "roc_auc") %>%
+  select(mean, mtry:sample_size) %>%
+  pivot_longer(mtry:sample_size,
+               values_to = "value",
+               names_to = "parameter"
+  ) %>%
+  ggplot(aes(value, mean, color = parameter)) +
+  geom_point(alpha = 0.8, show.legend = FALSE) +
+  facet_wrap(~parameter, scales = "free_x") +
+  labs(x = NULL, y = "AUC")
+```
+### ANN
+
+The specific ANN we deployed is a multilayer perceptron, a feed-forward neural network. We used one hidden layer, Rectified Linear Unit (ReLU) activation, and the Limited-memory Broyden-Fletcher-Goldfarb-Shanno (LBGFS) optimization algorithm. As we did for XGBoost, we created a 30 element Latin hypercube (Supplementary Table 11) of the tunable hyperparameters. We then tuned these values using 10 folds of the training data. 
+
+Supplementary Table 11. Minimum, average, and maximum hyperparameter values for the ANN tuning exercise. 
+
+```{r}
+# get all of the hyperparameter values
+nn_hyperparams <- bind_rows(
+  cs_tune_nn$nomix_imbal$nn_tune_results,
+  cs_tune_nn$allphase_imbal$nn_tune_results,
+  nh_tune_nn$nomix_imbal$xg_tune_results
+) %>% 
+  select(hidden_units:learn_rate) %>% 
+  pivot_longer(cols = hidden_units:learn_rate,
+               names_to = "hyperparam") %>% 
+  group_by(hyperparam) %>% 
+  summarize(min = min(value),
+            avg = mean(value),
+            max = max(value)) %>% 
+  mutate_if(is.numeric, funs(as.character(signif(., 3)))) 
+
+# make a table
+nn_hyperparams %>% 
+  knitr::kable(digits = 2)
+
+```
+
+Like XGBoost, ANN performance was more sensitive to the choice of hyperparameter values than random forest. For the crowdsourced dataset with just rain and snow, mean accuracy ranged from `r cs_tune_nn$nomix_imbal$nn_tune_results %>% filter(.metric == "accuracy") %>% pull(mean) %>% min() %>% round(3)` to `r cs_tune_nn$nomix_imbal$nn_tune_results %>% filter(.metric == "accuracy") %>% pull(mean) %>% max() %>% round(3)` and mean AUC ranged from `r cs_tune_nn$nomix_imbal$nn_tune_results %>% filter(.metric == "roc_auc") %>% pull(mean) %>% min() %>% round(3)` to `r cs_tune_nn$nomix_imbal$nn_tune_results %>% filter(.metric == "roc_auc") %>% pull(mean) %>% max() %>% round(3)` (Supplementary Table 12). For the crowdsourced data with mixed precipitation, mean accuracy ranged from `r cs_tune_nn$allphase_imbal$nn_tune_results %>% filter(.metric == "accuracy") %>% pull(mean) %>% min() %>% round(3)` to `r cs_tune_nn$allphase_imbal$nn_tune_results %>% filter(.metric == "accuracy") %>% pull(mean) %>% max() %>% round(3)` and mean AUC ranged from `r cs_tune_nn$allphase_imbal$nn_tune_results %>% filter(.metric == "roc_auc") %>% pull(mean) %>% min() %>% round(3)` to `r cs_tune_nn$allphase_imbal$nn_tune_results %>% filter(.metric == "roc_auc") %>% pull(mean) %>% max() %>% round(3)` (Supplementary Table 13). For the synoptic dataset, mean accuracy ranged from `r nh_tune_nn$nomix_imbal$nn_tune_results %>% filter(.metric == "accuracy") %>% pull(mean) %>% min() %>% round(3)` to `r nh_tune_nn$nomix_imbal$nn_tune_results %>% filter(.metric == "accuracy") %>% pull(mean) %>% max() %>% round(3)` and mean AUC ranged from `r nh_tune_nn$nomix_imbal$nn_tune_results %>% filter(.metric == "roc_auc") %>% pull(mean) %>% min() %>% round(3)` to `r nh_tune_nn$nomix_imbal$nn_tune_results %>% filter(.metric == "roc_auc") %>% pull(mean) %>% max() %>% round(3)` (Supplementary Table 14).
+
+Again, similar to XGBoost, much of the variation in the ANN output resulted from the poor performance of the lowest learn rate values. If we exclude values of this parameter that are less than 0.001, then the accuracy and AUC ranges become smaller. For the crowdsourced dataset with just rain and snow, mean accuracy ranged from `r cs_tune_nn$nomix_imbal$nn_tune_results %>% filter(.metric == "accuracy" & learn_rate > 0.001) %>% pull(mean) %>% min() %>% round(3)` to `r cs_tune_nn$nomix_imbal$nn_tune_results %>% filter(.metric == "accuracy" & learn_rate > 0.001) %>% pull(mean) %>% max() %>% round(3)` and mean AUC ranged from `r cs_tune_nn$nomix_imbal$nn_tune_results %>% filter(.metric == "roc_auc" & learn_rate > 0.001) %>% pull(mean) %>% min() %>% round(3)` to `r cs_tune_nn$nomix_imbal$nn_tune_results %>% filter(.metric == "roc_auc" & learn_rate > 0.001) %>% pull(mean) %>% max() %>% round(3)` when excluding the lowest learn rate values. It was a similar story for the crowdsourced data with mixed precipitation, where mean accuracy with these data points removed ranged from `r cs_tune_nn$allphase_imbal$nn_tune_results %>% filter(.metric == "accuracy" & learn_rate > 0.001) %>% pull(mean) %>% min() %>% round(3)` to `r cs_tune_nn$allphase_imbal$nn_tune_results %>% filter(.metric == "accuracy" & learn_rate > 0.001) %>% pull(mean) %>% max() %>% round(3)` and mean AUC ranged from `r cs_tune_nn$allphase_imbal$nn_tune_results %>% filter(.metric == "roc_auc" & learn_rate > 0.001) %>% pull(mean) %>% min() %>% round(3)` to `r cs_tune_nn$allphase_imbal$nn_tune_results %>% filter(.metric == "roc_auc" & learn_rate > 0.001) %>% pull(mean) %>% max() %>% round(3)`. It was more of the same for the synoptic dataset with mean accuracy ranging from `r nh_tune_nn$nomix_imbal$nn_tune_results %>% filter(.metric == "accuracy" & learn_rate > 0.001) %>% pull(mean) %>% min() %>% round(3)` to `r nh_tune_nn$nomix_imbal$nn_tune_results %>% filter(.metric == "accuracy" & learn_rate > 0.001) %>% pull(mean) %>% max() %>% round(3)` and mean AUC ranging from `r nh_tune_nn$nomix_imbal$nn_tune_results %>% filter(.metric == "roc_auc" & learn_rate > 0.001) %>% pull(mean) %>% min() %>% round(3)` to `r nh_tune_nn$nomix_imbal$nn_tune_results %>% filter(.metric == "roc_auc" & learn_rate > 0.001) %>% pull(mean) %>% max() %>% round(3)`.
+
+Supplementary Table 12. Mean accuracy and AUC values for the ANN hyperparameter tuning exercise for the crowdsourced dataset with rain and snow only.
+
+```{r}
+# Create a table with summarized values
+cs_tune_nn$nomix_imbal$nn_tune_results %>% 
+  select(hidden_units:.metric, mean) %>% 
+  pivot_wider(id_cols = c(epochs, hidden_units, learn_rate, penalty),
+              names_from = .metric,
+              values_from = mean) %>% 
+  mutate_if(is.numeric, funs(as.character(signif(., 3)))) %>% 
+  knitr::kable(digits = 3, 
+               col.names = c("epochs", "hidden units", "learn rate", "penalty",
+                             "Accuracy", "AUC"))
+
+```
+
+Supplementary Table 13. Mean accuracy and AUC values for the ANN hyperparameter tuning exercise for the crowdsourced dataset with rain, snow, and mixed precipitation
+
+```{r}
+# Create a table with summarized values
+cs_tune_nn$allphase_imbal$nn_tune_results %>% 
+  select(hidden_units:.metric, mean) %>% 
+  pivot_wider(id_cols = c(epochs, hidden_units, learn_rate, penalty),
+              names_from = .metric,
+              values_from = mean) %>% 
+  mutate_if(is.numeric, funs(as.character(signif(., 3)))) %>% 
+  knitr::kable(digits = 3, 
+               col.names = c("epochs", "hidden units", "learn rate", "penalty",
+                             "Accuracy", "AUC"))
+
+```
+
+Supplementary Table 14. Mean accuracy and AUC values for the ANN hyperparameter tuning exercise for the synoptic dataset with rain and snow only.
+
+```{r}
+# Create a table with summarized values
+nh_tune_nn$nomix_imbal$nn_tune_results %>% 
+  select(hidden_units:.metric, mean) %>% 
+  pivot_wider(id_cols = c(epochs, hidden_units, learn_rate, penalty),
+              names_from = .metric,
+              values_from = mean) %>% 
+  mutate_if(is.numeric, funs(as.character(signif(., 3)))) %>% 
+  knitr::kable(digits = 3, 
+               col.names = c("epochs", "hidden units", "learn rate", "penalty",
+                             "Accuracy", "AUC"))
+
+```
+
+We used the optimized hyperparameter values in Supplementary Table 15 to run the ANN models.
+
+Supplementary Table 15. Optimized hyperparameters for the ANN models.
+
+```{r}
+# Create a table of the best parameters
+nn_best_hyperparms <- bind_rows(
+  cs_tune_nn$nomix_imbal$param_best,
+  cs_tune_nn$allphase_imbal$param_best,
+  nh_tune_nn$nomix_imbal$param_best
+) %>% 
+  mutate(dataset = c("Crowdsourced with rain and snow",
+                     "Crowdsourced with rain, snow, and mixed",
+                     "Synoptic with rain and snow")) %>% 
+  select(dataset, hidden_units:learn_rate)
+nn_best_hyperparms %>% 
+  mutate_if(is.numeric, funs(as.character(signif(., 3)))) %>% 
+  knitr::kable()
+
+```

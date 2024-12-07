@@ -4,7 +4,7 @@
 # kjennings@lynker.com
 
 ################################################################################
-# Setup and data import
+# Setup
 
 # Load packages
 library(tidyverse)
@@ -12,6 +12,11 @@ library(tidyverse)
 # Data prefix and file names
 # Note: data are local, so prefix needs to be changed if files are moved
 data_pre = "../../data/"
+
+# Output file names
+summary_all_out = "performance_summary_all.RDS"
+summary_bytemp_out = "performance_summary_bytemp.RDS"
+all_data_out = "predictions_all.RDS"
 
 # Benchmark data
 benchmark_cs_file = "cs_benchmark_preds_ontest.RDS"
@@ -25,6 +30,11 @@ rf_nh_file = "rf_predict_imbal_NH.RDS"
 xg_cs_file = "xg_predict_imbal_CS.RDS"
 xg_nh_file = "xg_predict_imbal_NH.RDS"
 
+# NN data
+nn_cs_file = "nn_predict_imbal_CS.RDS"
+nn_nh_file = "nn_predict_imbal_NH.RDS"
+
+################################################################################
 # Import data
 
 # Benchmark
@@ -74,10 +84,23 @@ xg_nh <- xg_nh_tmp$nomix_imbal$rf_preds %>%
   mutate(ppm = "xg")
 rm(xg_nh_tmp)
 
-# Output files
-summary_all_out = "performance_summary_all.RDS"
-summary_bytemp_out = "performance_summary_bytemp.RDS"
-all_data_out = "predictions_all.RDS"
+# NN
+nn_cs_tmp <- readRDS(paste0(data_pre, nn_cs_file))
+nn_cs <- bind_rows(nn_cs_tmp$allphase_imbal$nn_preds,
+                   nn_cs_tmp$allphase_smote$nn_preds,
+                   nn_cs_tmp$nomix_imbal$nn_preds,
+                   nn_cs_tmp$nomix_smote$nn_preds) %>% 
+  mutate(ppm = "nn") %>% 
+  rename(phase_pred = pred_phase) %>% 
+  select(-score)
+rm(nn_cs_tmp)
+nn_nh_tmp <- readRDS(paste0(data_pre, nn_nh_file))
+nn_nh <- nn_nh_tmp$nomix_imbal$nn_preds %>% 
+  select(phase, phase_pred = pred_phase, tair = Air_Temp, twet, tdew = Dewpoint,
+         rh = RH, source, scenario) %>% 
+  mutate(ppm = "nn")
+rm(nn_nh_tmp)
+
 
 ################################################################################
 # Join and bind data
@@ -89,7 +112,9 @@ df_all <- bind_rows(
   rf_cs,
   rf_nh,
   xg_cs,
-  xg_nh
+  xg_nh,
+  nn_cs,
+  nn_nh
 )
 
 ################################################################################

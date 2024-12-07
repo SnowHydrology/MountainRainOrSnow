@@ -86,3 +86,90 @@ While the benchmark methods can only utilize near-surface meteorology, the machi
 ```
 
 DELETED Using wet bulb temperature makes the situation slightly better. Across the whole of the crowdsourced dataset, there is a `r (cs_nomix_twet_snowrain_overlap * 100) %>% round(digits = 1)`% overlap in the phase distributions by wet bulb temperature, compared to the previously noted `r (cs_nomix_tair_snowrain_overlap * 100) %>% round(digits = 1)`% for air temperature. The overlap similarly decreases in the synoptic dataset from the `r (nh_nomix_tair_snowrain_overlap * 100) %>% round(digits = 1)`% for air temperature to `r (nh_nomix_twet_snowrain_overlap * 100) %>% round(digits = 1)`% for wet bulb temperature. DELETED
+
+# ML method median comparison
+Changed to average in manuscript
+
+```{r}
+# cols_to_get = c("source", "ppm", "accuracy_pct", "snow_bias_pct", "rain_bias_pct")
+# 
+# 
+# cs_best_benchmark = summary_all %>% 
+#     filter(source == "cs" & !ppm %in% c("xg", "rf") & scenario == "nomix_imbal") %>% 
+#     ungroup() %>% 
+#     slice_max(accuracy_pct, n = 1) %>% 
+#     pull(ppm)
+# 
+# cs_median_benchmark = summary_all %>% 
+#     filter(source == "cs" & !ppm %in% c("xg", "rf") & scenario == "nomix_imbal") %>% 
+#     ungroup() %>% 
+#     arrange(-accuracy_pct) %>% 
+#     slice(5) %>% 
+#     pull(ppm)
+# 
+# cs_benchmark_diff <- summary_all %>% 
+#     filter(source == "cs" & ppm %in% c("xg", "rf") & scenario == "nomix_imbal") %>% 
+#     select(cols_to_get) %>% 
+#     bind_cols(.,summary_all %>% 
+#                   filter(source == "cs" & ppm == cs_best_benchmark & scenario == "nomix_imbal") %>% 
+#                   select(cols_to_get)) %>% 
+#     bind_rows(., summary_all %>% 
+#     filter(source == "cs" & ppm %in% c("xg", "rf") & scenario == "nomix_imbal") %>% 
+#     select(cols_to_get) %>% 
+#     bind_cols(.,summary_all %>% 
+#                   filter(source == "cs" & ppm == cs_median_benchmark & scenario == "nomix_imbal") %>% 
+#                   select(cols_to_get)))
+# 
+# nh_best_benchmark = summary_all %>% 
+#     filter(source == "nh" & !ppm %in% c("xg", "rf") & scenario == "nomix_imbal") %>% 
+#     ungroup() %>% 
+#     slice_max(accuracy_pct, n = 1) %>% 
+#     pull(ppm)
+# 
+# nh_median_benchmark = summary_all %>% 
+#     filter(source == "nh" & !ppm %in% c("xg", "rf") & scenario == "nomix_imbal") %>% 
+#     ungroup() %>% 
+#     arrange(-accuracy_pct) %>% 
+#     slice(5) %>% 
+#     pull(ppm)
+# 
+# nh_benchmark_diff <- summary_all %>% 
+#     filter(source == "nh" & ppm %in% c("xg", "rf") & scenario == "nomix_imbal") %>% 
+#     select(cols_to_get) %>% 
+#     bind_cols(.,summary_all %>% 
+#                   filter(source == "nh" & ppm == nh_best_benchmark & scenario == "nomix_imbal") %>% 
+#                   select(cols_to_get)) %>% 
+#     bind_rows(., summary_all %>% 
+#     filter(source == "nh" & ppm %in% c("xg", "rf") & scenario == "nomix_imbal") %>% 
+#     select(cols_to_get) %>% 
+#     bind_cols(.,summary_all %>% 
+#                   filter(source == "nh" & ppm == nh_median_benchmark & scenario == "nomix_imbal") %>% 
+#                   select(cols_to_get)))
+# 
+# ml_benchmark_diff <- bind_rows(cs_benchmark_diff, nh_benchmark_diff) %>% 
+#     mutate(comparison = rep(c("best", "best", "med", "med"), 2)) %>% 
+#     select(-scenario...1,
+#            source = source...2,
+#            ppm = ppm...3,
+#            comparison,
+#            ml_accuracy_pct = accuracy_pct...4,
+#            ml_snow_bias_pct = snow_bias_pct...5,
+#            ml_rain_bias_pct = rain_bias_pct...6,
+#            bm_accuracy_pct = accuracy_pct...10,
+#            bm_snow_bias_pct = snow_bias_pct...11,
+#            bm_rain_bias_pct = rain_bias_pct...12,
+#            -scenario...7, -source...8, -ppm...9) %>% 
+#     mutate(accuracy_pct_diff = ml_accuracy_pct - bm_accuracy_pct,
+#            snow_bias_abs_pct_diff = abs(ml_snow_bias_pct) - abs(bm_snow_bias_pct),
+#            rain_bias_abs_pct_diff = abs(ml_rain_bias_pct) - abs(bm_rain_bias_pct))
+# 
+# # Make a table
+# ml_benchmark_diff %>% 
+#     select(source, ppm, comparison,
+#            ml_accuracy_pct, accuracy_pct_diff,
+#            ml_snow_bias_pct, snow_bias_abs_pct_diff,
+#            ml_rain_bias_pct, rain_bias_abs_pct_diff) %>% 
+#     mutate(across(where(is.numeric), round, digits = 1)) %>% 
+#     knitr::kable()
+
+``` 

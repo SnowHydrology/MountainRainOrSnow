@@ -135,32 +135,15 @@ saveRDS(export_list, file = paste0(data_pre, "rf_tune_imbal_CS.RDS"))
 ################################################################################
 
 # Import data
-df_big <- read.csv("../../data/jennings_et_al_2018_file2_ppt_phase_met_observations.csv")
+df_train_nomix <- readRDS(paste0(data_pre, "nh_nomix_df_train.RDS"))
 
 # Make a small version for testing
-n_samples = 0.01 * nrow(df_big) %>% round(., digits = 0)
-df <- df_big %>% sample_n(n_samples) %>% 
-  mutate(phase = ifelse(Snow_Phase == 1, "snow", "rain"),
-         twet = wetbulb(Air_Temp, RH)) %>% 
-  select(phase, Air_Temp:gridded_data_pres, twet)
-
-# Set seed so that the analysis is reproducible
-set.seed(6547)
-
-# Split the data into training and testing
-df_split <- initial_split(data = df,
-                          prop = 0.75,  # This is the proportion of data allocated to training
-                          strata = "phase")  # Stratify the sampling based on this variable
-
-# Make new data frames of the training and testing data
-df_train <- training(df_split)
-df_test <- testing(df_split)
-
+n_samples = round(0.01 * nrow(df_train_nomix), digits = 0) 
+df_train <- df_train_nomix %>% 
+  sample_n(n_samples)
 
 # Make a recipe
 df_recipe <- recipe(phase ~ ., data = df_train)
-# %>% update_role(year, FracBurnedArea, huc6, new_role = "analysis")
-# you can use update role to add analysis or predictor variables
 
 # Create some folds
 df_folds <- vfold_cv(df_train, v = 10)
@@ -223,52 +206,10 @@ overall_time_elapsed = overall_time_end - overall_time_start
 overall_time_elapsed
 
 # Save info from the tuning exercise
-nh_nomix_metonly_rf_flow_tuned <- rf_flow_tuned
-nh_nomix_metonly_rf_param_best <- param_best
-nh_nomix_metonly_rf_tune_results <- rf_tune_results %>% collect_metrics()
+export_list <- list()
+export_list[["nomix_imbal"]] <- list(rf_flow_tuned = rf_flow_tuned, 
+                                     param_best = param_best,
+                                     rf_tune_results = rf_tune_results %>% collect_metrics())
 
-################################################################################
-# Save all of the metrics
-################################################################################
-
-save(cs_allphase_onlymet_rf_flow_tuned,
-     cs_allphase_onlymet_rf_param_best,
-     cs_allphase_onlymet_rf_tune_results,
-     cs_nomix_onlymet_rf_flow_tuned,
-     cs_nomix_onlymet_rf_param_best,
-     cs_nomix_onlymet_rf_tune_results,
-     cs_allphase_meteco_rf_flow_tuned,
-     cs_allphase_meteco_rf_param_best,
-     cs_allphase_meteco_rf_tune_results,
-     cs_nomix_meteco_rf_flow_tuned,
-     cs_nomix_meteco_rf_param_best,
-     cs_nomix_meteco_rf_tune_results,
-     nh_nomix_metonly_rf_flow_tuned,
-     nh_nomix_metonly_rf_param_best,
-     nh_nomix_metonly_rf_tune_results,
-     file = "../../data/rf_tune_results.rdata")
-
-
-# I redid the CS tuning with updated data
-# To avoid rerunning NH tuning, I had to import and re-export the data
-# hold_list <- list(
-#   cs_allphase_onlymet_rf_flow_tuned = cs_allphase_onlymet_rf_flow_tuned,
-#   cs_allphase_onlymet_rf_param_best = cs_allphase_onlymet_rf_param_best,
-#   cs_allphase_onlymet_rf_tune_results = cs_allphase_onlymet_rf_tune_results,
-#   cs_nomix_onlymet_rf_flow_tuned = cs_nomix_onlymet_rf_flow_tuned,
-#   cs_nomix_onlymet_rf_param_best = cs_nomix_onlymet_rf_param_best,
-#   cs_nomix_onlymet_rf_tune_results = cs_nomix_onlymet_rf_tune_results,
-#   cs_allphase_meteco_rf_flow_tuned = cs_allphase_meteco_rf_flow_tuned,
-#   cs_allphase_meteco_rf_param_best = cs_allphase_meteco_rf_param_best,
-#   cs_allphase_meteco_rf_tune_results = cs_allphase_meteco_rf_tune_results,
-#   cs_nomix_meteco_rf_flow_tuned = cs_nomix_meteco_rf_flow_tuned,
-#   cs_nomix_meteco_rf_param_best = cs_nomix_meteco_rf_param_best,
-#   cs_nomix_meteco_rf_tune_results = cs_nomix_meteco_rf_tune_results
-# )
-# rm(list=setdiff(ls(), "hold_list"))
-# load("../../data/rf_tune_results.rdata")
-# rm(list=setdiff(ls(), c("hold_list", "nh_nomix_metonly_rf_flow_tuned",
-#                         "nh_nomix_metonly_rf_param_best",
-#                         "nh_nomix_metonly_rf_tune_results")))
-# list2env(hold_list, globalenv())
-
+# Export the tuning results
+saveRDS(export_list, file = paste0(data_pre, "rf_tune_imbal_NH.RDS"))

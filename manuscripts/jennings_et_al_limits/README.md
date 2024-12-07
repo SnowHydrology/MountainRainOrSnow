@@ -22,6 +22,37 @@ library(tidymodels)
 library(cowplot); theme_set(theme_cowplot())
 ```
 
+Quantify the number of obs and date range for the crowdsourced data.
+
+``` r
+cs_df <- read.csv("../../../../data/mros_QAQCflags_2024_01_24.csv")
+cs_df <- cs_df %>% 
+  filter(dupe_flag == "Pass",
+         phase_flag == "Pass",
+         temp_air_flag == "Pass",
+         rh_flag == "Pass",
+         nstation_temp_air_flag == "Pass",
+         nstation_temp_dew_flag == "Pass",
+  )
+
+# Perform alternative dupe check to catch any that snuck through
+cs_df  <- cs_df %>% 
+  group_by(latitude, longitude, datetime_utc) %>% 
+  mutate(n_obs = n()) %>% 
+  filter(n_obs == 1)
+
+# Format date and compute date range
+cs_df$datetime <- ymd_hm(cs_df$datetime_utc)
+```
+
+    ## Warning: 398 failed to parse.
+
+``` r
+range(cs_df$datetime, na.rm = T)
+```
+
+    ## [1] "2020-01-08 08:05:00 UTC" "2023-07-24 21:06:00 UTC"
+
 Import the datasets we need.
 
 ``` r
@@ -59,10 +90,10 @@ benchmark_types <- data.frame(ppm = c("binlog","thresh_tdew_0", "thresh_tdew_0.5
                                       "thresh_twet_0", "thresh_twet_0.5", 
                                       "thresh_twet_1",
                                       "thresh_tair_1", "thresh_tair_1.5",
-                                      "rf", "xg"),
+                                      "rf", "xg", "nn"),
                               type = c(rep("humidity", 6), 
                                        rep("tair", 2),
-                                       rep("ml", 2)))
+                                       rep("ml", 3)))
 summary_all <- left_join(summary_all, benchmark_types, by = "ppm")
 ```
 
@@ -111,8 +142,8 @@ nh_benchmark_rain_bias_range = nh_benchmark_rain_bias_max - nh_benchmark_rain_bi
 
 When examining the two datasets separately, we found a few key
 differences. For example, accuracy was generally lower in the
-crowdsourced dataset, ranging from 80.5% to 88.7%, a total spread of
-8.2%. That is larger than the accuracy spread of the synoptic dataset
+crowdsourced dataset, ranging from 80.5% to 89.2%, a total spread of
+8.7%. That is larger than the accuracy spread of the synoptic dataset
 (2.4%), which had a minimum of 90.7% and a maximum of 93.1%. In the
 crowdsourced dataset, the top six methods, ranked by accuracy, all used
 humidity, while the bottom two relied on air temperature alone. The case
@@ -128,7 +159,7 @@ with better accuracy values typically had lower rain and snow biases.
 ``` r
 summary_all %>% 
     filter(scenario == "nomix_imbal") %>% 
-    filter(!ppm %in% c("xg", "rf")) %>% 
+    filter(type != "ml") %>% 
     ungroup() %>% 
     arrange(source_lab, -accuracy_pct) %>% 
     mutate(across(where(is.numeric), round, digits = 1)) %>% 
@@ -179,26 +210,40 @@ All of the benchmark methods performed worse at air temperatures near
 and slightly above the freezing point in terms of accuracy, with most of
 them reaching their minimum accuracy values between 1.5°C and 2.0°C in
 the crowdsourced dataset and between 0.5°C and 1.5°C in the synoptic
-dataset (Figure 3). In both datasets, most methods had slightly positive
-snow biases and markedly negative rain biases at air temperatures less
-than 1.0°C. This is consistent with their limited, or complete lack of,
-ability to predict rain at sub-freezing temperatures. Conversely, most
-methods, with the exception of the dew point temperature thresholds, had
-largely negative snow biases and slightly positive rain biases at air
-temperatures above 2°C. Notably, the crowdsourced dataset expressed
-larger positive rain biases at higher temperatures, indicating the
-benchmark methods failed to capture snowfall occurring during warm
-near-surface conditions.
+dataset (Figure 3). The best performing benchmarks in terms of accuracy
+were T<sub>w1.0</sub> and T<sub>w0.5</sub> in the crowdsourced and
+synoptic datasets, respectively. For the former, T<sub>w1.0</sub> hit a
+minimum accuracy of 66.3% at 2°C, while the latter reached a minimum
+accuracy of 68.7% at 1°C. In both datasets, most methods had slightly
+positive snow biases and markedly negative rain biases at air
+temperatures less than 1.0°C. This is consistent with their limited, or
+complete lack of, ability to predict rain at sub-freezing temperatures.
+Conversely, most methods, with the exception of the dew point
+temperature thresholds, had largely negative snow biases and slightly
+positive rain biases at air temperatures above 2°C. Notably, the
+crowdsourced dataset expressed larger positive rain biases at higher
+temperatures, indicating the benchmark methods failed to capture
+snowfall occurring during warm near-surface conditions.
 
-    ## Warning: Removed 608 rows containing missing values (`geom_raster()`).
-    ## Removed 608 rows containing missing values (`geom_raster()`).
-    ## Removed 608 rows containing missing values (`geom_raster()`).
+    ## Warning: The `legend.title.align` argument of `theme()` is deprecated as of ggplot2
+    ## 3.5.0.
+    ## ℹ Please use theme(legend.title = element_text(hjust)) instead.
+    ## This warning is displayed once every 8 hours.
+    ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
+    ## generated.
+
+    ## Warning: Removed 608 rows containing missing values or values outside the scale range
+    ## (`geom_raster()`).
+    ## Removed 608 rows containing missing values or values outside the scale range
+    ## (`geom_raster()`).
+    ## Removed 608 rows containing missing values or values outside the scale range
+    ## (`geom_raster()`).
 
 ![](README_files/figure-gfm/benchmark_plot-1.png)<!-- -->
 
 ``` r
 # Code for minimum accuracy
-summary_bytemp %>% filter(source == "cs" & scenario == "nomix_imbal" & !ppm %in% c("rf", "xg")) %>% group_by(ppm) %>% slice_min(accuracy_pct)
+summary_bytemp %>% filter(source == "cs" & scenario == "nomix_imbal" & !ppm %in% c("rf", "xg", "nn")) %>% group_by(ppm) %>% slice_min(accuracy_pct)
 ```
 
     ## # A tibble: 8 × 16
@@ -218,7 +263,7 @@ summary_bytemp %>% filter(source == "cs" & scenario == "nomix_imbal" & !ppm %in%
     ## #   rain_pred_pct <dbl>, mixed_pred_pct <dbl>, source_lab <chr>
 
 ``` r
-summary_bytemp %>% filter(source == "nh" & scenario == "nomix_imbal" & !ppm %in% c("rf", "xg")) %>% group_by(ppm) %>% slice_min(accuracy_pct)
+summary_bytemp %>% filter(source == "nh" & scenario == "nomix_imbal" & !ppm %in% c("rf", "xg", "nn")) %>% group_by(ppm) %>% slice_min(accuracy_pct)
 ```
 
     ## # A tibble: 8 × 16
@@ -240,34 +285,25 @@ summary_bytemp %>% filter(source == "nh" & scenario == "nomix_imbal" & !ppm %in%
 ### Machine learning methods
 
 ``` r
+# Identify columns to select
 cols_to_get = c("source", "ppm", "accuracy_pct", "snow_bias_pct", "rain_bias_pct")
 
-
+# Get the best benchmark in crowdsourced data
 cs_best_benchmark = summary_all %>% 
-    filter(source == "cs" & !ppm %in% c("xg", "rf") & scenario == "nomix_imbal") %>% 
+    filter(source == "cs" & !ppm %in% c("xg", "rf", "nn") & scenario == "nomix_imbal") %>% 
     ungroup() %>% 
     slice_max(accuracy_pct, n = 1) %>% 
     pull(ppm)
 
-cs_median_benchmark = summary_all %>% 
-    filter(source == "cs" & !ppm %in% c("xg", "rf") & scenario == "nomix_imbal") %>% 
-    ungroup() %>% 
-    arrange(-accuracy_pct) %>% 
-    slice(5) %>% 
-    pull(ppm)
-
-cs_benchmark_diff <- summary_all %>% 
-    filter(source == "cs" & ppm %in% c("xg", "rf") & scenario == "nomix_imbal") %>% 
-    select(cols_to_get) %>% 
-    bind_cols(.,summary_all %>% 
-                  filter(source == "cs" & ppm == cs_best_benchmark & scenario == "nomix_imbal") %>% 
-                  select(cols_to_get)) %>% 
-    bind_rows(., summary_all %>% 
-    filter(source == "cs" & ppm %in% c("xg", "rf") & scenario == "nomix_imbal") %>% 
-    select(cols_to_get) %>% 
-    bind_cols(.,summary_all %>% 
-                  filter(source == "cs" & ppm == cs_median_benchmark & scenario == "nomix_imbal") %>% 
-                  select(cols_to_get)))
+# Get the average accuracy 
+cs_accuracy_av <- summary_all %>% 
+  filter(scenario == "nomix_imbal" & source == "cs" & !ppm %in% c("rf", "xg", "nn")) %>% 
+  ungroup() %>% 
+  summarize(accuracy_pct = mean(accuracy_pct),
+            rain_bias_pct = mean(rain_bias_pct),
+            snow_bias_pct = mean(snow_bias_pct)) %>% 
+  mutate(source = "cs", "ppm" = "avg") %>% 
+  select(cols_to_get)
 ```
 
     ## Warning: Using an external vector in selections was deprecated in tidyselect 1.1.0.
@@ -283,58 +319,89 @@ cs_benchmark_diff <- summary_all %>%
     ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
     ## generated.
 
-    ## Adding missing grouping variables: `scenario`
-    ## Adding missing grouping variables: `scenario`
-    ## New names:
-    ## Adding missing grouping variables: `scenario`
-    ## Adding missing grouping variables: `scenario`
-    ## New names:
-
 ``` r
-nh_best_benchmark = "binlog"
-
-nh_median_benchmark = summary_all %>% 
-    filter(source == "nh" & !ppm %in% c("xg", "rf") & scenario == "nomix_imbal") %>% 
-    ungroup() %>% 
-    arrange(-accuracy_pct) %>% 
-    slice(5) %>% 
-    pull(ppm)
-
-nh_benchmark_diff <- summary_all %>% 
-    filter(source == "nh" & ppm %in% c("xg", "rf") & scenario == "nomix_imbal") %>% 
+# Extract and summarize results
+cs_benchmark_diff <- summary_all %>% ungroup() %>% 
+    filter(source == "cs" & ppm %in% c("xg", "rf", "nn") & scenario == "nomix_imbal") %>% 
     select(cols_to_get) %>% 
-    bind_cols(.,summary_all %>% 
-                  filter(source == "nh" & ppm == nh_best_benchmark & scenario == "nomix_imbal") %>% 
+    bind_cols(.,summary_all %>% ungroup() %>% 
+                  filter(source == "cs" & ppm == cs_best_benchmark & scenario == "nomix_imbal") %>% 
                   select(cols_to_get)) %>% 
-    bind_rows(., summary_all %>% 
-    filter(source == "nh" & ppm %in% c("xg", "rf") & scenario == "nomix_imbal") %>% 
+    bind_rows(., summary_all %>% ungroup() %>% 
+    filter(source == "cs" & ppm %in% c("xg", "rf", "nn") & scenario == "nomix_imbal") %>% 
     select(cols_to_get) %>% 
-    bind_cols(.,summary_all %>% 
-                  filter(source == "nh" & ppm == nh_median_benchmark & scenario == "nomix_imbal") %>% 
-                  select(cols_to_get)))
+    bind_cols(., cs_accuracy_av))
 ```
 
-    ## Adding missing grouping variables: `scenario`
-    ## Adding missing grouping variables: `scenario`
     ## New names:
-    ## Adding missing grouping variables: `scenario`
-    ## Adding missing grouping variables: `scenario`
     ## New names:
+    ## • `source` -> `source...1`
+    ## • `ppm` -> `ppm...2`
+    ## • `accuracy_pct` -> `accuracy_pct...3`
+    ## • `snow_bias_pct` -> `snow_bias_pct...4`
+    ## • `rain_bias_pct` -> `rain_bias_pct...5`
+    ## • `source` -> `source...6`
+    ## • `ppm` -> `ppm...7`
+    ## • `accuracy_pct` -> `accuracy_pct...8`
+    ## • `snow_bias_pct` -> `snow_bias_pct...9`
+    ## • `rain_bias_pct` -> `rain_bias_pct...10`
+
+``` r
+# Get the best benchmark in synoptic data
+nh_best_benchmark = summary_all %>% 
+    filter(source == "nh" & !ppm %in% c("xg", "rf", "nn") & scenario == "nomix_imbal") %>% 
+    ungroup() %>% 
+    slice_max(accuracy_pct, n = 1) %>% 
+    pull(ppm)
+
+# Get the average accuracy 
+nh_accuracy_av <- summary_all %>% 
+  filter(scenario == "nomix_imbal" & source == "nh" & !ppm %in% c("rf", "xg", "nn")) %>% 
+  ungroup() %>% 
+  summarize(accuracy_pct = mean(accuracy_pct),
+            rain_bias_pct = mean(rain_bias_pct),
+            snow_bias_pct = mean(snow_bias_pct)) %>% 
+  mutate(source = "cs", "ppm" = "avg") %>% 
+  select(cols_to_get)
+
+# Extract and summarize results
+nh_benchmark_diff <- summary_all %>% ungroup() %>% 
+    filter(source == "nh" & ppm %in% c("xg", "rf", "nn") & scenario == "nomix_imbal") %>% 
+    select(cols_to_get) %>% 
+    bind_cols(.,summary_all %>% ungroup() %>% 
+                  filter(source == "nh" & ppm == nh_best_benchmark & scenario == "nomix_imbal") %>% 
+                  select(cols_to_get)) %>% 
+    bind_rows(., summary_all %>% ungroup() %>% 
+    filter(source == "nh" & ppm %in% c("xg", "rf", "nn") & scenario == "nomix_imbal") %>% 
+    select(cols_to_get) %>% 
+    bind_cols(., nh_accuracy_av))
+```
+
+    ## New names:
+    ## New names:
+    ## • `source` -> `source...1`
+    ## • `ppm` -> `ppm...2`
+    ## • `accuracy_pct` -> `accuracy_pct...3`
+    ## • `snow_bias_pct` -> `snow_bias_pct...4`
+    ## • `rain_bias_pct` -> `rain_bias_pct...5`
+    ## • `source` -> `source...6`
+    ## • `ppm` -> `ppm...7`
+    ## • `accuracy_pct` -> `accuracy_pct...8`
+    ## • `snow_bias_pct` -> `snow_bias_pct...9`
+    ## • `rain_bias_pct` -> `rain_bias_pct...10`
 
 ``` r
 ml_benchmark_diff <- bind_rows(cs_benchmark_diff, nh_benchmark_diff) %>% 
-    mutate(comparison = rep(c("best", "best", "med", "med"), 2)) %>% 
-    select(-scenario...1,
-           source = source...2,
-           ppm = ppm...3,
+    mutate(comparison = rep(c("best", "best", "best", "avg", "avg", "avg"), 2)) %>% 
+    select(source = source...1,
+           ppm = ppm...2,
            comparison,
-           ml_accuracy_pct = accuracy_pct...4,
-           ml_snow_bias_pct = snow_bias_pct...5,
-           ml_rain_bias_pct = rain_bias_pct...6,
-           bm_accuracy_pct = accuracy_pct...10,
-           bm_snow_bias_pct = snow_bias_pct...11,
-           bm_rain_bias_pct = rain_bias_pct...12,
-           -scenario...7, -source...8, -ppm...9) %>% 
+           ml_accuracy_pct = accuracy_pct...3,
+           ml_snow_bias_pct = snow_bias_pct...4,
+           ml_rain_bias_pct = rain_bias_pct...5,
+           bm_accuracy_pct = accuracy_pct...8,
+           bm_snow_bias_pct = snow_bias_pct...9,
+           bm_rain_bias_pct = rain_bias_pct...10) %>% 
     mutate(accuracy_pct_diff = ml_accuracy_pct - bm_accuracy_pct,
            snow_bias_abs_pct_diff = abs(ml_snow_bias_pct) - abs(bm_snow_bias_pct),
            rain_bias_abs_pct_diff = abs(ml_rain_bias_pct) - abs(bm_rain_bias_pct))
@@ -342,118 +409,119 @@ ml_benchmark_diff <- bind_rows(cs_benchmark_diff, nh_benchmark_diff) %>%
 # Make a table
 ml_benchmark_diff %>% 
     select(source, ppm, comparison,
-           ml_accuracy_pct, accuracy_pct_diff,
-           ml_snow_bias_pct, snow_bias_abs_pct_diff,
-           ml_rain_bias_pct, rain_bias_abs_pct_diff) %>% 
+           ml_accuracy_pct, ml_snow_bias_pct, ml_rain_bias_pct, 
+           accuracy_pct_diff, snow_bias_abs_pct_diff, rain_bias_abs_pct_diff) %>% 
     mutate(across(where(is.numeric), round, digits = 1)) %>% 
     knitr::kable()
 ```
 
-| source | ppm | comparison | ml_accuracy_pct | accuracy_pct_diff | ml_snow_bias_pct | snow_bias_abs_pct_diff | ml_rain_bias_pct | rain_bias_abs_pct_diff |
+| source | ppm | comparison | ml_accuracy_pct | ml_snow_bias_pct | ml_rain_bias_pct | accuracy_pct_diff | snow_bias_abs_pct_diff | rain_bias_abs_pct_diff |
 |:---|:---|:---|---:|---:|---:|---:|---:|---:|
-| cs | rf | best | 88.3 | -0.4 | 3.5 | -1.0 | -7.9 | -2.3 |
-| cs | xg | best | 88.8 | 0.1 | 4.7 | 0.2 | -10.6 | 0.4 |
-| cs | rf | med | 88.3 | 2.0 | 3.5 | -5.1 | -7.9 | -11.6 |
-| cs | xg | med | 88.8 | 2.4 | 4.7 | -3.9 | -10.6 | -8.9 |
-| nh | rf | best | 93.7 | 0.6 | 3.6 | -2.0 | -3.2 | -1.8 |
-| nh | xg | best | 93.3 | 0.2 | 5.4 | -0.2 | -4.8 | -0.2 |
-| nh | rf | med | 93.7 | 1.8 | 3.6 | -4.5 | -3.2 | -4.0 |
-| nh | xg | med | 93.3 | 1.4 | 5.4 | -2.7 | -4.8 | -2.4 |
+| cs | nn | best | 89.2 | 3.8 | -8.6 | 0.5 | -0.7 | -1.6 |
+| cs | rf | best | 88.3 | 3.5 | -7.9 | -0.4 | -1.0 | -2.3 |
+| cs | xg | best | 88.8 | 4.7 | -10.6 | 0.1 | 0.2 | 0.4 |
+| cs | nn | avg | 89.2 | 3.8 | -8.6 | 3.2 | -1.7 | -3.9 |
+| cs | rf | avg | 88.3 | 3.5 | -7.9 | 2.3 | -2.0 | -4.5 |
+| cs | xg | avg | 88.8 | 4.7 | -10.6 | 2.8 | -0.8 | -1.8 |
+| nh | nn | best | 92.8 | 1.5 | -1.4 | -0.3 | -4.7 | -4.1 |
+| nh | rf | best | 93.7 | 3.6 | -3.2 | 0.6 | -2.6 | -2.3 |
+| nh | xg | best | 93.3 | 5.4 | -4.8 | 0.1 | -0.8 | -0.7 |
+| nh | nn | avg | 92.8 | 1.5 | -1.4 | 0.8 | -5.9 | -5.2 |
+| nh | rf | avg | 93.7 | 3.6 | -3.2 | 1.7 | -3.8 | -3.3 |
+| nh | xg | avg | 93.3 | 5.4 | -4.8 | 1.3 | -2.0 | -1.7 |
 
-The two machine learning methods, random forest and XGBoost, generally
-provided small performance gains relative to the best benchmark methods
-and large, consistent improvements relative to the median benchmark
-methods (Table 3). In the crowdsourced dataset, XGBoost had a negligibly
-higher accuracy (88.8%) than T<sub>w1.0</sub> (88.7%), while random
-forest had a slightly lower accuracy (88.3%) than the T<sub>w1.0</sub>
-threshold, which was the best performing method from the benchmark
-exercise. Both XGBoost (93.3%) and random forest (93.7%) provided
-marginal improvements relative to T<sub>w0.5</sub> (93.1%) and
-Bin<sub>log</sub> (93.1%), the best PPMs in the synoptic dataset as
-measured by the accuracy metric.
+The three machine learning methods, ANN, random forest and XGBoost,
+generally provided small performance gains relative to the best
+benchmark methods and larger, more consistent improvements relative to
+the average benchmark results (Table 2). In the crowdsourced dataset,
+ANN (89.2%) and XGBoost (88.8%) had slightly higher accuracy values than
+T<sub>w1.0</sub> (88.7%), while random forest had a slightly lower
+accuracy (88.3%) than the T<sub>w1.0</sub> threshold, which was the best
+performing method from the benchmark exercise. Both XGBoost (93.3%) and
+random forest (93.7%) provided marginal improvements relative to
+T<sub>w0.5</sub> (93.1%), the best benchmark in the synoptic dataset as
+measured by the accuracy metric. ANN, however, expressed a slightly
+worse accuracy value (92.8%) than the best benchmark.
 
 ``` r
 # Code for minimum accuracy
-summary_bytemp %>% filter(source == "cs" & scenario == "nomix_imbal" & ppm %in% c("rf", "xg")) %>% group_by(ppm) %>% slice_min(accuracy_pct)
+summary_bytemp %>% filter(source == "cs" & scenario == "nomix_imbal" & ppm %in% c("rf", "xg", "nn")) %>% group_by(ppm) %>% slice_min(accuracy_pct)
 ```
 
-    ## # A tibble: 2 × 16
-    ## # Groups:   ppm [2]
+    ## # A tibble: 3 × 16
+    ## # Groups:   ppm [3]
     ##   ppm   scenario  source tair_bin     n accuracy_pct snow_bias_pct rain_bias_pct
     ##   <chr> <chr>     <chr>     <dbl> <int>        <dbl>         <dbl>         <dbl>
-    ## 1 rf    nomix_im… cs            2   421         66.0          5.12         -7.78
-    ## 2 xg    nomix_im… cs            2   421         68.6         12.6         -19.2 
-    ## # ℹ 8 more variables: mixed_bias_pct <dbl>, snow_obs_pct <dbl>,
-    ## #   rain_obs_pct <dbl>, mixed_obs_pct <dbl>, snow_pred_pct <dbl>,
-    ## #   rain_pred_pct <dbl>, mixed_pred_pct <dbl>, source_lab <chr>
-
-``` r
-summary_bytemp %>% filter(source == "nh" & scenario == "nomix_imbal" & ppm %in% c("rf", "xg")) %>% group_by(ppm) %>% slice_min(accuracy_pct)
-```
-
-    ## # A tibble: 2 × 16
-    ## # Groups:   ppm [2]
-    ##   ppm   scenario source tair_bin      n accuracy_pct snow_bias_pct rain_bias_pct
-    ##   <chr> <chr>    <chr>     <dbl>  <int>        <dbl>         <dbl>         <dbl>
-    ## 1 rf    nomix_i… nh            1 297821         74.2          9.77         -15.2
-    ## 2 xg    nomix_i… nh            1 297821         70.0         12.7          -19.8
+    ## 1 nn    nomix_im… cs          2.5   377         70.0         -8.20          7.73
+    ## 2 rf    nomix_im… cs          2     421         66.0          5.12         -7.78
+    ## 3 xg    nomix_im… cs          2     421         68.6         12.6         -19.2 
     ## # ℹ 8 more variables: mixed_bias_pct <dbl>, snow_obs_pct <dbl>,
     ## #   rain_obs_pct <dbl>, mixed_obs_pct <dbl>, snow_pred_pct <dbl>,
     ## #   rain_pred_pct <dbl>, mixed_pred_pct <dbl>, source_lab <chr>
 
 ``` r
 # Code for minimum accuracy
-summary_bytemp %>% filter(source == "cs" & scenario == "nomix_imbal" & ppm %in% c("rf", "xg")) %>% group_by(ppm) %>% slice_min(accuracy_pct)
+summary_bytemp %>% filter(source == "nh" & scenario == "nomix_imbal" & ppm %in% c("rf", "xg", "nn")) %>% group_by(ppm) %>% slice_min(accuracy_pct)
 ```
 
-    ## # A tibble: 2 × 16
-    ## # Groups:   ppm [2]
-    ##   ppm   scenario  source tair_bin     n accuracy_pct snow_bias_pct rain_bias_pct
-    ##   <chr> <chr>     <chr>     <dbl> <int>        <dbl>         <dbl>         <dbl>
-    ## 1 rf    nomix_im… cs            2   421         66.0          5.12         -7.78
-    ## 2 xg    nomix_im… cs            2   421         68.6         12.6         -19.2 
-    ## # ℹ 8 more variables: mixed_bias_pct <dbl>, snow_obs_pct <dbl>,
-    ## #   rain_obs_pct <dbl>, mixed_obs_pct <dbl>, snow_pred_pct <dbl>,
-    ## #   rain_pred_pct <dbl>, mixed_pred_pct <dbl>, source_lab <chr>
-
-``` r
-summary_bytemp %>% filter(source == "nh" & scenario == "nomix_imbal" & ppm %in% c("rf", "xg")) %>% group_by(ppm) %>% slice_min(accuracy_pct)
-```
-
-    ## # A tibble: 2 × 16
-    ## # Groups:   ppm [2]
+    ## # A tibble: 3 × 16
+    ## # Groups:   ppm [3]
     ##   ppm   scenario source tair_bin      n accuracy_pct snow_bias_pct rain_bias_pct
     ##   <chr> <chr>    <chr>     <dbl>  <int>        <dbl>         <dbl>         <dbl>
-    ## 1 rf    nomix_i… nh            1 297821         74.2          9.77         -15.2
-    ## 2 xg    nomix_i… nh            1 297821         70.0         12.7          -19.8
+    ## 1 nn    nomix_i… nh            1 297821         67.1        -10.6           16.5
+    ## 2 rf    nomix_i… nh            1 297821         74.2          9.77         -15.2
+    ## 3 xg    nomix_i… nh            1 297821         70.0         12.7          -19.8
     ## # ℹ 8 more variables: mixed_bias_pct <dbl>, snow_obs_pct <dbl>,
     ## #   rain_obs_pct <dbl>, mixed_obs_pct <dbl>, snow_pred_pct <dbl>,
     ## #   rain_pred_pct <dbl>, mixed_pred_pct <dbl>, source_lab <chr>
 
 ``` r
+# Add average values to summary by temp
+performance_av_bytemp <- summary_bytemp %>% 
+  filter(scenario == "nomix_imbal" & !ppm %in% c("rf", "xg", "nn")) %>% 
+  group_by(tair_bin, source) %>% 
+  summarize(accuracy_pct = mean(accuracy_pct),
+            rain_bias_pct = mean(rain_bias_pct),
+            snow_bias_pct = mean(snow_bias_pct)) %>% 
+  mutate(ppm = "avg", scenario = "nomix_imbal")
+```
+
+    ## `summarise()` has grouped output by 'tair_bin'. You can override using the
+    ## `.groups` argument.
+
+``` r
+# Bind to summary_bytemp
+summary_bytemp_withavg <- bind_rows(summary_bytemp,
+                                    performance_av_bytemp)
+
+# Summarize for each dataset
 ml_benchmark_diff_bytemp <- bind_rows(
-  summary_bytemp %>% 
+  summary_bytemp_withavg %>% 
     filter(source == "cs" & scenario == "nomix_imbal") %>% 
     pivot_wider(names_from = ppm, values_from = accuracy_pct, id_cols = tair_bin) %>% 
     mutate(rf_best = (rf-thresh_twet_1)/thresh_twet_1*100,
-           rf_med = (rf-binlog)/binlog*100,
+           rf_avg = (rf-avg)/avg*100,
            xg_best = (xg-thresh_twet_1)/thresh_twet_1*100,
-           xg_med = (xg-binlog)/binlog*100) %>% 
-    select(tair_bin, rf_best:xg_med) %>% 
-    pivot_longer(cols = rf_best:xg_med,
+           xg_avg = (xg-avg)/avg*100,
+           nn_best = (nn-thresh_twet_1)/thresh_twet_1*100,
+           nn_avg = (nn-avg)/avg*100) %>% 
+    select(tair_bin, rf_best:nn_avg) %>% 
+    pivot_longer(cols = rf_best:nn_avg,
                  names_to = c("ppm", "benchmark"),
                  names_pattern = "(.*)_(.*)",
                  values_to = "accuracy_diff_rel_pct") %>% 
     mutate(source_lab = "Crowdsourced", source = "cs"),
-  summary_bytemp %>% 
+  summary_bytemp_withavg %>% 
     filter(source == "nh" & scenario == "nomix_imbal") %>% 
     pivot_wider(names_from = ppm, values_from = accuracy_pct, id_cols = tair_bin) %>% 
-    mutate(rf_best = (rf-binlog)/binlog*100,
-           rf_med = (rf-thresh_twet_1)/thresh_twet_1*100,
-           xg_best = (xg-binlog)/binlog*100,
-           xg_med = (xg-thresh_twet_1)/thresh_twet_1*100) %>% 
-    select(tair_bin, rf_best:xg_med) %>% 
-    pivot_longer(cols = rf_best:xg_med,
+    mutate(rf_best = (rf-thresh_twet_0.5)/thresh_twet_0.5*100,
+           rf_avg = (rf-avg)/avg*100,
+           xg_best = (xg-thresh_twet_0.5)/thresh_twet_0.5*100,
+           xg_avg = (xg-avg)/avg*100,
+           nn_best = (nn-thresh_twet_0.5)/thresh_twet_0.5*100,
+           nn_avg = (nn-avg)/avg*100) %>% 
+    select(tair_bin, rf_best:nn_avg) %>% 
+    pivot_longer(cols = rf_best:nn_avg,
                  names_to = c("ppm", "benchmark"),
                  names_pattern = "(.*)_(.*)",
                  values_to = "accuracy_diff_rel_pct") %>% 
@@ -465,97 +533,116 @@ ml_benchmark_rel_diff_plot <-
   geom_hline(yintercept = 0, color = "grey") +
   geom_line(data = ml_benchmark_diff_bytemp, lwd = 1, 
             aes(tair_bin, accuracy_diff_rel_pct, color = ppm, lty = benchmark)) +
-  scale_color_manual(values =  hcl.colors(2, "Blue-Red2"),
-                     labels = c("RF", "XG"),
+  scale_color_manual(values =  c("#4a6fe3", "gray26", "#d33f6a"),
+                     labels = c("ANN","RF", "XG"),
                      name = "PPM")+
-  scale_linetype_discrete(labels = c("Best", "Median"),
+  scale_linetype_discrete(labels = c("Average", "Best"),
                           name = "Benchmark\ncomparison") +
   labs(x = "Air temperature (°C)", 
        y = "Relative accuracy difference to benchmark (%)") +
   xlim(c(-5,10)) +
-  theme(legend.position = c(0.1,0.7)) +
+  theme(legend.position = c(0.03,0.7)) +
   facet_wrap(~source_lab)
+```
+
+    ## Warning: A numeric `legend.position` argument in `theme()` was deprecated in ggplot2
+    ## 3.5.0.
+    ## ℹ Please use the `legend.position.inside` argument of `theme()` instead.
+    ## This warning is displayed once every 8 hours.
+    ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
+    ## generated.
+
+``` r
 ml_benchmark_rel_diff_plot
 ```
 
-    ## Warning: Removed 24 rows containing missing values (`geom_line()`).
+    ## Warning: Removed 36 rows containing missing values or values outside the scale range
+    ## (`geom_line()`).
 
-![](README_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
 
 ``` r
-save_plot(filename = "figures/fig04_ml_benchmark_rel_diff.png", 
+save_plot(filename = "figures/fig02_ml_benchmark_rel_diff.png", 
           plot = ml_benchmark_rel_diff_plot, 
           base_height = 5, 
           base_width = 9)
 ```
 
-    ## Warning: Removed 24 rows containing missing values (`geom_line()`).
+    ## Warning: Removed 36 rows containing missing values or values outside the scale range
+    ## (`geom_line()`).
 
-The two machine learning methods exhibited similar accuracy patterns by
-air temperature as the best and median benchmark methods, with
-performance degrading at air temperatures slightly above freezing. Both
-random forest and XGBoost achieved their minimum success rates of 66%
-and 68.6%, respectively, at 2°C in the crowdsourced dataset. Performance
-was higher in the synoptic dataset with minimum accuracy values of 74.2%
-for random forest and 70% for XGBoost. Both minima occurred at 1°C in
-the synoptic dataset. Relative improvements in accuracy compared to the
-best and median benchmarks varied by temperature for the machine
-learning methods (Figure 4). In the crowdsourced dataset, relative
-improvements reached a maximum of 6.3% at 7.5°C compared to the best
-benchmark and a maximum of 16.7% at 5°C compared to the median
-benchmark. In the synoptic dataset relative improvements were smaller
-for the best benchmark comparison, with a max increase of 8.1% at 1°C,
-and larger for the median benchmark, with a max increase of 32.7% at
-1.5°C.
+The three machine learning methods exhibited similar accuracy patterns
+by air temperature as the best benchmark and the average benchmark
+results, with performance degrading at air temperatures slightly above
+freezing. Both random forest and XGBoost achieved their minimum success
+rates of 66% and 68.6%, respectively, at 2°C in the crowdsourced
+dataset. Meanwhile, ANN had its worst accuracy value of 70% at 2.5°C.
+Performance was higher in the synoptic dataset for random forest and
+XGBoost with minimum accuracy values of 74.2% and 70%, respectively.
+ANN, conversely, expressed slightly worse performance than in the
+crowdsourced dataset with a minimum accuracy of 67.1%. All minima
+occurred at 1°C in the synoptic dataset. Relative improvements in
+accuracy compared to the best and average benchmarks varied by
+temperature for the machine learning methods (Figure 2). In the
+crowdsourced dataset, relative improvements reached a maximum of 7.9% at
+7.5°C compared to the best benchmark and a maximum of 19% at 1.5°C
+compared to the average benchmark values. In the synoptic dataset
+relative improvements were similar for the best benchmark comparison,
+with a max increase of 8% at 1°C, and smaller for the average benchmark
+values, with a max increase of 14.7% at 1°C. Notably, ANN did not
+provide an accuracy improvement at any air temperature relative to the
+best benchmark in the synoptic dataset.
 
-When compared to the snow and rain biases produced by the best and
-median benchmark methods, the machine learning methods provided larger
-absolute improvements than those recorded for accuracy (Table YYYY).
-While accuracy improvements were all less than or equal to 2.4%, the
-reduction in snow bias maxed out at -5.1% and -4.5% in the crowdsourced
-and synoptic datasets, respectively. Random forest and XGBoost provided
-an even larger improvement in rain bias in the crowdsourced dataset with
-a maximum reduction of -11.6%. Conversely, the rain bias reduction was
-slightly smaller than the snow bias reduction in the synoptic dataset at
--4%. These results show that while accuracy improvements from the
-machine learning methods may be small, random forest and XGBoost predict
-rain and snow with lower biases than the benchmark methods.
+When compared to the snow and rain biases produced by the best
+benchmarks and average benchmark values, the machine learning methods
+generally provided larger absolute improvements than those recorded for
+accuracy (Table 2). While accuracy improvements were all less than or
+equal to 3.2%, the reduction in snow bias maxed out at -2% and -5.9% in
+the crowdsourced and synoptic datasets, respectively. Random forest,
+XGBoost, and ANN also provided consistent improvements in rain bias,
+with a maximum reduction of -4.5% in the crowdsourced dataset and -5.2%
+in the synoptic dataset. These results show that while accuracy
+improvements from the machine learning methods may be small, random
+forest, XGBoost, and ANN predict rain and snow with lower biases than
+the benchmark methods.
 
 ## Mixed precipitation
 
 Until this point, we have only considered precipitation in its solid and
 liquid forms. While the synoptic dataset does not include any mixed
 precipitation observations, the testing split of the crowdsourced
-dataset includes 1140 observations, comprising 11.8% of the total. As
-noted in the methods section, we do not include any dual-threshold
-benchmark methods because of their poor historical performance. The
-machine learning methods analyzed here fared little better. Including
-the mixed observations caused overall accuracy to markedly decline,
-going from 88.3% (rain and snow only) to 77.5% (rain, snow, and mixed)
-for random forest and from 88.8% (rain and snow only) to 79.2% (rain,
-snow, and mixed) for XGBoost.
+dataset includes 1140 mixed phase observations, comprising 11.8% of the
+total. As noted in the methods section, we do not include any
+dual-threshold benchmark methods because of their poor historical
+performance. The machine learning methods analyzed here fared little
+better. Including the mixed observations caused overall accuracy to
+markedly decline, going from 88.3% (rain and snow only) to 77.5% (rain,
+snow, and mixed) for random forest, from 88.8% (rain and snow only) to
+79.2% (rain, snow, and mixed) for XGBoost, and from 89.2% (rain and snow
+only) to 79.2% (rain, snow, and mixed) for ANN.
 
-Although XGBoost had a higher accuracy than random forest when we
-included mixed precipitation, it achieved this result at the expense of
-bias. The random forest method predicted that 4.3% of the observations
-were mixed, which was well short of the observed value of 11.8%, giving
-it a mixed bias of -63.9%. XGBoost fared even worse, predicting 0% of
-the observations to be mixed, giving it a mixed bias of -100%. When
-including mixed precipitation, random forest had a lower snow bias
-(12.2%) than XGBoost (16.1%). It was the same story for rain bias with
-XGBoost (7.3%) having a worse bias than random forest (0.4%). These
-findings appear even worse when viewing the confusion matrix in Figure
-5. This plot shows that random forest correctly predicted only 9.3% of
-the observed mixed precipitation and incorrectly predicted the mixed
-observations as rain 32.9% of the time and as snow the remaining 57.8%.
-XGBoost failed completely here, correctly predicting none of the mixed
-precipitation observations, identifying them as rain and snow 36.8% and
-63.2% of the time, respectively.
+Although XGBoost and ANN had higher accuracy values than random forest
+when we included mixed precipitation, they achieved this result at the
+expense of bias. The random forest method predicted that 4.3% of the
+observations were mixed, which was well short of the observed value of
+11.8%, giving it a mixed bias of -63.9%. XGBoost and ANN fared even
+worse, predicting 0% of the observations to be mixed, giving them both a
+mixed bias of -100%. When including mixed precipitation, random forest
+had a lower snow bias (12.2%) than XGBoost (16.1%) and ANN (17.1%). It
+was the same story for rain bias with XGBoost (7.3%) and ANN (5.1%)
+having worse biases than random forest (0.4%). These findings appear
+even worse when viewing the confusion matrix in Figure 3. This plot
+shows that random forest correctly predicted only 9.3% of the observed
+mixed precipitation and incorrectly predicted the mixed observations as
+rain 32.9% of the time and as snow the remaining 57.8%. XGBoost and ANN
+failed completely here, correctly predicting none of the mixed
+precipitation observations, identifying them as snow over 60% of the
+time.
 
 ``` r
 # Get the mixed predictions
 mixed_preds <- predictions_all %>%
-  filter(scenario == "allphase_imbal" & ppm %in% c("rf", "xg")) %>% 
+  filter(scenario == "allphase_imbal" & ppm %in% c("rf", "xg", "nn")) %>% 
   mutate(phase_factor = as.factor(phase),
          phase_pred_factor = as.factor(phase_pred))
 
@@ -574,6 +661,12 @@ mixed_conf_matrix_plot <-
       prop.table(2) %>%
       as.data.frame() %>%
       mutate(ppm_lab = "Random forest"),
+     mixed_preds %>% filter(ppm == "nn") %>%
+      select(phase_pred_factor, phase_factor) %>%
+      table() %>%
+      prop.table(2) %>%
+      as.data.frame() %>%
+      mutate(ppm_lab = "ANN")
   ) %>%
   ggplot(aes(phase_factor, phase_pred_factor, fill = Freq*100)) +
   geom_tile() +
@@ -584,15 +677,19 @@ mixed_conf_matrix_plot <-
   labs(x = "Observed", y = "Predicted") +
   scale_x_discrete(labels = c("Mixed", "Rain", "Snow")) +
   scale_y_discrete(labels = c("Mixed", "Rain", "Snow")) +
-  facet_wrap(~ppm_lab) 
+  facet_wrap(~ppm_lab) +
+  theme(legend.position = "top", legend.justification = "center",
+          legend.title.align = 0.5) +
+  guides(fill = guide_colorbar(title.position = "top", title = "Frequency (%)",
+                                 barwidth = 10))
 
 mixed_conf_matrix_plot
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->
 
 ``` r
-save_plot(filename = "figures/fig05_mixed_conf_matrix.png", 
+save_plot(filename = "figures/fig03_mixed_conf_matrix.png", 
           plot = mixed_conf_matrix_plot, 
           base_height = 5, 
           base_width = 9)
@@ -618,11 +715,11 @@ frequency_data <-
              rain_pred_diff = rain_pred_pct_max - rain_pred_pct_min),
     summary_bytemp %>% 
       filter(scenario == "nomix_imbal" & tair_bin < 15 & tair_bin > -10) %>% 
-      filter(ppm == "xg" & source == "cs" | ppm == "thresh_twet_1" & source == "cs" |
+      filter(ppm == "nn" & source == "cs" | ppm == "thresh_twet_1" & source == "cs" |
                ppm == "rf" & source == "nh" | ppm == "thresh_twet_0.5" & source == "nh") %>% 
       select(ppm, source, snow_pred_pct, rain_pred_pct, tair_bin) %>% 
       mutate(type = ifelse(source == "cs",
-                           ifelse(ppm == "xg",
+                           ifelse(ppm == "nn",
                                   "Machine learning",
                                   "Benchmark"),
                            ifelse(ppm == "rf",
@@ -661,10 +758,10 @@ snowfall_freq_plot <-
 snowfall_freq_plot
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->
 
 ``` r
-save_plot(filename = "figures/fig06_snowfall_freq.png", 
+save_plot(filename = "figures/fig04_snowfall_freq.png", 
           plot = snowfall_freq_plot, 
           base_height = 4, 
           base_width = 9)
@@ -824,7 +921,7 @@ density_overlap_plot<-
 density_overlap_plot
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-15-1.png)<!-- -->
 
 ``` r
 save_plot(filename = "figures/fig07_density_overlap.png", 
@@ -865,7 +962,9 @@ overlap_dens_tair_binned <- overlap_dens_tair %>%
 accuracy_av_bytemp <- summary_bytemp %>% 
   filter(scenario == "nomix_imbal") %>% 
   group_by(tair_bin, source) %>% 
-  summarize(accuracy_av_pct = mean(accuracy_pct))
+  summarize(accuracy_av_pct = mean(accuracy_pct),
+            rain_bias_av_pct = mean(rain_bias_pct),
+            snow_bias_av_pct = mean(snow_bias_pct))
 ```
 
     ## `summarise()` has grouped output by 'tair_bin'. You can override using the
@@ -898,7 +997,8 @@ overlap_accuracy_relationship_plot <-
   ),
   ggplot(overlap_dens_tair_binned, aes(density_av, accuracy_av_pct, 
                                        color = source_lab, shape = source_lab)) + 
-  geom_point() +
+    geom_smooth(method = "lm", se = F, lty = "dashed", alpha = 0.7) +
+    geom_point() +
     theme(legend.position = "top") +
     labs(x = "Overlap density",
          y = "Average Accuracy (%)") +
@@ -911,13 +1011,19 @@ overlap_accuracy_relationship_plot <-
 )
 ```
 
-    ## Warning: Removed 8 rows containing missing values (`geom_point()`).
+    ## `geom_smooth()` using formula = 'y ~ x'
+
+    ## Warning: Removed 8 rows containing non-finite outside the scale range
+    ## (`stat_smooth()`).
+
+    ## Warning: Removed 8 rows containing missing values or values outside the scale range
+    ## (`geom_point()`).
 
 ``` r
 overlap_accuracy_relationship_plot
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-15-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-16-1.png)<!-- -->
 
 ``` r
 save_plot(filename = "figures/fig08_overlap_accuracy_relationship.png", 
@@ -942,21 +1048,46 @@ nh_overlap_accuracy_lm <-
   summary()
 ```
 
-This lack of differentiability reveals an issue with using near-surface
-meteorology to partition rain and snow. The left panels of Figure 8
-below present the average accuracy of the benchmark and machine learning
-phase partitioning methods plus the overlap in rain and snow
-distributions from the two datasets. We plot both variables against air
-temperature to show how the dip in performance corresponds to the
-increase in overlap. What is more, the right panel indicates there is a
-strong negative relationship between the distribution overlap and
-average accuracy, where accuracy decreases as overlap increases. Using
-ordinary least squares regression, we compute an r<sup>2</sup> of 0.79
-for this relationship in the crowdsourced dataset and 0.73 in the
-synoptic. That means that the air temperature distribution overlap
-between rain and snow explains at least 73% of the variance in
-precipitation phase partitioning accuracy. The higher the overlap, the
-worse the performance.
+This lack of differentiability at temperatures from 0° to 4°C reveals an
+issue with using near-surface meteorology to partition rain and snow.
+The left panels of Figure 8 below present the average accuracy of the
+benchmark and machine learning phase partitioning methods plus the
+overlap in rain and snow distributions from the two datasets. We plot
+both variables against air temperature to demonstrate how the dip in
+performance corresponds to the increase in overlap. The right panel then
+shows that there is a statistically significant (p \< 0.0005) negative
+relationship between the distribution overlap and average accuracy,
+where accuracy decreases as overlap increases. Using ordinary least
+squares regression, we compute an r<sup>2</sup> of 0.79 for this
+relationship in the crowdsourced dataset and 0.73 in the synoptic. That
+means that the air temperature distribution overlap between rain and
+snow explains at least 73.2228013 % of the variance in precipitation
+phase partitioning accuracy.
+
+This relationship (Figure 6) provides information on the limits of using
+near-surface meteorology to partition rain and snow. Recall that the
+benchmark and machine learning methods, when applied to the synoptic
+dataset, expressed higher accuracy values than in the crowdsourced
+dataset (Table 1). Consistent with the findings in this section, the
+higher accuracy in the synoptic dataset is complemented by a lower
+percentage of rain and snow distribution overlap (16%) than in the
+crowdsourced dataset (33.7%). This, plus the fact that the air
+temperature distribution overlap between rain and snow explains at least
+73% of the variance in precipitation phase partitioning accuracy,
+indicates that the key limiting factor to performance is the overlap of
+the air temperature distributions of the different phases. The higher
+the overlap, the worse the performance. Even the machine learning
+methods are beholden to this phenomenon (Figure 2, Table 2). Thus, as of
+now, regions with a high degree of rain-snow air temperature
+distribution overlap (i.e., those with characteristics of the
+crowdsourced dataset) are likely to see minimum benchmark accuracy
+values approaching 66.3%, while regions with less overlap (i.e., those
+with characteristics of the synoptic dataset) may see improved minimum
+accuracies, approaching 68.7%. Although the machine learning methods may
+moderately improve this performance dip in the crowdsourced (up to 70%)
+and synoptic datasets (up to 74.2%) , they do not eliminate it,
+demonstrating a limit to precipitation phase partitioning accuracy using
+near-surface meteorology.
 
 # Discussion
 
@@ -1036,7 +1167,7 @@ vip_plot <-
 vip_plot
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-17-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-18-1.png)<!-- -->
 
 ``` r
 save_plot(filename = "figures/fig09_vip.png", 
@@ -1081,21 +1212,26 @@ summary_all %>%
          `Class balance` = scenario2, 
          Phases = phases, 
          `Accuracy (%)` = accuracy_pct, 
+         `Rain bias (%)` = rain_bias_pct,
          `Snow bias (%)` = snow_bias_pct,
          `Mixed bias (%)` = mixed_bias_pct) %>% 
   knitr::kable()
 ```
 
-| PPM | Class balance | Phases     | Accuracy (%) | Snow bias (%) | Mixed bias (%) |
-|:----|:--------------|:-----------|-------------:|--------------:|---------------:|
-| rf  | Imbalanced    | All Phases |         77.5 |          12.2 |          -63.9 |
-| rf  | SMOTE         | All Phases |         69.0 |         -12.6 |           74.7 |
-| rf  | Imbalanced    | No Mixed   |         88.3 |           3.5 |            NaN |
-| rf  | SMOTE         | No Mixed   |         87.2 |          -3.5 |            NaN |
-| xg  | Imbalanced    | All Phases |         79.2 |          16.1 |         -100.0 |
-| xg  | SMOTE         | All Phases |         72.8 |         -11.2 |           90.3 |
-| xg  | Imbalanced    | No Mixed   |         88.8 |           4.7 |            NaN |
-| xg  | SMOTE         | No Mixed   |         88.1 |          -5.0 |            NaN |
+| PPM | Class balance | Phases | Accuracy (%) | Rain bias (%) | Snow bias (%) | Mixed bias (%) |
+|:---|:---|:---|---:|---:|---:|---:|
+| nn | Imbalanced | All Phases | 79.2 | 5.1 | 17.1 | -100.0 |
+| nn | SMOTE | All Phases | 66.1 | -16.9 | -27.3 | 179.8 |
+| nn | Imbalanced | No Mixed | 89.2 | -8.6 | 3.8 | NaN |
+| nn | SMOTE | No Mixed | 87.9 | 13.8 | -6.1 | NaN |
+| rf | Imbalanced | All Phases | 77.5 | 0.4 | 12.2 | -63.9 |
+| rf | SMOTE | All Phases | 69.0 | -4.2 | -12.6 | 74.7 |
+| rf | Imbalanced | No Mixed | 88.3 | -7.9 | 3.5 | NaN |
+| rf | SMOTE | No Mixed | 87.2 | 7.9 | -3.5 | NaN |
+| xg | Imbalanced | All Phases | 79.2 | 7.3 | 16.1 | -100.0 |
+| xg | SMOTE | All Phases | 72.8 | -14.3 | -11.2 | 90.3 |
+| xg | Imbalanced | No Mixed | 88.8 | -10.6 | 4.7 | NaN |
+| xg | SMOTE | No Mixed | 88.1 | 11.3 | -5.0 | NaN |
 
 Although we did not find that oversampling the data to correct class
 imbalances improved the machine learning predictions, such imbalances

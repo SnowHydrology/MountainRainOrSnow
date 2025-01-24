@@ -1,16 +1,60 @@
 ---
-title: "Text and Analysis for in-progress Mountain Rain or Snow Manuscript"
+title: "Text and Analysis for Mountain Rain or Snow Manuscript"
 author: "Keith Jennings"
 date: "Sys.Date()"
 output:
   github_document: default
 ---
 
-# Info
+# Welcome!
 
-The directory, for which this document serves as the README, includes all of the R scripts for tuning, processing, and analyzing rain-snow partitioning models.
+This README file contains the plotting and analysis code for a manuscript submitted to *Nature Communications*:
 
-<DETAIL THE FILES>
+> Jennings, K.S., Collins, M., Hatchett, B.J., Heggli, A., Hur, N., Tonino, S., Nolin, A.W., Yu, G., Zhang, W., and Arienzo, M.M. (*In Review*). Machine Learning Shows a Limit to Rain-Snow Partitioning Accuracy when Using Near-Surface Meteorology. *Nature Communications*.
+
+The directory, for which this document serves as the README, includes all of the R scripts for tuning, processing, and analyzing rain-snow partitioning models. The files and sub-directories are as follows (listed in order of operations):
+
+1) Data preparation:
+- `data_prep_for_training.R`: The code that divides the crowdsourced and synoptic datasets into a 75-25 training-testing split, stratified by precipitation phase. We validate all benchmark methods and machine learning (ML) models only on the testing data.
+
+*Note: the data for this analysis are freely available online at https://doi.org/10.17632/x84hy7yky4.1 and https://doi.org/10.1038/s41467-018-03629-7*
+  
+2) Hyperparameter tuning of ML models
+- `nn_tune_imbal.R`: Tune the hyperparameters of the artificial neural network (ANN) model 
+- `rf`_tune_imbal.R`: Tune the hyperparameters of the random forest model 
+- `xg_tune_imbal.R`: Tune the hyperparameters of the XGBoost model 
+
+3) Precipitation phase prediction
+- `benchmark_predict.R`: Predict rain, snow, and mixed precipitation using the benchmark methods
+- `nn_predict_imbal.R`: Predict rain, snow, and mixed precipitation using the ANN model
+- `rf`_predict_imbal.R`: Predict rain, snow, and mixed precipitation using the random forest model
+- `xg_predict_imbal.R`: Predict rain, snow, and mixed precipitation using the XGBoost model
+- `/alternative_methods`: Deploy and test an ANN with two hidden layers and a stacked model ensemble
+
+4) Data combination and synthesis
+- `data_prep_for_analysis.R`: Combine and synthesize all benchmark method, ML model, and meteorological data
+- `predict_analysis.R`: Combine and synthesize all the precipitation phase predictions
+
+5) Analysis
+- `README.Rmd`: This file
+- `/figures`: Subdirectory containing figures exported from `README`
+- `SUPPLEMENT`: supplemental information for manuscript
+- `deleted_material.Rmd` and `/original_scripts`: Deleted methods and analyses that may need revisiting
+- `data_prep_for_web.R`: Final processing and export of crowdsourced data to post online
+
+Before getting started with the code, here is what you will need to do:
+
+- Install an up-to-date version of R
+  - We wrote and ran this code using R version 4.4.2 on a Mac (Sequoia OS 15.2)
+- Import all necessary packages
+  - These are given in the top rows of all the R scripts described above
+  - An IDE like an RStudio will assist in package management
+  
+Total installation time for R and related packages should be less than 30 minutes.
+
+To run the code, you will need the data linked above, all R packages installed, and you will need to update the data directory path in the R scripts if/where necessary. You can run the scripts in the order described previously. Most scripts will run relatively quickly (< 1 h), but the hyperparameter tuning scripts may each take 8 h or more, depending on your hardware.
+
+Expected output from the code includes the processed files (e.g., model results, model definitions, figures, tables) described and created in this README.
 
 # The necessary stuff
 
@@ -23,31 +67,6 @@ library(tidyverse)
 library(tidymodels)
 library(cowplot); theme_set(theme_cowplot())
 ```
-
-Quantify the number of obs and date range for the crowdsourced data.
-
-```{r}
-cs_df <- read.csv("../../../../data/mros_QAQCflags_2024_01_24.csv")
-cs_df <- cs_df %>% 
-  filter(dupe_flag == "Pass",
-         phase_flag == "Pass",
-         temp_air_flag == "Pass",
-         rh_flag == "Pass",
-         nstation_temp_air_flag == "Pass",
-         nstation_temp_dew_flag == "Pass",
-  )
-
-# Perform alternative dupe check to catch any that snuck through
-cs_df  <- cs_df %>% 
-  group_by(latitude, longitude, datetime_utc) %>% 
-  mutate(n_obs = n()) %>% 
-  filter(n_obs == 1)
-
-# Format date and compute date range
-cs_df$datetime <- ymd_hm(cs_df$datetime_utc)
-range(cs_df$datetime, na.rm = T)
-```
-
 
 Import the datasets we need.
 
@@ -74,6 +93,11 @@ ml_for_vip <- readRDS(paste0(data_pre, "ml_models_for_vip.RDS"))
 
 # Load the met data for analysis
 met <- readRDS(paste0(data_pre, "cs_nh_met_data.RDS"))
+
+# Load the two-hidden-layer ANN and stacked ensemble data
+cs_tune_nn2 <- readRDS(paste0(data_pre, "nn_tune_imbal_multi_CS.RDS"))
+cs_predict_nn2 <- readRDS(paste0(data_pre, "nn_predict_imbal_multi_CS.RDS"))
+cs_predict_stack <- readRDS(paste0(data_pre, "stacks_predict_CS.RDS"))
 
 ```
 
@@ -129,7 +153,6 @@ nh_benchmark_rain_bias_min = summary_all %>% filter(source == "nh", scenario == 
 nh_benchmark_rain_bias_max = summary_all %>% filter(source == "nh", scenario == "nomix_imbal" & !ppm %in% c("xg", "rf")) %>% pull(rain_bias_pct) %>% max() %>% round(digits = 1)
 nh_benchmark_rain_bias_range = nh_benchmark_rain_bias_max - nh_benchmark_rain_bias_min
 
-
 ```
 
 When examining the two datasets separately, we found a few key differences. For example, accuracy was generally lower in the crowdsourced dataset, ranging from `r cs_benchmark_accuracy_min`% to `r cs_benchmark_accuracy_max`%, a total spread of `r cs_benchmark_accuracy_range`%. That is larger than the accuracy spread of the synoptic dataset (`r nh_benchmark_accuracy_range`%), which had a minimum of `r nh_benchmark_accuracy_min`% and a maximum of `r nh_benchmark_accuracy_max`%. In the crowdsourced dataset, the top six methods, ranked by accuracy, all used humidity, while the bottom two relied on air temperature alone. The case was slightly different for the synoptic dataset where the two dew point temperature thresholds performed worse than the two static air temperature thresholds. Snow and rain biases had larger ranges than accuracy in both datasets. Snow bias varied by `r cs_benchmark_snow_bias_range`% and `r nh_benchmark_snow_bias_range`%, while rain bias varied by `r cs_benchmark_rain_bias_range`% and `r nh_benchmark_rain_bias_range`% in the crowdsourced and synoptic datasets, respectively. In general, the benchmarks performed better and with less variability when applied to the synoptic dataset, and methods with better accuracy values typically had lower rain and snow biases.
@@ -153,7 +176,7 @@ Table: Table 1. Performance metrics for the benchmark precipitation partitioning
 
 All of the benchmark methods performed worse at air temperatures near and slightly above the freezing point in terms of accuracy, with most of them reaching their minimum accuracy values between 1.5°C and 2.0°C in the crowdsourced dataset and between 0.5°C and 1.5°C in the synoptic dataset (Figure 3). The best performing benchmarks in terms of accuracy were T~w1.0~ and T~w0.5~ in the crowdsourced and synoptic datasets, respectively. For the former, T~w1.0~ hit a minimum accuracy of `r summary_bytemp %>% filter(scenario == "nomix_imbal" & source == "cs" & ppm == "thresh_twet_1") %>% slice_min(accuracy_pct) %>% pull(accuracy_pct) %>% round(digits = 1)`% at `r summary_bytemp %>% filter(scenario == "nomix_imbal" & source == "cs" & ppm == "thresh_twet_1") %>% slice_min(accuracy_pct) %>% pull(tair_bin) %>% round(digits = 1)`°C, while the latter reached a minimum accuracy of `r summary_bytemp %>% filter(scenario == "nomix_imbal" & source == "nh" & ppm == "thresh_twet_0.5") %>% slice_min(accuracy_pct) %>% pull(accuracy_pct) %>% round(digits = 1)`% at `r summary_bytemp %>% filter(scenario == "nomix_imbal" & source == "nh" & ppm == "thresh_twet_0.5") %>% slice_min(accuracy_pct) %>% pull(tair_bin) %>% round(digits = 1)`°C. In both datasets, most methods had slightly positive snow biases and markedly negative rain biases at air temperatures less than 1.0°C. This is consistent with their limited, or complete lack of, ability to predict rain at sub-freezing temperatures. Conversely, most methods, with the exception of the dew point temperature thresholds, had largely negative snow biases and slightly positive rain biases at air temperatures above 2°C. Notably, the crowdsourced dataset expressed larger positive rain biases at higher temperatures, indicating the benchmark methods failed to capture snowfall occurring during warm near-surface conditions.
 
-```{r benchmark_plot, echo=F, message=F, fig.cap = "", fig.height=4, fig.width=6}
+```{r}
 
 # Make PPM labels
 ppm_labels <- 
@@ -192,9 +215,11 @@ plot_data <- summary_bytemp %>%
     filter(!ppm %in% c("xg", "rf", "nn")) %>% 
     left_join(ppm_labels, by = "ppm") %>% 
     mutate(source2 = ifelse(source == "cs", "Crowdsourced", "Synoptic"))
+```
 
-# Make the plot
-benchmark_accuracy_bias_plot <-
+```{r benchmark_plot_h, echo=F, message=F, fig.cap = "", fig.height=4, fig.width=6}
+# Make the horizontal version of the plot
+benchmark_accuracy_bias_plot_horizontal <-
   plot_grid(
   ggplot(plot_data, aes(tair_bin, ppm_labs, fill = accuracy_pct)) + 
     geom_raster() + 
@@ -204,8 +229,6 @@ benchmark_accuracy_bias_plot <-
     scale_y_discrete("PPM", labels = rev(parse(text = unique(plot_data$ppm_labs))),
                      limits = rev) +
     labs(x = "Air temperature (°C)") +
-    #scale_fill_gradient(low="honeydew1", high="#009194", name = "Frequency (%)") +
-    #scale_fill_viridis_c(option = "inferno", direction = -1) +
     scale_fill_gradientn(colors = hcl.colors(3, "Heat2")) +
     guides(fill = guide_colorbar(title.position = "top", title = "Accuracy (%)",
                                  barwidth = 10)) +
@@ -221,6 +244,8 @@ benchmark_accuracy_bias_plot <-
     labs(x = "Air temperature (°C)")+
     guides(fill = guide_colorbar(title.position = "top", title = "Snow Bias (%)",
                                  barwidth = 10)) +
+    scale_y_discrete("PPM", labels = rev(parse(text = unique(plot_data$ppm_labs))),
+                     limits = rev) +
     theme(legend.position = "top", legend.justification = "center",
           legend.title.align = 0.5,
           axis.title.y = element_blank(),
@@ -235,6 +260,8 @@ benchmark_accuracy_bias_plot <-
     labs(x = "Air temperature (°C)") +
     guides(fill = guide_colorbar(title.position = "top", title = "Rain Bias (%)",
                                  barwidth = 10)) +
+    scale_y_discrete("PPM", labels = rev(parse(text = unique(plot_data$ppm_labs))),
+                     limits = rev) +
     theme(legend.position = "top", legend.justification = "center",
           legend.title.align = 0.5,
           axis.title.y = element_blank(),
@@ -242,11 +269,61 @@ benchmark_accuracy_bias_plot <-
   nrow = 1, rel_widths = c(1, 0.8, 0.8), labels = "auto"
 )
 
-benchmark_accuracy_bias_plot
-save_plot(filename = "figures/fig03_benchmark_accuracy_bias.png", 
-          plot = benchmark_accuracy_bias_plot, 
+benchmark_accuracy_bias_plot_horizontal
+save_plot(filename = "figures/fig01_benchmark_accuracy_bias_horiz.png", 
+          plot = benchmark_accuracy_bias_plot_horizontal, 
           base_height = 5, 
           base_width = 9)
+
+
+```
+
+```{r benchmark_plot_v, echo=F, message=F, fig.cap = "", fig.height=4, fig.width=6}
+# Make the vertical version of the plot
+benchmark_accuracy_bias_plot_vertical <-
+  plot_grid(
+    ggplot(plot_data, aes(tair_bin, ppm_labs, fill = accuracy_pct)) + 
+      geom_raster() + 
+      geom_vline(xintercept = 0, lty = "dashed") +
+      facet_wrap(~source2) + 
+      xlim(-8, 8) +
+      scale_y_discrete("PPM", labels = rev(parse(text = unique(plot_data$ppm_labs))),
+                       limits = rev) +
+      labs(x = "Air temperature (°C)") +
+      scale_fill_gradientn(colors = hcl.colors(3, "Heat2"), name = "Accuracy\n(%)") +
+      theme(axis.title.x = element_blank(),
+            axis.text.x = element_blank()),
+    ggplot(plot_data, aes(tair_bin, ppm_labs, fill = snow_bias_pct)) + 
+      geom_raster() + 
+      geom_vline(xintercept = 0, lty = "dashed") +
+      facet_wrap(~source2) + 
+      xlim(-8, 8) +
+      scale_fill_gradientn(limits = c(-100,100), oob = squish, na.value = "white", 
+                           colors = hcl.colors(3, "Blue-Red2", rev = T), name = "Snow Bias\n(%)")  +
+      labs(x = "Air temperature (°C)") +
+      scale_y_discrete("PPM", labels = rev(parse(text = unique(plot_data$ppm_labs))),
+                       limits = rev) +
+      theme(axis.title.x = element_blank(),
+            axis.text.x = element_blank()),
+    ggplot(plot_data, aes(tair_bin, ppm_labs, fill = rain_bias_pct)) + 
+      geom_raster() + 
+      geom_vline(xintercept = 0, lty = "dashed") +
+      facet_wrap(~source2) + 
+      xlim(-8, 8) +
+      scale_fill_gradientn(limits = c(-100,100), oob = squish, na.value = "white", 
+                           colors = hcl.colors(3, "Blue-Red2", rev = T), name = "Rain Bias\n(%)") +
+      labs(x = "Air temperature (°C)") +
+      scale_y_discrete("PPM", labels = rev(parse(text = unique(plot_data$ppm_labs))),
+                       limits = rev),
+    nrow = 3, labels = "auto", rel_heights = c(0.8, 0.8, 1)
+  )
+
+benchmark_accuracy_bias_plot_vertical
+save_plot(filename = "figures/fig01_benchmark_accuracy_bias_vert.png", 
+          plot = benchmark_accuracy_bias_plot_vertical, 
+          base_height = 6, 
+          base_width = 9)
+
 ```
 
 ```{r}
@@ -494,6 +571,60 @@ save_plot(filename = "figures/fig03_mixed_conf_matrix.png",
 
 ```
 
+
+## More complex ML methods
+
+
+```{r}
+
+# Bind alt predictions into one data frame
+alt_results <- 
+  bind_rows(
+    cs_predict_nn2$nomix_imbal$nn_preds %>% 
+      rename(phase_pred = pred_phase) %>%
+      mutate(ppm = "ANN-2"),
+    cs_predict_nn2$allphase_imbal$nn_preds  %>% 
+      rename(phase_pred = pred_phase) %>%
+      mutate(ppm = "ANN-2"),
+    cs_predict_stack$nomix_imbal$stack_preds %>% 
+      mutate(ppm = "Stack"),
+    cs_predict_stack$allphase_imbal$stack_preds %>% 
+      mutate(ppm = "Stack"),
+  ) %>% 
+  mutate(phase = tolower(phase),
+         phase_pred = tolower(phase_pred))
+
+# Summarize the output
+summary_all_alt <- alt_results %>% 
+  group_by(ppm, scenario, source) %>% 
+  summarize(n = n(),
+            accuracy_pct = sum(phase == phase_pred) / n() * 100,
+            snow_bias_pct = (sum(phase_pred == "snow" ) / sum(phase == "snow") - 1) * 100,
+            rain_bias_pct = (sum(phase_pred == "rain" ) / sum(phase == "rain") - 1) * 100,
+            mixed_bias_pct = (sum(phase_pred == "mix" ) / sum(phase == "mix") - 1) * 100,
+            snow_obs_pct = sum(phase == "snow") / n() * 100,
+            rain_obs_pct = sum(phase == "rain") / n() * 100,
+            mixed_obs_pct = sum(phase == "mix") / n() * 100,
+            snow_pred_pct = sum(phase_pred == "snow") / n() * 100,
+            rain_pred_pct = sum(phase_pred == "rain") / n() * 100,
+            mixed_pred_pct = sum(phase_pred == "mix") / n() * 100)
+
+# Make a table
+summary_all_alt %>% 
+  mutate(scenario2 = ifelse(str_detect(scenario, "imbal"), 
+                             "Imbalanced", "SMOTE"),
+         phases = ifelse(str_detect(scenario, "nomix"),
+                         "No Mixed", "All Phases"),
+         across(where(is.numeric), round, digits = 1)) %>% 
+  ungroup() %>% 
+  select(PPM = ppm, 
+         Phases = phases, 
+         `Accuracy (%)` = accuracy_pct, 
+         `Rain bias (%)` = rain_bias_pct,
+         `Snow bias (%)` = snow_bias_pct,
+         `Mixed bias (%)` = mixed_bias_pct) %>% 
+  knitr::kable()
+```
 
 ## Meteorology and snow frequency analysis
 

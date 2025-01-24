@@ -1,15 +1,94 @@
-Text and Analysis for in-progress Mountain Rain or Snow Manuscript
+Text and Analysis for Mountain Rain or Snow Manuscript
 ================
 Keith Jennings
 Sys.Date()
 
-# Info
+# Welcome!
+
+This README file contains the plotting and analysis code for a
+manuscript submitted to *Nature Communications*:
+
+> Jennings, K.S., Collins, M., Hatchett, B.J., Heggli, A., Hur, N.,
+> Tonino, S., Nolin, A.W., Yu, G., Zhang, W., and Arienzo, M.M. (*In
+> Review*). Machine Learning Shows a Limit to Rain-Snow Partitioning
+> Accuracy when Using Near-Surface Meteorology. *Nature Communications*.
 
 The directory, for which this document serves as the README, includes
 all of the R scripts for tuning, processing, and analyzing rain-snow
-partitioning models.
+partitioning models. The files and sub-directories are as follows
+(listed in order of operations):
 
-<DETAIL THE FILES>
+1)  Data preparation:
+
+- `data_prep_for_training.R`: The code that divides the crowdsourced and
+  synoptic datasets into a 75-25 training-testing split, stratified by
+  precipitation phase. We validate all benchmark methods and machine
+  learning (ML) models only on the testing data.
+
+*Note: the data for this analysis are freely available online at
+<https://doi.org/10.17632/x84hy7yky4.1> and
+<https://doi.org/10.1038/s41467-018-03629-7>*
+
+2)  Hyperparameter tuning of ML models
+
+- `nn_tune_imbal.R`: Tune the hyperparameters of the artificial neural
+  network (ANN) model
+- `rf`\_tune_imbal.R\`: Tune the hyperparameters of the random forest
+  model
+- `xg_tune_imbal.R`: Tune the hyperparameters of the XGBoost model
+
+3)  Precipitation phase prediction
+
+- `benchmark_predict.R`: Predict rain, snow, and mixed precipitation
+  using the benchmark methods
+- `nn_predict_imbal.R`: Predict rain, snow, and mixed precipitation
+  using the ANN model
+- `rf`\_predict_imbal.R\`: Predict rain, snow, and mixed precipitation
+  using the random forest model
+- `xg_predict_imbal.R`: Predict rain, snow, and mixed precipitation
+  using the XGBoost model
+- `/alternative_methods`: Deploy and test an ANN with two hidden layers
+  and a stacked model ensemble
+
+4)  Data combination and synthesis
+
+- `data_prep_for_analysis.R`: Combine and synthesize all benchmark
+  method, ML model, and meteorological data
+- `predict_analysis.R`: Combine and synthesize all the precipitation
+  phase predictions
+
+5)  Analysis
+
+- `README.Rmd`: This file
+- `/figures`: Subdirectory containing figures exported from `README`
+- `SUPPLEMENT`: supplemental information for manuscript
+- `deleted_material.Rmd` and `/original_scripts`: Deleted methods and
+  analyses that may need revisiting
+- `data_prep_for_web.R`: Final processing and export of crowdsourced
+  data to post online
+
+Before getting started with the code, here is what you will need to do:
+
+- Install an up-to-date version of R
+  - We wrote and ran this code using R version 4.4.2 on a Mac (Sequoia
+    OS 15.2)
+- Import all necessary packages
+  - These are given in the top rows of all the R scripts described above
+  - An IDE like an RStudio will assist in package management
+
+Total installation time for R and related packages should be less than
+30 minutes.
+
+To run the code, you will need the data linked above, all R packages
+installed, and you will need to update the data directory path in the R
+scripts if/where necessary. You can run the scripts in the order
+described previously. Most scripts will run relatively quickly (\< 1 h),
+but the hyperparameter tuning scripts may each take 8 h or more,
+depending on your hardware.
+
+Expected output from the code includes the processed files (e.g., model
+results, model definitions, figures, tables) described and created in
+this README.
 
 # The necessary stuff
 
@@ -21,37 +100,6 @@ library(tidyverse)
 library(tidymodels)
 library(cowplot); theme_set(theme_cowplot())
 ```
-
-Quantify the number of obs and date range for the crowdsourced data.
-
-``` r
-cs_df <- read.csv("../../../../data/mros_QAQCflags_2024_01_24.csv")
-cs_df <- cs_df %>% 
-  filter(dupe_flag == "Pass",
-         phase_flag == "Pass",
-         temp_air_flag == "Pass",
-         rh_flag == "Pass",
-         nstation_temp_air_flag == "Pass",
-         nstation_temp_dew_flag == "Pass",
-  )
-
-# Perform alternative dupe check to catch any that snuck through
-cs_df  <- cs_df %>% 
-  group_by(latitude, longitude, datetime_utc) %>% 
-  mutate(n_obs = n()) %>% 
-  filter(n_obs == 1)
-
-# Format date and compute date range
-cs_df$datetime <- ymd_hm(cs_df$datetime_utc)
-```
-
-    ## Warning: 398 failed to parse.
-
-``` r
-range(cs_df$datetime, na.rm = T)
-```
-
-    ## [1] "2020-01-08 08:05:00 UTC" "2023-07-24 21:06:00 UTC"
 
 Import the datasets we need.
 
@@ -77,6 +125,11 @@ ml_for_vip <- readRDS(paste0(data_pre, "ml_models_for_vip.RDS"))
 
 # Load the met data for analysis
 met <- readRDS(paste0(data_pre, "cs_nh_met_data.RDS"))
+
+# Load the two-hidden-layer ANN and stacked ensemble data
+cs_tune_nn2 <- readRDS(paste0(data_pre, "nn_tune_imbal_multi_CS.RDS"))
+cs_predict_nn2 <- readRDS(paste0(data_pre, "nn_predict_imbal_multi_CS.RDS"))
+cs_predict_stack <- readRDS(paste0(data_pre, "stacks_predict_CS.RDS"))
 ```
 
 # Results
@@ -225,6 +278,46 @@ crowdsourced dataset expressed larger positive rain biases at higher
 temperatures, indicating the benchmark methods failed to capture
 snowfall occurring during warm near-surface conditions.
 
+``` r
+# Make PPM labels
+ppm_labels <- 
+    data.frame(
+        ppm = c(
+            "binlog",
+            "nn",
+            "rf",
+            "thresh_tair_1",
+            "thresh_tair_1.5",
+            "thresh_tdew_0",
+            "thresh_tdew_0.5",
+            "thresh_twet_0",
+            "thresh_twet_0.5",
+            "thresh_twet_1",
+            "xg"
+        ),
+        ppm_labs = c(
+            "Bin[log]",
+            "ANN",
+            "RF",
+            "T[a1.0]",
+            "T[a1.5]",
+            "T[d0.0]",
+            "T[d0.5]",
+            "T[w0.0]",
+            "T[w0.5]",
+            "T[w1.0]",
+            "XG"
+        )
+    )
+
+# Filter data to plot and join labels
+plot_data <- summary_bytemp %>% 
+    filter(scenario == "nomix_imbal") %>% 
+    filter(!ppm %in% c("xg", "rf", "nn")) %>% 
+    left_join(ppm_labels, by = "ppm") %>% 
+    mutate(source2 = ifelse(source == "cs", "Crowdsourced", "Synoptic"))
+```
+
     ## Warning: The `legend.title.align` argument of `theme()` is deprecated as of ggplot2
     ## 3.5.0.
     ## ℹ Please use theme(legend.title = element_text(hjust)) instead.
@@ -239,7 +332,16 @@ snowfall occurring during warm near-surface conditions.
     ## Removed 608 rows containing missing values or values outside the scale range
     ## (`geom_raster()`).
 
-![](README_files/figure-gfm/benchmark_plot-1.png)<!-- -->
+![](README_files/figure-gfm/benchmark_plot_h-1.png)<!-- -->
+
+    ## Warning: Removed 608 rows containing missing values or values outside the scale range
+    ## (`geom_raster()`).
+    ## Removed 608 rows containing missing values or values outside the scale range
+    ## (`geom_raster()`).
+    ## Removed 608 rows containing missing values or values outside the scale range
+    ## (`geom_raster()`).
+
+![](README_files/figure-gfm/benchmark_plot_v-1.png)<!-- -->
 
 ``` r
 # Code for minimum accuracy
@@ -695,6 +797,70 @@ save_plot(filename = "figures/fig03_mixed_conf_matrix.png",
           base_width = 9)
 ```
 
+## More complex ML methods
+
+``` r
+# Bind alt predictions into one data frame
+alt_results <- 
+  bind_rows(
+    cs_predict_nn2$nomix_imbal$nn_preds %>% 
+      rename(phase_pred = pred_phase) %>%
+      mutate(ppm = "ANN-2"),
+    cs_predict_nn2$allphase_imbal$nn_preds  %>% 
+      rename(phase_pred = pred_phase) %>%
+      mutate(ppm = "ANN-2"),
+    cs_predict_stack$nomix_imbal$stack_preds %>% 
+      mutate(ppm = "Stack"),
+    cs_predict_stack$allphase_imbal$stack_preds %>% 
+      mutate(ppm = "Stack"),
+  ) %>% 
+  mutate(phase = tolower(phase),
+         phase_pred = tolower(phase_pred))
+
+# Summarize the output
+summary_all_alt <- alt_results %>% 
+  group_by(ppm, scenario, source) %>% 
+  summarize(n = n(),
+            accuracy_pct = sum(phase == phase_pred) / n() * 100,
+            snow_bias_pct = (sum(phase_pred == "snow" ) / sum(phase == "snow") - 1) * 100,
+            rain_bias_pct = (sum(phase_pred == "rain" ) / sum(phase == "rain") - 1) * 100,
+            mixed_bias_pct = (sum(phase_pred == "mix" ) / sum(phase == "mix") - 1) * 100,
+            snow_obs_pct = sum(phase == "snow") / n() * 100,
+            rain_obs_pct = sum(phase == "rain") / n() * 100,
+            mixed_obs_pct = sum(phase == "mix") / n() * 100,
+            snow_pred_pct = sum(phase_pred == "snow") / n() * 100,
+            rain_pred_pct = sum(phase_pred == "rain") / n() * 100,
+            mixed_pred_pct = sum(phase_pred == "mix") / n() * 100)
+```
+
+    ## `summarise()` has grouped output by 'ppm', 'scenario'. You can override using
+    ## the `.groups` argument.
+
+``` r
+# Make a table
+summary_all_alt %>% 
+  mutate(scenario2 = ifelse(str_detect(scenario, "imbal"), 
+                             "Imbalanced", "SMOTE"),
+         phases = ifelse(str_detect(scenario, "nomix"),
+                         "No Mixed", "All Phases"),
+         across(where(is.numeric), round, digits = 1)) %>% 
+  ungroup() %>% 
+  select(PPM = ppm, 
+         Phases = phases, 
+         `Accuracy (%)` = accuracy_pct, 
+         `Rain bias (%)` = rain_bias_pct,
+         `Snow bias (%)` = snow_bias_pct,
+         `Mixed bias (%)` = mixed_bias_pct) %>% 
+  knitr::kable()
+```
+
+| PPM   | Phases     | Accuracy (%) | Rain bias (%) | Snow bias (%) | Mixed bias (%) |
+|:------|:-----------|-------------:|--------------:|--------------:|---------------:|
+| ANN-2 | All Phases |         79.3 |           6.2 |          16.6 |         -100.0 |
+| ANN-2 | No Mixed   |         88.8 |         -14.0 |           6.2 |            NaN |
+| Stack | All Phases |         79.3 |          10.6 |          14.6 |          -99.6 |
+| Stack | No Mixed   |         88.9 |          -9.4 |           4.2 |            NaN |
+
 ## Meteorology and snow frequency analysis
 
 ``` r
@@ -758,7 +924,7 @@ snowfall_freq_plot <-
 snowfall_freq_plot
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->
 
 ``` r
 save_plot(filename = "figures/fig04_snowfall_freq.png", 
@@ -921,7 +1087,7 @@ density_overlap_plot<-
 density_overlap_plot
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-15-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-16-1.png)<!-- -->
 
 ``` r
 save_plot(filename = "figures/fig07_density_overlap.png", 
@@ -1023,7 +1189,7 @@ overlap_accuracy_relationship_plot <-
 overlap_accuracy_relationship_plot
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-16-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-17-1.png)<!-- -->
 
 ``` r
 save_plot(filename = "figures/fig08_overlap_accuracy_relationship.png", 
@@ -1061,7 +1227,7 @@ where accuracy decreases as overlap increases. Using ordinary least
 squares regression, we compute an r<sup>2</sup> of 0.79 for this
 relationship in the crowdsourced dataset and 0.73 in the synoptic. That
 means that the air temperature distribution overlap between rain and
-snow explains at least 73.2228013 % of the variance in precipitation
+snow explains at least 73.2054413 % of the variance in precipitation
 phase partitioning accuracy.
 
 This relationship (Figure 6) provides information on the limits of using
@@ -1163,11 +1329,31 @@ vip_plot <-
     nrow = 1, rel_widths = c(0.1, 1, 1), labels = c("", "c", "d")
   ),
   nrow = 3, rel_heights = c(0.2, 1, 1))
+```
 
+    ## [14:23:36] WARNING: src/learner.cc:553: 
+    ##   If you are loading a serialized model (like pickle in Python, RDS in R) generated by
+    ##   older XGBoost, please export the model by calling `Booster.save_model` from that version
+    ##   first, then load it back in current version. See:
+    ## 
+    ##     https://xgboost.readthedocs.io/en/latest/tutorials/saving_model.html
+    ## 
+    ##   for more details about differences between saving model and serializing.
+    ## 
+    ## [14:23:36] WARNING: src/learner.cc:553: 
+    ##   If you are loading a serialized model (like pickle in Python, RDS in R) generated by
+    ##   older XGBoost, please export the model by calling `Booster.save_model` from that version
+    ##   first, then load it back in current version. See:
+    ## 
+    ##     https://xgboost.readthedocs.io/en/latest/tutorials/saving_model.html
+    ## 
+    ##   for more details about differences between saving model and serializing.
+
+``` r
 vip_plot
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-18-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-19-1.png)<!-- -->
 
 ``` r
 save_plot(filename = "figures/fig09_vip.png", 

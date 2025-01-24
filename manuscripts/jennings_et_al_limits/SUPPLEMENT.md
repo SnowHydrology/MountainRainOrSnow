@@ -27,7 +27,6 @@ library(cowplot); theme_set(theme_cowplot())
 # Specific to my computer, change before sharing
 data_pre <- "../../../../data/"
 
-
 # Load the tuning data
 # These are local files (update document if moved)
 cs_tune_rf <- readRDS(paste0(data_pre, "rf_tune_imbal_CS.RDS"))
@@ -36,14 +35,76 @@ cs_tune_xg <- readRDS(paste0(data_pre, "xg_tune_imbal_CS.RDS"))
 nh_tune_xg <- readRDS(paste0(data_pre, "xg_tune_imbal_NH.RDS"))
 cs_tune_nn <- readRDS(paste0(data_pre, "nn_tune_imbal_CS.RDS"))
 nh_tune_nn <- readRDS(paste0(data_pre, "nn_tune_imbal_NH.RDS"))
+cs_tune_nn2 <- readRDS(paste0(data_pre, "nn_tune_imbal_multi_CS.RDS"))
 
 # Load the training data
 cs_nomix_train <- readRDS(paste0(data_pre, "cs_nomix_df_train.RDS"))
 cs_allphase_train <- readRDS(paste0(data_pre, "cs_allphase_df_train.RDS"))
 nh_nomix_train <- readRDS(paste0(data_pre, "nh_nomix_df_train.RDS"))
+
+# Load the predictions for making a supplement plot of ML accuracy/bias
+summary_bytemp <- readRDS(paste0(data_pre, "performance_summary_bytemp.RDS")) %>% 
+    mutate(source_lab = ifelse(source == "cs", "Crowdsourced", "Synoptic"))
 ```
 
 # Supplemental Information
+
+## Machine learning results
+
+Supplementary figure 1 complements figure 1 in the main manuscript. It
+is a raster plot showing the accuracy and bias of the ML methods
+relative to the crowdsourced and synoptic reports of rain and snow.
+
+First make the plot labels and subset the data.
+
+``` r
+# Make PPM labels
+ppm_labels <- 
+    data.frame(
+        ppm = c(
+            "binlog",
+            "nn",
+            "rf",
+            "thresh_tair_1",
+            "thresh_tair_1.5",
+            "thresh_tdew_0",
+            "thresh_tdew_0.5",
+            "thresh_twet_0",
+            "thresh_twet_0.5",
+            "thresh_twet_1",
+            "xg"
+        ),
+        ppm_labs = c(
+            "Bin[log]",
+            "ANN",
+            "RF",
+            "T[a1.0]",
+            "T[a1.5]",
+            "T[d0.0]",
+            "T[d0.5]",
+            "T[w0.0]",
+            "T[w0.5]",
+            "T[w1.0]",
+            "XG"
+        )
+    )
+
+# Filter data to plot and join labels
+plot_data <- summary_bytemp %>% 
+    filter(scenario == "nomix_imbal") %>% 
+    filter(ppm %in% c("xg", "rf", "nn")) %>% 
+    left_join(ppm_labels, by = "ppm") %>% 
+    mutate(source2 = ifelse(source == "cs", "Crowdsourced", "Synoptic"))
+```
+
+    ## Warning: Removed 228 rows containing missing values or values outside the scale range
+    ## (`geom_raster()`).
+    ## Removed 228 rows containing missing values or values outside the scale range
+    ## (`geom_raster()`).
+    ## Removed 228 rows containing missing values or values outside the scale range
+    ## (`geom_raster()`).
+
+![](SUPPLEMENT_files/figure-gfm/ml_plot-1.png)<!-- -->
 
 ## Hyperparameter tuning
 
@@ -269,22 +330,11 @@ cs_tune_xg$nomix_imbal$xg_tune_results %>%
                           loss_reduction, sample_size),
               names_from = .metric,
               values_from = mean) %>% 
-  mutate_if(is.numeric, funs(as.character(signif(., 3)))) %>% 
+  mutate_if(is.numeric, list(~ as.character(signif(., 3)))) %>% 
   knitr::kable(digits = 3, 
                col.names = c("mtry", "trees","min_n", "tree depth", "learn rate",
                              "loss reduction", "sample size", "Accuracy", "AUC"))
 ```
-
-    ## Warning: `funs()` was deprecated in dplyr 0.8.0.
-    ## ℹ Please use a list of either functions or lambdas:
-    ## 
-    ## # Simple named list: list(mean = mean, median = median)
-    ## 
-    ## # Auto named with `tibble::lst()`: tibble::lst(mean, median)
-    ## 
-    ## # Using lambdas list(~ mean(., trim = .2), ~ median(., na.rm = TRUE))
-    ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
-    ## generated.
 
 | mtry | trees | min_n | tree depth | learn rate | loss reduction | sample size | Accuracy | AUC   |
 |:-----|:------|:------|:-----------|:-----------|:---------------|:------------|:---------|:------|
@@ -331,22 +381,11 @@ cs_tune_xg$allphase_imbal$xg_tune_results %>%
                           loss_reduction, sample_size),
               names_from = .metric,
               values_from = mean) %>% 
-  mutate_if(is.numeric, funs(as.character(signif(., 3)))) %>% 
+  mutate_if(is.numeric, list(~ as.character(signif(., 3)))) %>% 
   knitr::kable(digits = 3, 
                col.names = c("mtry", "trees","min_n", "tree depth", "learn rate",
                              "loss reduction", "sample size", "Accuracy", "AUC"))
 ```
-
-    ## Warning: `funs()` was deprecated in dplyr 0.8.0.
-    ## ℹ Please use a list of either functions or lambdas:
-    ## 
-    ## # Simple named list: list(mean = mean, median = median)
-    ## 
-    ## # Auto named with `tibble::lst()`: tibble::lst(mean, median)
-    ## 
-    ## # Using lambdas list(~ mean(., trim = .2), ~ median(., na.rm = TRUE))
-    ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
-    ## generated.
 
 | mtry | trees | min_n | tree depth | learn rate | loss reduction | sample size | Accuracy | AUC   |
 |:-----|:------|:------|:-----------|:-----------|:---------------|:------------|:---------|:------|
@@ -393,22 +432,11 @@ nh_tune_xg$nomix_imbal$xg_tune_results %>%
                           loss_reduction, sample_size),
               names_from = .metric,
               values_from = mean) %>% 
-  mutate_if(is.numeric, funs(as.character(signif(., 3)))) %>% 
+  mutate_if(is.numeric, list(~ as.character(signif(., 3)))) %>% 
   knitr::kable(digits = 3, 
                col.names = c("mtry", "trees","min_n", "tree depth", "learn rate",
                              "loss reduction", "sample size", "Accuracy", "AUC"))
 ```
-
-    ## Warning: `funs()` was deprecated in dplyr 0.8.0.
-    ## ℹ Please use a list of either functions or lambdas:
-    ## 
-    ## # Simple named list: list(mean = mean, median = median)
-    ## 
-    ## # Auto named with `tibble::lst()`: tibble::lst(mean, median)
-    ## 
-    ## # Using lambdas list(~ mean(., trim = .2), ~ median(., na.rm = TRUE))
-    ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
-    ## generated.
 
 | mtry | trees | min_n | tree depth | learn rate | loss reduction | sample size | Accuracy | AUC   |
 |:-----|:------|:------|:-----------|:-----------|:---------------|:------------|:---------|:------|
@@ -461,20 +489,9 @@ xg_best_hyperparms <- bind_rows(
                      "Synoptic with rain and snow")) %>% 
   select(dataset, mtry:sample_size)
 xg_best_hyperparms %>% 
-  mutate_if(is.numeric, funs(as.character(signif(., 3)))) %>% 
+  mutate_if(is.numeric, list(~ as.character(signif(., 3)))) %>% 
   knitr::kable()
 ```
-
-    ## Warning: `funs()` was deprecated in dplyr 0.8.0.
-    ## ℹ Please use a list of either functions or lambdas:
-    ## 
-    ## # Simple named list: list(mean = mean, median = median)
-    ## 
-    ## # Auto named with `tibble::lst()`: tibble::lst(mean, median)
-    ## 
-    ## # Using lambdas list(~ mean(., trim = .2), ~ median(., na.rm = TRUE))
-    ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
-    ## generated.
 
 | dataset | mtry | trees | min_n | tree_depth | learn_rate | loss_reduction | sample_size |
 |:---|:---|:---|:---|:---|:---|:---|:---|
@@ -496,7 +513,8 @@ cs_tune_xg$nomix_imbal$xg_tune_results %>%
   labs(x = NULL, y = "AUC")
 ```
 
-![](SUPPLEMENT_files/figure-gfm/unnamed-chunk-12-1.png)<!-- --> \### ANN
+![](SUPPLEMENT_files/figure-gfm/unnamed-chunk-13-1.png)<!-- --> \### ANN
+
 The specific ANN we deployed is a multilayer perceptron, a feed-forward
 neural network. We used one hidden layer, Rectified Linear Unit (ReLU)
 activation, and the Limited-memory Broyden-Fletcher-Goldfarb-Shanno
@@ -522,21 +540,8 @@ nn_hyperparams <- bind_rows(
   summarize(min = min(value),
             avg = mean(value),
             max = max(value)) %>% 
-  mutate_if(is.numeric, funs(as.character(signif(., 3)))) 
-```
+  mutate_if(is.numeric, list(~ as.character(signif(., 3)))) 
 
-    ## Warning: `funs()` was deprecated in dplyr 0.8.0.
-    ## ℹ Please use a list of either functions or lambdas:
-    ## 
-    ## # Simple named list: list(mean = mean, median = median)
-    ## 
-    ## # Auto named with `tibble::lst()`: tibble::lst(mean, median)
-    ## 
-    ## # Using lambdas list(~ mean(., trim = .2), ~ median(., na.rm = TRUE))
-    ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
-    ## generated.
-
-``` r
 # make a table
 nn_hyperparams %>% 
   knitr::kable(digits = 2)
@@ -549,26 +554,26 @@ nn_hyperparams %>%
 | learn_rate   | 1.15e-10 | 0.0049 | 0.0657 |
 | penalty      | 2.04e-10 | 0.039  | 0.559  |
 
-Like XGBoost, ANN peformance was more sensitive to the choice of
+Like XGBoost, ANN performance was more sensitive to the choice of
 hyperparameter values than random forest. For the crowdsourced dataset
 with just rain and snow, mean accuracy ranged from 0.375 to 0.898 and
-mean AUC ranged from 0.247 to 0.953 (Supplementary Table 7). For the
+mean AUC ranged from 0.247 to 0.953 (Supplementary Table 12). For the
 crowdsourced data with mixed precipitation, mean accuracy ranged from
 0.249 to 0.79 and mean AUC ranged from 0.446 to 0.821 (Supplementary
-Table 8). For the synoptic dataset, mean accuracy ranged from 0.457 to
-0.927 and mean AUC ranged from 0.439 to 0.974 (Supplementary Table 9).
+Table 13). For the synoptic dataset, mean accuracy ranged from 0.457 to
+0.927 and mean AUC ranged from 0.439 to 0.974 (Supplementary Table 14).
 
-Again similar to XGBoost, much of the variation in the ANN output
+Again, similar to XGBoost, much of the variation in the ANN output
 resulted from the poor performance of the lowest learn rate values. If
 we exclude values of this parameter that are less than 0.001, then the
-accuracy and AUC ranges become markedly smaller. For the crowdsourced
-dataset with just rain and snow, mean accuracy ranged from 0.771 to
-0.898 and mean AUC ranged from 0.712 to 0.953 when excluding the lowest
-learn rate values. It was a similar story for the crowdsourced data with
-mixed precipitation, where mean accuracy with these data points removed
-ranged from 0.643 to 0.79 and mean AUC ranged from 0.652 to 0.821. It
-was more of the same for the synoptic dataset with mean accuracy ranging
-from 0.749 to 0.922 and mean AUC ranging from 0.743 to 0.973.
+accuracy and AUC ranges become smaller. For the crowdsourced dataset
+with just rain and snow, mean accuracy ranged from 0.771 to 0.898 and
+mean AUC ranged from 0.712 to 0.953 when excluding the lowest learn rate
+values. It was a similar story for the crowdsourced data with mixed
+precipitation, where mean accuracy with these data points removed ranged
+from 0.643 to 0.79 and mean AUC ranged from 0.652 to 0.821. It was more
+of the same for the synoptic dataset with mean accuracy ranging from
+0.749 to 0.922 and mean AUC ranging from 0.743 to 0.973.
 
 Supplementary Table 12. Mean accuracy and AUC values for the ANN
 hyperparameter tuning exercise for the crowdsourced dataset with rain
@@ -581,22 +586,11 @@ cs_tune_nn$nomix_imbal$nn_tune_results %>%
   pivot_wider(id_cols = c(epochs, hidden_units, learn_rate, penalty),
               names_from = .metric,
               values_from = mean) %>% 
-  mutate_if(is.numeric, funs(as.character(signif(., 3)))) %>% 
+  mutate_if(is.numeric, list(~ as.character(signif(., 3)))) %>% 
   knitr::kable(digits = 3, 
                col.names = c("epochs", "hidden units", "learn rate", "penalty",
                              "Accuracy", "AUC"))
 ```
-
-    ## Warning: `funs()` was deprecated in dplyr 0.8.0.
-    ## ℹ Please use a list of either functions or lambdas:
-    ## 
-    ## # Simple named list: list(mean = mean, median = median)
-    ## 
-    ## # Auto named with `tibble::lst()`: tibble::lst(mean, median)
-    ## 
-    ## # Using lambdas list(~ mean(., trim = .2), ~ median(., na.rm = TRUE))
-    ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
-    ## generated.
 
 | epochs | hidden units | learn rate | penalty  | Accuracy | AUC   |
 |:-------|:-------------|:-----------|:---------|:---------|:------|
@@ -642,22 +636,11 @@ cs_tune_nn$allphase_imbal$nn_tune_results %>%
   pivot_wider(id_cols = c(epochs, hidden_units, learn_rate, penalty),
               names_from = .metric,
               values_from = mean) %>% 
-  mutate_if(is.numeric, funs(as.character(signif(., 3)))) %>% 
+  mutate_if(is.numeric, list(~ as.character(signif(., 3)))) %>% 
   knitr::kable(digits = 3, 
                col.names = c("epochs", "hidden units", "learn rate", "penalty",
                              "Accuracy", "AUC"))
 ```
-
-    ## Warning: `funs()` was deprecated in dplyr 0.8.0.
-    ## ℹ Please use a list of either functions or lambdas:
-    ## 
-    ## # Simple named list: list(mean = mean, median = median)
-    ## 
-    ## # Auto named with `tibble::lst()`: tibble::lst(mean, median)
-    ## 
-    ## # Using lambdas list(~ mean(., trim = .2), ~ median(., na.rm = TRUE))
-    ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
-    ## generated.
 
 | epochs | hidden units | learn rate | penalty  | Accuracy | AUC   |
 |:-------|:-------------|:-----------|:---------|:---------|:------|
@@ -703,22 +686,11 @@ nh_tune_nn$nomix_imbal$nn_tune_results %>%
   pivot_wider(id_cols = c(epochs, hidden_units, learn_rate, penalty),
               names_from = .metric,
               values_from = mean) %>% 
-  mutate_if(is.numeric, funs(as.character(signif(., 3)))) %>% 
+  mutate_if(is.numeric, list(~ as.character(signif(., 3)))) %>% 
   knitr::kable(digits = 3, 
                col.names = c("epochs", "hidden units", "learn rate", "penalty",
                              "Accuracy", "AUC"))
 ```
-
-    ## Warning: `funs()` was deprecated in dplyr 0.8.0.
-    ## ℹ Please use a list of either functions or lambdas:
-    ## 
-    ## # Simple named list: list(mean = mean, median = median)
-    ## 
-    ## # Auto named with `tibble::lst()`: tibble::lst(mean, median)
-    ## 
-    ## # Using lambdas list(~ mean(., trim = .2), ~ median(., na.rm = TRUE))
-    ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
-    ## generated.
 
 | epochs | hidden units | learn rate | penalty  | Accuracy | AUC   |
 |:-------|:-------------|:-----------|:---------|:---------|:------|
@@ -770,23 +742,138 @@ nn_best_hyperparms <- bind_rows(
                      "Synoptic with rain and snow")) %>% 
   select(dataset, hidden_units:learn_rate)
 nn_best_hyperparms %>% 
-  mutate_if(is.numeric, funs(as.character(signif(., 3)))) %>% 
+  mutate_if(is.numeric, list(~ as.character(signif(., 3)))) %>% 
   knitr::kable()
 ```
-
-    ## Warning: `funs()` was deprecated in dplyr 0.8.0.
-    ## ℹ Please use a list of either functions or lambdas:
-    ## 
-    ## # Simple named list: list(mean = mean, median = median)
-    ## 
-    ## # Auto named with `tibble::lst()`: tibble::lst(mean, median)
-    ## 
-    ## # Using lambdas list(~ mean(., trim = .2), ~ median(., na.rm = TRUE))
-    ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
-    ## generated.
 
 | dataset | hidden_units | penalty | epochs | learn_rate |
 |:---|:---|:---|:---|:---|
 | Crowdsourced with rain and snow | 9 | 1.49e-06 | 635 | 0.00422 |
 | Crowdsourced with rain, snow, and mixed | 9 | 1.49e-06 | 635 | 0.00422 |
 | Synoptic with rain and snow | 9 | 0.000294 | 743 | 0.000503 |
+
+### ANN with two hidden layers
+
+Supplementary Table 16. Mean accuracy and AUC values for the ANN-2
+hyperparameter tuning exercise for the crowdsourced dataset with rain
+and snow only.
+
+``` r
+# Create a table with summarized values
+cs_tune_nn2$nomix_imbal$nn_tune_results %>% 
+  select(hidden_units:.metric, mean) %>% 
+  pivot_wider(id_cols = c(epochs, hidden_units, learn_rate, penalty),
+              names_from = .metric,
+              values_from = mean) %>% 
+  mutate_if(is.numeric, list(~ as.character(signif(., 3)))) %>% 
+  knitr::kable(digits = 3, 
+               col.names = c("epochs", "hidden units", "learn rate", "penalty",
+                             "Accuracy", "AUC"))
+```
+
+| epochs | hidden units | learn rate | penalty  | Accuracy | AUC   |
+|:-------|:-------------|:-----------|:---------|:---------|:------|
+| 491    | 9, 9         | 7.24e-05   | 3.91e-09 | 0.784    | 0.869 |
+| 407    | 6, 6         | 4.47e-05   | 1.6e-05  | 0.715    | 0.682 |
+| 231    | 7, 7         | 2.47e-06   | 3.49e-07 | 0.479    | 0.524 |
+| 550    | 8, 8         | 0.00249    | 8.56e-06 | 0.877    | 0.951 |
+| 840    | 3, 3         | 1.23e-07   | 4.41e-10 | 0.462    | 0.556 |
+| 330    | 8, 8         | 0.0473     | 4.49e-06 | 0.893    | 0.951 |
+| 692    | 3, 3         | 3.7e-10    | 3.49e-08 | 0.46     | 0.554 |
+| 392    | 5, 5         | 3.06e-07   | 0.00473  | 0.381    | 0.392 |
+| 43     | 3, 3         | 9.13e-07   | 1.17e-08 | 0.46     | 0.554 |
+| 135    | 2, 2         | 3.63e-09   | 1.08e-10 | 0.503    | 0.515 |
+| 974    | 5, 5         | 0.0234     | 9.64e-07 | 0.895    | 0.947 |
+| 510    | 2, 2         | 0.000321   | 3.43e-05 | 0.737    | 0.677 |
+| 794    | 6, 6         | 0.000119   | 1.24e-09 | 0.793    | 0.76  |
+| 613    | 6, 6         | 4.67e-10   | 7.1e-09  | 0.481    | 0.483 |
+| 202    | 4, 4         | 4.48e-06   | 7.51e-08 | 0.534    | 0.63  |
+| 642    | 2, 2         | 0.000837   | 0.815    | 0.697    | 0.568 |
+| 57     | 5, 5         | 1.89e-09   | 6.09e-10 | 0.38     | 0.394 |
+| 248    | 7, 7         | 0.00918    | 0.000167 | 0.898    | 0.953 |
+| 580    | 8, 8         | 1.51e-09   | 1.58e-06 | 0.585    | 0.537 |
+| 708    | 10, 10       | 1.79e-05   | 0.0127   | 0.578    | 0.665 |
+| 916    | 9, 9         | 1.1e-05    | 0.00121  | 0.56     | 0.503 |
+| 351    | 9, 9         | 1.12e-08   | 2.11e-07 | 0.484    | 0.431 |
+| 743    | 9, 9         | 0.000503   | 0.000294 | 0.859    | 0.881 |
+| 889    | 1, 1         | 5.35e-07   | 0.0644   | 0.46     | 0.541 |
+| 80     | 8, 8         | 2.04e-08   | 0.00349  | 0.585    | 0.537 |
+| 948    | 3, 3         | 0.00368    | 0.109    | 0.876    | 0.906 |
+| 823    | 7, 7         | 1.51e-10   | 0.000758 | 0.436    | 0.518 |
+| 456    | 1, 1         | 8.21e-08   | 0.345    | 0.46     | 0.537 |
+| 280    | 4, 4         | 0.0522     | 0.0397   | 0.867    | 0.902 |
+| 147    | 5, 5         | 4.58e-08   | 9.55e-05 | 0.381    | 0.394 |
+
+Supplementary Table 17. Mean accuracy and AUC values for the ANN-2
+hyperparameter tuning exercise for the crowdsourced dataset with rain,
+snow, and mixed precipitation
+
+``` r
+# Create a table with summarized values
+cs_tune_nn2$allphase_imbal$nn_tune_results %>% 
+  select(hidden_units:.metric, mean) %>% 
+  pivot_wider(id_cols = c(epochs, hidden_units, learn_rate, penalty),
+              names_from = .metric,
+              values_from = mean) %>% 
+  mutate_if(is.numeric, list(~ as.character(signif(., 3)))) %>% 
+  knitr::kable(digits = 3, 
+               col.names = c("epochs", "hidden units", "learn rate", "penalty",
+                             "Accuracy", "AUC"))
+```
+
+| epochs | hidden units | learn rate | penalty  | Accuracy | AUC   |
+|:-------|:-------------|:-----------|:---------|:---------|:------|
+| 491    | 9, 9         | 7.24e-05   | 3.91e-09 | 0.595    | 0.621 |
+| 407    | 6, 6         | 4.47e-05   | 1.6e-05  | 0.635    | 0.577 |
+| 231    | 7, 7         | 2.47e-06   | 3.49e-07 | 0.287    | 0.541 |
+| 550    | 8, 8         | 0.00249    | 8.56e-06 | 0.79     | 0.822 |
+| 840    | 3, 3         | 1.23e-07   | 4.41e-10 | 0.437    | 0.474 |
+| 330    | 8, 8         | 0.0473     | 4.49e-06 | 0.77     | 0.794 |
+| 692    | 3, 3         | 3.7e-10    | 3.49e-08 | 0.436    | 0.473 |
+| 392    | 5, 5         | 3.06e-07   | 0.00473  | 0.376    | 0.564 |
+| 43     | 3, 3         | 9.13e-07   | 1.17e-08 | 0.436    | 0.473 |
+| 135    | 2, 2         | 3.63e-09   | 1.08e-10 | 0.38     | 0.524 |
+| 974    | 5, 5         | 0.0234     | 9.64e-07 | 0.788    | 0.814 |
+| 510    | 2, 2         | 0.000321   | 3.43e-05 | 0.68     | 0.633 |
+| 794    | 6, 6         | 0.000119   | 1.24e-09 | 0.666    | 0.696 |
+| 613    | 6, 6         | 4.67e-10   | 7.1e-09  | 0.448    | 0.489 |
+| 202    | 4, 4         | 4.48e-06   | 7.51e-08 | 0.423    | 0.539 |
+| 642    | 2, 2         | 0.000837   | 0.815    | 0.611    | 0.504 |
+| 57     | 5, 5         | 1.89e-09   | 6.09e-10 | 0.377    | 0.563 |
+| 248    | 7, 7         | 0.00918    | 0.000167 | 0.778    | 0.791 |
+| 580    | 8, 8         | 1.51e-09   | 1.58e-06 | 0.321    | 0.502 |
+| 708    | 10, 10       | 1.79e-05   | 0.0127   | 0.449    | 0.561 |
+| 916    | 9, 9         | 1.1e-05    | 0.00121  | 0.403    | 0.542 |
+| 351    | 9, 9         | 1.12e-08   | 2.11e-07 | 0.226    | 0.524 |
+| 743    | 9, 9         | 0.000503   | 0.000294 | 0.764    | 0.78  |
+| 889    | 1, 1         | 5.35e-07   | 0.0644   | 0.359    | 0.509 |
+| 80     | 8, 8         | 2.04e-08   | 0.00349  | 0.321    | 0.502 |
+| 948    | 3, 3         | 0.00368    | 0.109    | 0.774    | 0.804 |
+| 823    | 7, 7         | 1.51e-10   | 0.000758 | 0.281    | 0.544 |
+| 456    | 1, 1         | 8.21e-08   | 0.345    | 0.359    | 0.508 |
+| 280    | 4, 4         | 0.0522     | 0.0397   | 0.767    | 0.793 |
+| 147    | 5, 5         | 4.58e-08   | 9.55e-05 | 0.377    | 0.563 |
+
+We used the optimized hyperparameter values in Supplementary Table 18 to
+run the ANN-2 models.
+
+Supplementary Table 18. Optimized hyperparameters for the ANN-2 models.
+
+``` r
+# Create a table of the best parameters
+nn2_best_hyperparms <- bind_rows(
+  cs_tune_nn2$nomix_imbal$param_best,
+  cs_tune_nn2$allphase_imbal$param_best
+) %>% 
+  mutate(dataset = c("Crowdsourced with rain and snow",
+                     "Crowdsourced with rain, snow, and mixed")) %>% 
+  select(dataset, hidden_units:learn_rate)
+nn2_best_hyperparms %>% 
+  mutate_if(is.numeric, list(~ as.character(signif(., 3)))) %>% 
+  knitr::kable()
+```
+
+| dataset | hidden_units | penalty | epochs | learn_rate |
+|:---|:---|:---|:---|:---|
+| Crowdsourced with rain and snow | 7, 7 | 0.000167 | 248 | 0.00918 |
+| Crowdsourced with rain, snow, and mixed | 8, 8 | 8.56e-06 | 550 | 0.00249 |

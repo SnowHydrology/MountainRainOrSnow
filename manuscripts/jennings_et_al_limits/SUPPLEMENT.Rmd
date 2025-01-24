@@ -29,7 +29,6 @@ library(cowplot); theme_set(theme_cowplot())
 # Specific to my computer, change before sharing
 data_pre <- "../../../../data/"
 
-
 # Load the tuning data
 # These are local files (update document if moved)
 cs_tune_rf <- readRDS(paste0(data_pre, "rf_tune_imbal_CS.RDS"))
@@ -38,17 +37,114 @@ cs_tune_xg <- readRDS(paste0(data_pre, "xg_tune_imbal_CS.RDS"))
 nh_tune_xg <- readRDS(paste0(data_pre, "xg_tune_imbal_NH.RDS"))
 cs_tune_nn <- readRDS(paste0(data_pre, "nn_tune_imbal_CS.RDS"))
 nh_tune_nn <- readRDS(paste0(data_pre, "nn_tune_imbal_NH.RDS"))
+cs_tune_nn2 <- readRDS(paste0(data_pre, "nn_tune_imbal_multi_CS.RDS"))
 
 # Load the training data
 cs_nomix_train <- readRDS(paste0(data_pre, "cs_nomix_df_train.RDS"))
 cs_allphase_train <- readRDS(paste0(data_pre, "cs_allphase_df_train.RDS"))
 nh_nomix_train <- readRDS(paste0(data_pre, "nh_nomix_df_train.RDS"))
 
-
+# Load the predictions for making a supplement plot of ML accuracy/bias
+summary_bytemp <- readRDS(paste0(data_pre, "performance_summary_bytemp.RDS")) %>% 
+    mutate(source_lab = ifelse(source == "cs", "Crowdsourced", "Synoptic"))
 
 ```
 
 # Supplemental Information
+
+## Machine learning results
+
+Supplementary figure 1 complements figure 1 in the main manuscript. It is a raster plot showing the accuracy and bias of the ML methods relative to the crowdsourced and synoptic reports of rain and snow.
+
+First make the plot labels and subset the data.
+
+```{r}
+# Make PPM labels
+ppm_labels <- 
+    data.frame(
+        ppm = c(
+            "binlog",
+            "nn",
+            "rf",
+            "thresh_tair_1",
+            "thresh_tair_1.5",
+            "thresh_tdew_0",
+            "thresh_tdew_0.5",
+            "thresh_twet_0",
+            "thresh_twet_0.5",
+            "thresh_twet_1",
+            "xg"
+        ),
+        ppm_labs = c(
+            "Bin[log]",
+            "ANN",
+            "RF",
+            "T[a1.0]",
+            "T[a1.5]",
+            "T[d0.0]",
+            "T[d0.5]",
+            "T[w0.0]",
+            "T[w0.5]",
+            "T[w1.0]",
+            "XG"
+        )
+    )
+
+# Filter data to plot and join labels
+plot_data <- summary_bytemp %>% 
+    filter(scenario == "nomix_imbal") %>% 
+    filter(ppm %in% c("xg", "rf", "nn")) %>% 
+    left_join(ppm_labels, by = "ppm") %>% 
+    mutate(source2 = ifelse(source == "cs", "Crowdsourced", "Synoptic"))
+```
+
+```{r ml_plot, echo=F, message=F, fig.cap = "", fig.height=4, fig.width=6}
+# Make the vertical version of the plot
+ml_accuracy_bias_plot_vertical <-
+  plot_grid(
+    ggplot(plot_data, aes(tair_bin, ppm_labs, fill = accuracy_pct)) + 
+      geom_raster() + 
+      geom_vline(xintercept = 0, lty = "dashed") +
+      facet_wrap(~source2) + 
+      xlim(-8, 8) +
+      scale_y_discrete("PPM", labels = rev(parse(text = unique(plot_data$ppm_labs))),
+                       limits = rev) +
+      labs(x = "Air temperature (°C)") +
+      scale_fill_gradientn(colors = hcl.colors(3, "Heat2"), name = "Accuracy\n(%)") +
+      theme(axis.title.x = element_blank(),
+            axis.text.x = element_blank()),
+    ggplot(plot_data, aes(tair_bin, ppm_labs, fill = snow_bias_pct)) + 
+      geom_raster() + 
+      geom_vline(xintercept = 0, lty = "dashed") +
+      facet_wrap(~source2) + 
+      xlim(-8, 8) +
+      scale_fill_gradientn(limits = c(-100,100), oob = squish, na.value = "white", 
+                           colors = hcl.colors(3, "Blue-Red2", rev = T), name = "Snow Bias\n(%)")  +
+      labs(x = "Air temperature (°C)") +
+      scale_y_discrete("PPM", labels = rev(parse(text = unique(plot_data$ppm_labs))),
+                       limits = rev) +
+      theme(axis.title.x = element_blank(),
+            axis.text.x = element_blank()),
+    ggplot(plot_data, aes(tair_bin, ppm_labs, fill = rain_bias_pct)) + 
+      geom_raster() + 
+      geom_vline(xintercept = 0, lty = "dashed") +
+      facet_wrap(~source2) + 
+      xlim(-8, 8) +
+      scale_fill_gradientn(limits = c(-100,100), oob = squish, na.value = "white", 
+                           colors = hcl.colors(3, "Blue-Red2", rev = T), name = "Rain Bias\n(%)") +
+      labs(x = "Air temperature (°C)") +
+      scale_y_discrete("PPM", labels = rev(parse(text = unique(plot_data$ppm_labs))),
+                       limits = rev),
+    nrow = 3, labels = "auto", rel_heights = c(0.8, 0.8, 1)
+  )
+
+ml_accuracy_bias_plot_vertical
+save_plot(filename = "figures/figSUP01_ml_accuracy_bias_vert.png", 
+          plot = ml_accuracy_bias_plot_vertical, 
+          base_height = 6, 
+          base_width = 9)
+
+```
 
 ## Hyperparameter tuning
 
@@ -171,7 +267,7 @@ cs_tune_xg$nomix_imbal$xg_tune_results %>%
                           loss_reduction, sample_size),
               names_from = .metric,
               values_from = mean) %>% 
-  mutate_if(is.numeric, funs(as.character(signif(., 3)))) %>% 
+  mutate_if(is.numeric, list(~ as.character(signif(., 3)))) %>% 
   knitr::kable(digits = 3, 
                col.names = c("mtry", "trees","min_n", "tree depth", "learn rate",
                              "loss reduction", "sample size", "Accuracy", "AUC"))
@@ -188,7 +284,7 @@ cs_tune_xg$allphase_imbal$xg_tune_results %>%
                           loss_reduction, sample_size),
               names_from = .metric,
               values_from = mean) %>% 
-  mutate_if(is.numeric, funs(as.character(signif(., 3)))) %>% 
+  mutate_if(is.numeric, list(~ as.character(signif(., 3)))) %>% 
   knitr::kable(digits = 3, 
                col.names = c("mtry", "trees","min_n", "tree depth", "learn rate",
                              "loss reduction", "sample size", "Accuracy", "AUC"))
@@ -205,7 +301,7 @@ nh_tune_xg$nomix_imbal$xg_tune_results %>%
                           loss_reduction, sample_size),
               names_from = .metric,
               values_from = mean) %>% 
-  mutate_if(is.numeric, funs(as.character(signif(., 3)))) %>% 
+  mutate_if(is.numeric, list(~ as.character(signif(., 3)))) %>% 
   knitr::kable(digits = 3, 
                col.names = c("mtry", "trees","min_n", "tree depth", "learn rate",
                              "loss reduction", "sample size", "Accuracy", "AUC"))
@@ -228,7 +324,7 @@ xg_best_hyperparms <- bind_rows(
                      "Synoptic with rain and snow")) %>% 
   select(dataset, mtry:sample_size)
 xg_best_hyperparms %>% 
-  mutate_if(is.numeric, funs(as.character(signif(., 3)))) %>% 
+  mutate_if(is.numeric, list(~ as.character(signif(., 3)))) %>% 
   knitr::kable()
 
 ```
@@ -269,7 +365,7 @@ nn_hyperparams <- bind_rows(
   summarize(min = min(value),
             avg = mean(value),
             max = max(value)) %>% 
-  mutate_if(is.numeric, funs(as.character(signif(., 3)))) 
+  mutate_if(is.numeric, list(~ as.character(signif(., 3)))) 
 
 # make a table
 nn_hyperparams %>% 
@@ -290,7 +386,7 @@ cs_tune_nn$nomix_imbal$nn_tune_results %>%
   pivot_wider(id_cols = c(epochs, hidden_units, learn_rate, penalty),
               names_from = .metric,
               values_from = mean) %>% 
-  mutate_if(is.numeric, funs(as.character(signif(., 3)))) %>% 
+  mutate_if(is.numeric, list(~ as.character(signif(., 3)))) %>% 
   knitr::kable(digits = 3, 
                col.names = c("epochs", "hidden units", "learn rate", "penalty",
                              "Accuracy", "AUC"))
@@ -306,7 +402,7 @@ cs_tune_nn$allphase_imbal$nn_tune_results %>%
   pivot_wider(id_cols = c(epochs, hidden_units, learn_rate, penalty),
               names_from = .metric,
               values_from = mean) %>% 
-  mutate_if(is.numeric, funs(as.character(signif(., 3)))) %>% 
+  mutate_if(is.numeric, list(~ as.character(signif(., 3)))) %>% 
   knitr::kable(digits = 3, 
                col.names = c("epochs", "hidden units", "learn rate", "penalty",
                              "Accuracy", "AUC"))
@@ -322,7 +418,7 @@ nh_tune_nn$nomix_imbal$nn_tune_results %>%
   pivot_wider(id_cols = c(epochs, hidden_units, learn_rate, penalty),
               names_from = .metric,
               values_from = mean) %>% 
-  mutate_if(is.numeric, funs(as.character(signif(., 3)))) %>% 
+  mutate_if(is.numeric, list(~ as.character(signif(., 3)))) %>% 
   knitr::kable(digits = 3, 
                col.names = c("epochs", "hidden units", "learn rate", "penalty",
                              "Accuracy", "AUC"))
@@ -345,7 +441,61 @@ nn_best_hyperparms <- bind_rows(
                      "Synoptic with rain and snow")) %>% 
   select(dataset, hidden_units:learn_rate)
 nn_best_hyperparms %>% 
-  mutate_if(is.numeric, funs(as.character(signif(., 3)))) %>% 
+  mutate_if(is.numeric, list(~ as.character(signif(., 3)))) %>% 
   knitr::kable()
 
+```
+
+
+
+### ANN with two hidden layers
+
+Supplementary Table 16. Mean accuracy and AUC values for the ANN-2 hyperparameter tuning exercise for the crowdsourced dataset with rain and snow only.
+
+```{r}
+# Create a table with summarized values
+cs_tune_nn2$nomix_imbal$nn_tune_results %>% 
+  select(hidden_units:.metric, mean) %>% 
+  pivot_wider(id_cols = c(epochs, hidden_units, learn_rate, penalty),
+              names_from = .metric,
+              values_from = mean) %>% 
+  mutate_if(is.numeric, list(~ as.character(signif(., 3)))) %>% 
+  knitr::kable(digits = 3, 
+               col.names = c("epochs", "hidden units", "learn rate", "penalty",
+                             "Accuracy", "AUC"))
+
+```
+
+Supplementary Table 17. Mean accuracy and AUC values for the ANN-2 hyperparameter tuning exercise for the crowdsourced dataset with rain, snow, and mixed precipitation
+
+```{r}
+# Create a table with summarized values
+cs_tune_nn2$allphase_imbal$nn_tune_results %>% 
+  select(hidden_units:.metric, mean) %>% 
+  pivot_wider(id_cols = c(epochs, hidden_units, learn_rate, penalty),
+              names_from = .metric,
+              values_from = mean) %>% 
+  mutate_if(is.numeric, list(~ as.character(signif(., 3)))) %>% 
+  knitr::kable(digits = 3, 
+               col.names = c("epochs", "hidden units", "learn rate", "penalty",
+                             "Accuracy", "AUC"))
+
+```
+
+We used the optimized hyperparameter values in Supplementary Table 18 to run the ANN-2 models.
+
+Supplementary Table 18. Optimized hyperparameters for the ANN-2 models.
+
+```{r}
+# Create a table of the best parameters
+nn2_best_hyperparms <- bind_rows(
+  cs_tune_nn2$nomix_imbal$param_best,
+  cs_tune_nn2$allphase_imbal$param_best
+) %>% 
+  mutate(dataset = c("Crowdsourced with rain and snow",
+                     "Crowdsourced with rain, snow, and mixed")) %>% 
+  select(dataset, hidden_units:learn_rate)
+nn2_best_hyperparms %>% 
+  mutate_if(is.numeric, list(~ as.character(signif(., 3)))) %>% 
+  knitr::kable()
 ```

@@ -1,27 +1,20 @@
-# Script to test stacked models
+# Apply a stacked model ensemble to crowdsourced data
 
 # Load packages
 library(tidymodels)
 library(tidyverse)
 library(AppliedPredictiveModeling)
-#library(doParallel)
 library(brulee) # for MLP
 library(ranger) # for random forest
 library(xgboost) # for xgboost
 library(stacks) # for hybrid models
-#library(themis) # for imbalanced data
-Sys.setenv(KMP_DUPLICATE_LIB_OK=TRUE)
+Sys.setenv(KMP_DUPLICATE_LIB_OK=TRUE) # needed to prevent Brulee error in ANN
 
 # Set the data prefix
 data_pre <- "../../data/"
 
 # Set seed so that the analysis is reproducible
 set.seed(6547)
-
-# Set up parallelization info
-# cores <- parallel::detectCores(logical = F)
-# cl <- makePSOCKcluster(cores)
-# registerDoParallel(cl)
 
 ################################################################################
 # No mixed dataset
@@ -103,7 +96,6 @@ xg_res <- fit_resamples(xg_flow, df_folds,
 nn_res <- fit_resamples(nn_flow, df_folds,  
                         control = control_resamples(save_pred = TRUE, 
                                                     save_workflow = TRUE))
-                        #,parallel_over = "everything"))
                         
 ################################################################################
 # Make a hybrid model using the fit models
@@ -141,11 +133,8 @@ summary_nomix <- stack_preds %>%
             rain_pred_pct = sum(phase_pred == "rain") / n() * 100,
             mixed_pred_pct = sum(phase_pred == "mix") / n() * 100)
 
-save.image("~/Documents/projects/mountain_rain_or_snow/analysis/MountainRainOrSnow/stacks_test_nomixCS.RData")
-
-
 ################################################################################
-# No mixed dataset
+# Mixed dataset
 ################################################################################
 
 ################################################################################
@@ -263,5 +252,29 @@ summary_allphase <- stack_preds_allphase %>%
             mixed_pred_pct = sum(phase_pred == "mix") / n() * 100)
 
 
-save.image("~/Documents/projects/mountain_rain_or_snow/analysis/MountainRainOrSnow/stacks_test_allphaseCS.RData")
+################################################################################
+# Export the data
+################################################################################
+
+# Create a list for the data export
+export_list <- list()
+
+# Add the no mixed data
+export_list[["nomix_imbal"]] <- 
+  list(stack_preds = stack_preds %>% 
+         mutate(scenario = "nomix_imbal",
+                source = "cs"), 
+       stack_final_fit = stack_fit,
+       stack_final_model = model_stack)
+
+# Add the all phase data
+export_list[["allphase_imbal"]] <- 
+  list(stack_preds = stack_preds_allphase %>% 
+         mutate(scenario = "allphase_imbal",
+                source = "cs"), 
+       stack_final_fit = stack_fit_allphase,
+       stack_final_model = model_stack_allphase)
+
+# Export
+saveRDS(export_list, file = "../../data/stacks_predict_CS.RDS")
 

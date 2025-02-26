@@ -98,7 +98,11 @@ Import the packages we need.
 # Load R packages
 library(tidyverse)
 library(tidymodels)
-library(cowplot); theme_set(theme_cowplot())
+library(cowplot)
+
+# Set the cowplot theme and font size for publication plots
+theme_set(theme_cowplot(font_size = 12))
+labsize = 12
 ```
 
 Import the datasets we need.
@@ -130,6 +134,26 @@ met <- readRDS(paste0(data_pre, "cs_nh_met_data.RDS"))
 cs_tune_nn2 <- readRDS(paste0(data_pre, "nn_tune_imbal_multi_CS.RDS"))
 cs_predict_nn2 <- readRDS(paste0(data_pre, "nn_predict_imbal_multi_CS.RDS"))
 cs_predict_stack <- readRDS(paste0(data_pre, "stacks_predict_CS.RDS"))
+```
+
+Add configuration parameters for Nature Communications figures. Based on
+<https://www.nature.com/documents/NRJs-guide-to-preparing-final-artwork.pdf>
+
+``` r
+# mm to in. conversion factor
+mm2in = 25.4
+
+# Figure widths for 1 and 2 column figs
+natcomm_1column_width = 88 / mm2in
+natcomm_2column_width = 180 / mm2in
+
+# Figure heights for 1 and 2 column figs based on caption word count
+natcomm_1column_height_max_lt300wds = 130 / mm2in
+natcomm_1column_height_max_lt150wds = 180 / mm2in
+natcomm_1column_height_max_lt50wds  = 220 / mm2in
+natcomm_2column_height_max_lt300wds = 185 / mm2in
+natcomm_2column_height_max_lt150wds = 210 / mm2in
+natcomm_2column_height_max_lt50wds  = 225 / mm2in
 ```
 
 # Results
@@ -281,41 +305,41 @@ snowfall occurring during warm near-surface conditions.
 ``` r
 # Make PPM labels
 ppm_labels <- 
-    data.frame(
-        ppm = c(
-            "binlog",
-            "nn",
-            "rf",
-            "thresh_tair_1",
-            "thresh_tair_1.5",
-            "thresh_tdew_0",
-            "thresh_tdew_0.5",
-            "thresh_twet_0",
-            "thresh_twet_0.5",
-            "thresh_twet_1",
-            "xg"
-        ),
-        ppm_labs = c(
-            "Bin[log]",
-            "ANN",
-            "RF",
-            "T[a1.0]",
-            "T[a1.5]",
-            "T[d0.0]",
-            "T[d0.5]",
-            "T[w0.0]",
-            "T[w0.5]",
-            "T[w1.0]",
-            "XG"
-        )
+  data.frame(
+    ppm = c(
+      "binlog",
+      "nn",
+      "rf",
+      "thresh_tair_1",
+      "thresh_tair_1.5",
+      "thresh_tdew_0",
+      "thresh_tdew_0.5",
+      "thresh_twet_0",
+      "thresh_twet_0.5",
+      "thresh_twet_1",
+      "xg"
+    ),
+    ppm_labs = c(
+      "Bin[log]",
+      "ANN",
+      "RF",
+      "italic(T[a1.0])",
+      "italic(T[a1.5])",
+      "italic(T[d0.0])",
+      "italic(T[d0.5])",
+      "italic(T[w0.0])",
+      "italic(T[w0.5])",
+      "italic(T[w1.0])",
+      "XG"
     )
+  )
 
 # Filter data to plot and join labels
 plot_data <- summary_bytemp %>% 
-    filter(scenario == "nomix_imbal") %>% 
-    filter(!ppm %in% c("xg", "rf", "nn")) %>% 
-    left_join(ppm_labels, by = "ppm") %>% 
-    mutate(source2 = ifelse(source == "cs", "Crowdsourced", "Synoptic"))
+  filter(scenario == "nomix_imbal") %>% 
+  filter(!ppm %in% c("xg", "rf", "nn")) %>% 
+  left_join(ppm_labels, by = "ppm") %>% 
+  mutate(source2 = ifelse(source == "cs", "Crowdsourced", "Synoptic"))
 ```
 
     ## Warning: The `legend.title.align` argument of `theme()` is deprecated as of ggplot2
@@ -643,7 +667,7 @@ ml_benchmark_rel_diff_plot <-
   labs(x = "Air temperature (°C)", 
        y = "Relative accuracy difference to benchmark (%)") +
   xlim(c(-5,10)) +
-  theme(legend.position = c(0.03,0.7)) +
+  theme(legend.position = c(0.03,0.65)) +
   facet_wrap(~source_lab)
 ```
 
@@ -661,13 +685,13 @@ ml_benchmark_rel_diff_plot
     ## Warning: Removed 36 rows containing missing values or values outside the scale range
     ## (`geom_line()`).
 
-![](README_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->
 
 ``` r
-save_plot(filename = "figures/fig02_ml_benchmark_rel_diff.png", 
+save_plot(filename = "figures/fig02_ml_benchmark_rel_diff.pdf", 
           plot = ml_benchmark_rel_diff_plot, 
-          base_height = 5, 
-          base_width = 9)
+          base_height = natcomm_2column_height_max_lt300wds * 0.5, 
+          base_width = natcomm_2column_width)
 ```
 
     ## Warning: Removed 36 rows containing missing values or values outside the scale range
@@ -788,13 +812,13 @@ mixed_conf_matrix_plot <-
 mixed_conf_matrix_plot
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->
 
 ``` r
-save_plot(filename = "figures/fig03_mixed_conf_matrix.png", 
+save_plot(filename = "figures/fig03_mixed_conf_matrix.pdf", 
           plot = mixed_conf_matrix_plot, 
-          base_height = 5, 
-          base_width = 9)
+          base_height = natcomm_2column_height_max_lt300wds * 0.5, 
+          base_width = natcomm_2column_width)
 ```
 
 ## More complex ML methods
@@ -924,13 +948,13 @@ snowfall_freq_plot <-
 snowfall_freq_plot
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-15-1.png)<!-- -->
 
 ``` r
-save_plot(filename = "figures/fig04_snowfall_freq.png", 
+save_plot(filename = "figures/figSUP02_snowfall_freq.pdf", 
           plot = snowfall_freq_plot, 
-          base_height = 4, 
-          base_width = 9)
+          base_height = natcomm_2column_height_max_lt150wds * 0.4, 
+          base_width = natcomm_2column_width)
 
 
 subzero_freq <- met %>% 
@@ -1087,13 +1111,13 @@ density_overlap_plot<-
 density_overlap_plot
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-16-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-17-1.png)<!-- -->
 
 ``` r
-save_plot(filename = "figures/fig07_density_overlap.png", 
+save_plot(filename = "figures/fig04_density_overlap.pdf", 
           plot = density_overlap_plot, 
-          base_height = 4, 
-          base_width = 9)
+          base_height = natcomm_2column_height_max_lt150wds * 0.4, 
+          base_width = natcomm_2column_width)
 ```
 
 If we investigate the observed air temperature distributions of rain and
@@ -1189,13 +1213,13 @@ overlap_accuracy_relationship_plot <-
 overlap_accuracy_relationship_plot
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-17-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-18-1.png)<!-- -->
 
 ``` r
-save_plot(filename = "figures/fig08_overlap_accuracy_relationship.png", 
+save_plot(filename = "figures/fig05_overlap_accuracy_relationship.pdf", 
           plot = overlap_accuracy_relationship_plot, 
-          base_height = 5, 
-          base_width = 9)
+          base_height = natcomm_2column_height_max_lt150wds * 0.5, 
+          base_width = natcomm_2column_width)
 ```
 
 ``` r
@@ -1331,7 +1355,7 @@ vip_plot <-
   nrow = 3, rel_heights = c(0.2, 1, 1))
 ```
 
-    ## [14:23:36] WARNING: src/learner.cc:553: 
+    ## [16:19:47] WARNING: src/learner.cc:553: 
     ##   If you are loading a serialized model (like pickle in Python, RDS in R) generated by
     ##   older XGBoost, please export the model by calling `Booster.save_model` from that version
     ##   first, then load it back in current version. See:
@@ -1340,7 +1364,7 @@ vip_plot <-
     ## 
     ##   for more details about differences between saving model and serializing.
     ## 
-    ## [14:23:36] WARNING: src/learner.cc:553: 
+    ## [16:19:47] WARNING: src/learner.cc:553: 
     ##   If you are loading a serialized model (like pickle in Python, RDS in R) generated by
     ##   older XGBoost, please export the model by calling `Booster.save_model` from that version
     ##   first, then load it back in current version. See:
@@ -1353,13 +1377,13 @@ vip_plot <-
 vip_plot
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-19-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-20-1.png)<!-- -->
 
 ``` r
-save_plot(filename = "figures/fig09_vip.png", 
+save_plot(filename = "figures/figSUP03_vip.pdf", 
           plot = vip_plot, 
-          base_height = 7, 
-          base_width = 9)
+          base_height = natcomm_2column_height_max_lt150wds * 0.6, 
+          base_width = natcomm_2column_width)
 ```
 
 ## Class imbalances

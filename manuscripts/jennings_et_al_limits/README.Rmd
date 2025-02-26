@@ -65,7 +65,11 @@ Import the packages we need.
 # Load R packages
 library(tidyverse)
 library(tidymodels)
-library(cowplot); theme_set(theme_cowplot())
+library(cowplot)
+
+# Set the cowplot theme and font size for publication plots
+theme_set(theme_cowplot(font_size = 12))
+labsize = 12
 ```
 
 Import the datasets we need.
@@ -99,6 +103,25 @@ cs_tune_nn2 <- readRDS(paste0(data_pre, "nn_tune_imbal_multi_CS.RDS"))
 cs_predict_nn2 <- readRDS(paste0(data_pre, "nn_predict_imbal_multi_CS.RDS"))
 cs_predict_stack <- readRDS(paste0(data_pre, "stacks_predict_CS.RDS"))
 
+```
+
+Add configuration parameters for Nature Communications figures. Based on https://www.nature.com/documents/NRJs-guide-to-preparing-final-artwork.pdf
+
+```{r}
+# mm to in. conversion factor
+mm2in = 25.4
+
+# Figure widths for 1 and 2 column figs
+natcomm_1column_width = 88 / mm2in
+natcomm_2column_width = 180 / mm2in
+
+# Figure heights for 1 and 2 column figs based on caption word count
+natcomm_1column_height_max_lt300wds = 130 / mm2in
+natcomm_1column_height_max_lt150wds = 180 / mm2in
+natcomm_1column_height_max_lt50wds  = 220 / mm2in
+natcomm_2column_height_max_lt300wds = 185 / mm2in
+natcomm_2column_height_max_lt150wds = 210 / mm2in
+natcomm_2column_height_max_lt50wds  = 225 / mm2in
 ```
 
 # Results
@@ -177,44 +200,43 @@ Table: Table 1. Performance metrics for the benchmark precipitation partitioning
 All of the benchmark methods performed worse at air temperatures near and slightly above the freezing point in terms of accuracy, with most of them reaching their minimum accuracy values between 1.5°C and 2.0°C in the crowdsourced dataset and between 0.5°C and 1.5°C in the synoptic dataset (Figure 3). The best performing benchmarks in terms of accuracy were T~w1.0~ and T~w0.5~ in the crowdsourced and synoptic datasets, respectively. For the former, T~w1.0~ hit a minimum accuracy of `r summary_bytemp %>% filter(scenario == "nomix_imbal" & source == "cs" & ppm == "thresh_twet_1") %>% slice_min(accuracy_pct) %>% pull(accuracy_pct) %>% round(digits = 1)`% at `r summary_bytemp %>% filter(scenario == "nomix_imbal" & source == "cs" & ppm == "thresh_twet_1") %>% slice_min(accuracy_pct) %>% pull(tair_bin) %>% round(digits = 1)`°C, while the latter reached a minimum accuracy of `r summary_bytemp %>% filter(scenario == "nomix_imbal" & source == "nh" & ppm == "thresh_twet_0.5") %>% slice_min(accuracy_pct) %>% pull(accuracy_pct) %>% round(digits = 1)`% at `r summary_bytemp %>% filter(scenario == "nomix_imbal" & source == "nh" & ppm == "thresh_twet_0.5") %>% slice_min(accuracy_pct) %>% pull(tair_bin) %>% round(digits = 1)`°C. In both datasets, most methods had slightly positive snow biases and markedly negative rain biases at air temperatures less than 1.0°C. This is consistent with their limited, or complete lack of, ability to predict rain at sub-freezing temperatures. Conversely, most methods, with the exception of the dew point temperature thresholds, had largely negative snow biases and slightly positive rain biases at air temperatures above 2°C. Notably, the crowdsourced dataset expressed larger positive rain biases at higher temperatures, indicating the benchmark methods failed to capture snowfall occurring during warm near-surface conditions.
 
 ```{r}
-
 # Make PPM labels
 ppm_labels <- 
-    data.frame(
-        ppm = c(
-            "binlog",
-            "nn",
-            "rf",
-            "thresh_tair_1",
-            "thresh_tair_1.5",
-            "thresh_tdew_0",
-            "thresh_tdew_0.5",
-            "thresh_twet_0",
-            "thresh_twet_0.5",
-            "thresh_twet_1",
-            "xg"
-        ),
-        ppm_labs = c(
-            "Bin[log]",
-            "ANN",
-            "RF",
-            "T[a1.0]",
-            "T[a1.5]",
-            "T[d0.0]",
-            "T[d0.5]",
-            "T[w0.0]",
-            "T[w0.5]",
-            "T[w1.0]",
-            "XG"
-        )
+  data.frame(
+    ppm = c(
+      "binlog",
+      "nn",
+      "rf",
+      "thresh_tair_1",
+      "thresh_tair_1.5",
+      "thresh_tdew_0",
+      "thresh_tdew_0.5",
+      "thresh_twet_0",
+      "thresh_twet_0.5",
+      "thresh_twet_1",
+      "xg"
+    ),
+    ppm_labs = c(
+      "Bin[log]",
+      "ANN",
+      "RF",
+      "italic(T[a1.0])",
+      "italic(T[a1.5])",
+      "italic(T[d0.0])",
+      "italic(T[d0.5])",
+      "italic(T[w0.0])",
+      "italic(T[w0.5])",
+      "italic(T[w1.0])",
+      "XG"
     )
+  )
 
 # Filter data to plot and join labels
 plot_data <- summary_bytemp %>% 
-    filter(scenario == "nomix_imbal") %>% 
-    filter(!ppm %in% c("xg", "rf", "nn")) %>% 
-    left_join(ppm_labels, by = "ppm") %>% 
-    mutate(source2 = ifelse(source == "cs", "Crowdsourced", "Synoptic"))
+  filter(scenario == "nomix_imbal") %>% 
+  filter(!ppm %in% c("xg", "rf", "nn")) %>% 
+  left_join(ppm_labels, by = "ppm") %>% 
+  mutate(source2 = ifelse(source == "cs", "Crowdsourced", "Synoptic"))
 ```
 
 ```{r benchmark_plot_h, echo=F, message=F, fig.cap = "", fig.height=4, fig.width=6}
@@ -315,14 +337,14 @@ benchmark_accuracy_bias_plot_vertical <-
       labs(x = "Air temperature (°C)") +
       scale_y_discrete("PPM", labels = rev(parse(text = unique(plot_data$ppm_labs))),
                        limits = rev),
-    nrow = 3, labels = "auto", rel_heights = c(0.8, 0.8, 1)
+    nrow = 3, labels = "auto", rel_heights = c(0.8, 0.8, 1), label_size = labsize
   )
 
 benchmark_accuracy_bias_plot_vertical
-save_plot(filename = "figures/fig01_benchmark_accuracy_bias_vert.png", 
+save_plot(filename = "figures/fig01_benchmark_accuracy_bias_vert.pdf", 
           plot = benchmark_accuracy_bias_plot_vertical, 
-          base_height = 6, 
-          base_width = 9)
+          base_height = natcomm_2column_height_max_lt150wds * 0.65, 
+          base_width = natcomm_2column_width)
 
 ```
 
@@ -497,13 +519,13 @@ ml_benchmark_rel_diff_plot <-
   labs(x = "Air temperature (°C)", 
        y = "Relative accuracy difference to benchmark (%)") +
   xlim(c(-5,10)) +
-  theme(legend.position = c(0.03,0.7)) +
+  theme(legend.position = c(0.03,0.65)) +
   facet_wrap(~source_lab)
 ml_benchmark_rel_diff_plot
-save_plot(filename = "figures/fig02_ml_benchmark_rel_diff.png", 
+save_plot(filename = "figures/fig02_ml_benchmark_rel_diff.pdf", 
           plot = ml_benchmark_rel_diff_plot, 
-          base_height = 5, 
-          base_width = 9)
+          base_height = natcomm_2column_height_max_lt300wds * 0.5, 
+          base_width = natcomm_2column_width)
 
 
 ```
@@ -564,10 +586,10 @@ mixed_conf_matrix_plot <-
 
 mixed_conf_matrix_plot
 
-save_plot(filename = "figures/fig03_mixed_conf_matrix.png", 
+save_plot(filename = "figures/fig03_mixed_conf_matrix.pdf", 
           plot = mixed_conf_matrix_plot, 
-          base_height = 5, 
-          base_width = 9)
+          base_height = natcomm_2column_height_max_lt300wds * 0.5, 
+          base_width = natcomm_2column_width)
 
 ```
 
@@ -682,10 +704,10 @@ snowfall_freq_plot <-
   
 snowfall_freq_plot
 
-save_plot(filename = "figures/fig04_snowfall_freq.png", 
+save_plot(filename = "figures/figSUP02_snowfall_freq.pdf", 
           plot = snowfall_freq_plot, 
-          base_height = 4, 
-          base_width = 9)
+          base_height = natcomm_2column_height_max_lt150wds * 0.4, 
+          base_width = natcomm_2column_width)
 
 
 subzero_freq <- met %>% 
@@ -829,10 +851,10 @@ density_overlap_plot<-
 
 density_overlap_plot
 
-save_plot(filename = "figures/fig07_density_overlap.png", 
+save_plot(filename = "figures/fig04_density_overlap.pdf", 
           plot = density_overlap_plot, 
-          base_height = 4, 
-          base_width = 9)
+          base_height = natcomm_2column_height_max_lt150wds * 0.4, 
+          base_width = natcomm_2column_width)
 
 ```
 
@@ -897,12 +919,13 @@ overlap_accuracy_relationship_plot <-
 
 overlap_accuracy_relationship_plot
 
-save_plot(filename = "figures/fig08_overlap_accuracy_relationship.png", 
+save_plot(filename = "figures/fig05_overlap_accuracy_relationship.pdf", 
           plot = overlap_accuracy_relationship_plot, 
-          base_height = 5, 
-          base_width = 9)
+          base_height = natcomm_2column_height_max_lt150wds * 0.5, 
+          base_width = natcomm_2column_width)
 
 ```
+
 ```{r}
 # Quantify the relationship
 cs_overlap_accuracy_lm <- 
@@ -985,10 +1008,10 @@ vip_plot <-
 
 vip_plot
 
-save_plot(filename = "figures/fig09_vip.png", 
+save_plot(filename = "figures/figSUP03_vip.pdf", 
           plot = vip_plot, 
-          base_height = 7, 
-          base_width = 9)
+          base_height = natcomm_2column_height_max_lt150wds * 0.6, 
+          base_width = natcomm_2column_width)
   
 ```
 

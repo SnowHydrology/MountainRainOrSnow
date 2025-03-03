@@ -1,10 +1,14 @@
 ---
 title: "Text and Analysis for Mountain Rain or Snow Manuscript"
 author: "Keith Jennings"
-date: "Sys.Date()"
+date: Sys.Date()
 output:
   github_document: default
 ---
+
+```{r setup, include=FALSE} 
+knitr::opts_chunk$set(warning = FALSE, message = FALSE) 
+```
 
 # Welcome!
 

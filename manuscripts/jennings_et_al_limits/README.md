@@ -248,18 +248,6 @@ summary_all %>%
     knitr::kable()
 ```
 
-    ## Warning: There was 1 warning in `mutate()`.
-    ## ℹ In argument: `across(where(is.numeric), round, digits = 1)`.
-    ## Caused by warning:
-    ## ! The `...` argument of `across()` is deprecated as of dplyr 1.1.0.
-    ## Supply arguments directly to `.fns` through an anonymous function instead.
-    ## 
-    ##   # Previously
-    ##   across(a:b, mean, na.rm = TRUE)
-    ## 
-    ##   # Now
-    ##   across(a:b, \(x) mean(x, na.rm = TRUE))
-
 | Source       | PPM             | Accuracy (%) | Snow bias (%) | Rain bias (%) |
 |:-------------|:----------------|-------------:|--------------:|--------------:|
 | Crowdsourced | thresh_twet_1   |         88.7 |           4.5 |         -10.2 |
@@ -342,28 +330,7 @@ plot_data <- summary_bytemp %>%
   mutate(source2 = ifelse(source == "cs", "Crowdsourced", "Synoptic"))
 ```
 
-    ## Warning: The `legend.title.align` argument of `theme()` is deprecated as of ggplot2
-    ## 3.5.0.
-    ## ℹ Please use theme(legend.title = element_text(hjust)) instead.
-    ## This warning is displayed once every 8 hours.
-    ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
-    ## generated.
-
-    ## Warning: Removed 608 rows containing missing values or values outside the scale range
-    ## (`geom_raster()`).
-    ## Removed 608 rows containing missing values or values outside the scale range
-    ## (`geom_raster()`).
-    ## Removed 608 rows containing missing values or values outside the scale range
-    ## (`geom_raster()`).
-
 ![](README_files/figure-gfm/benchmark_plot_h-1.png)<!-- -->
-
-    ## Warning: Removed 608 rows containing missing values or values outside the scale range
-    ## (`geom_raster()`).
-    ## Removed 608 rows containing missing values or values outside the scale range
-    ## (`geom_raster()`).
-    ## Removed 608 rows containing missing values or values outside the scale range
-    ## (`geom_raster()`).
 
 ![](README_files/figure-gfm/benchmark_plot_v-1.png)<!-- -->
 
@@ -430,22 +397,7 @@ cs_accuracy_av <- summary_all %>%
             snow_bias_pct = mean(snow_bias_pct)) %>% 
   mutate(source = "cs", "ppm" = "avg") %>% 
   select(cols_to_get)
-```
 
-    ## Warning: Using an external vector in selections was deprecated in tidyselect 1.1.0.
-    ## ℹ Please use `all_of()` or `any_of()` instead.
-    ##   # Was:
-    ##   data %>% select(cols_to_get)
-    ## 
-    ##   # Now:
-    ##   data %>% select(all_of(cols_to_get))
-    ## 
-    ## See <https://tidyselect.r-lib.org/reference/faq-external-vector.html>.
-    ## This warning is displayed once every 8 hours.
-    ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
-    ## generated.
-
-``` r
 # Extract and summarize results
 cs_benchmark_diff <- summary_all %>% ungroup() %>% 
     filter(source == "cs" & ppm %in% c("xg", "rf", "nn") & scenario == "nomix_imbal") %>% 
@@ -457,22 +409,7 @@ cs_benchmark_diff <- summary_all %>% ungroup() %>%
     filter(source == "cs" & ppm %in% c("xg", "rf", "nn") & scenario == "nomix_imbal") %>% 
     select(cols_to_get) %>% 
     bind_cols(., cs_accuracy_av))
-```
 
-    ## New names:
-    ## New names:
-    ## • `source` -> `source...1`
-    ## • `ppm` -> `ppm...2`
-    ## • `accuracy_pct` -> `accuracy_pct...3`
-    ## • `snow_bias_pct` -> `snow_bias_pct...4`
-    ## • `rain_bias_pct` -> `rain_bias_pct...5`
-    ## • `source` -> `source...6`
-    ## • `ppm` -> `ppm...7`
-    ## • `accuracy_pct` -> `accuracy_pct...8`
-    ## • `snow_bias_pct` -> `snow_bias_pct...9`
-    ## • `rain_bias_pct` -> `rain_bias_pct...10`
-
-``` r
 # Get the best benchmark in synoptic data
 nh_best_benchmark = summary_all %>% 
     filter(source == "nh" & !ppm %in% c("xg", "rf", "nn") & scenario == "nomix_imbal") %>% 
@@ -501,22 +438,7 @@ nh_benchmark_diff <- summary_all %>% ungroup() %>%
     filter(source == "nh" & ppm %in% c("xg", "rf", "nn") & scenario == "nomix_imbal") %>% 
     select(cols_to_get) %>% 
     bind_cols(., nh_accuracy_av))
-```
 
-    ## New names:
-    ## New names:
-    ## • `source` -> `source...1`
-    ## • `ppm` -> `ppm...2`
-    ## • `accuracy_pct` -> `accuracy_pct...3`
-    ## • `snow_bias_pct` -> `snow_bias_pct...4`
-    ## • `rain_bias_pct` -> `rain_bias_pct...5`
-    ## • `source` -> `source...6`
-    ## • `ppm` -> `ppm...7`
-    ## • `accuracy_pct` -> `accuracy_pct...8`
-    ## • `snow_bias_pct` -> `snow_bias_pct...9`
-    ## • `rain_bias_pct` -> `rain_bias_pct...10`
-
-``` r
 ml_benchmark_diff <- bind_rows(cs_benchmark_diff, nh_benchmark_diff) %>% 
     mutate(comparison = rep(c("best", "best", "best", "avg", "avg", "avg"), 2)) %>% 
     select(source = source...1,
@@ -610,12 +532,7 @@ performance_av_bytemp <- summary_bytemp %>%
             rain_bias_pct = mean(rain_bias_pct),
             snow_bias_pct = mean(snow_bias_pct)) %>% 
   mutate(ppm = "avg", scenario = "nomix_imbal")
-```
 
-    ## `summarise()` has grouped output by 'tair_bin'. You can override using the
-    ## `.groups` argument.
-
-``` r
 # Bind to summary_bytemp
 summary_bytemp_withavg <- bind_rows(summary_bytemp,
                                     performance_av_bytemp)
@@ -669,21 +586,8 @@ ml_benchmark_rel_diff_plot <-
   xlim(c(-5,10)) +
   theme(legend.position = c(0.03,0.65)) +
   facet_wrap(~source_lab)
-```
-
-    ## Warning: A numeric `legend.position` argument in `theme()` was deprecated in ggplot2
-    ## 3.5.0.
-    ## ℹ Please use the `legend.position.inside` argument of `theme()` instead.
-    ## This warning is displayed once every 8 hours.
-    ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
-    ## generated.
-
-``` r
 ml_benchmark_rel_diff_plot
 ```
-
-    ## Warning: Removed 36 rows containing missing values or values outside the scale range
-    ## (`geom_line()`).
 
 ![](README_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->
 
@@ -693,9 +597,6 @@ save_plot(filename = "figures/fig02_ml_benchmark_rel_diff.pdf",
           base_height = natcomm_2column_height_max_lt300wds * 0.5, 
           base_width = natcomm_2column_width)
 ```
-
-    ## Warning: Removed 36 rows containing missing values or values outside the scale range
-    ## (`geom_line()`).
 
 The three machine learning methods exhibited similar accuracy patterns
 by air temperature as the best benchmark and the average benchmark
@@ -855,12 +756,7 @@ summary_all_alt <- alt_results %>%
             snow_pred_pct = sum(phase_pred == "snow") / n() * 100,
             rain_pred_pct = sum(phase_pred == "rain") / n() * 100,
             mixed_pred_pct = sum(phase_pred == "mix") / n() * 100)
-```
 
-    ## `summarise()` has grouped output by 'ppm', 'scenario'. You can override using
-    ## the `.groups` argument.
-
-``` r
 # Make a table
 summary_all_alt %>% 
   mutate(scenario2 = ifelse(str_detect(scenario, "imbal"), 
@@ -920,13 +816,7 @@ frequency_data <-
                              "Crowdsourced",
                              "Synoptic"),
          dummy = "dummy")
-```
 
-    ## `summarise()` has grouped output by 'tair_bin'. You can override using the
-    ## `.groups` argument.
-    ## Adding missing grouping variables: `scenario`
-
-``` r
 snowfall_freq_plot <- 
   ggplot() +
   geom_ribbon(data = filter(frequency_data, !is.na(snow_pred_pct_min) & !is.na(snow_pred_pct_max)),
@@ -1142,12 +1032,7 @@ overlap_dens_tair_binned <- overlap_dens_tair %>%
   mutate(tair_bin = round(temp/0.5) * 0.5) %>% 
   group_by(tair_bin, source_lab, source) %>% 
   summarise(density_av = mean(density)) 
-```
 
-    ## `summarise()` has grouped output by 'tair_bin', 'source_lab'. You can override
-    ## using the `.groups` argument.
-
-``` r
 # Get avg accuracy from all methods
 accuracy_av_bytemp <- summary_bytemp %>% 
   filter(scenario == "nomix_imbal") %>% 
@@ -1155,12 +1040,7 @@ accuracy_av_bytemp <- summary_bytemp %>%
   summarize(accuracy_av_pct = mean(accuracy_pct),
             rain_bias_av_pct = mean(rain_bias_pct),
             snow_bias_av_pct = mean(snow_bias_pct))
-```
 
-    ## `summarise()` has grouped output by 'tair_bin'. You can override using the
-    ## `.groups` argument.
-
-``` r
 # Join accuracy to overlap density
 overlap_dens_tair_binned <- left_join(overlap_dens_tair_binned,
                                       accuracy_av_bytemp,
@@ -1199,17 +1079,7 @@ overlap_accuracy_relationship_plot <-
                                 legend.justification = "center", legend.title.align = 0.5)),
   ncol = 2, labels = c("a", "c")
 )
-```
 
-    ## `geom_smooth()` using formula = 'y ~ x'
-
-    ## Warning: Removed 8 rows containing non-finite outside the scale range
-    ## (`stat_smooth()`).
-
-    ## Warning: Removed 8 rows containing missing values or values outside the scale range
-    ## (`geom_point()`).
-
-``` r
 overlap_accuracy_relationship_plot
 ```
 
@@ -1355,7 +1225,7 @@ vip_plot <-
   nrow = 3, rel_heights = c(0.2, 1, 1))
 ```
 
-    ## [16:19:47] WARNING: src/learner.cc:553: 
+    ## [13:45:57] WARNING: src/learner.cc:553: 
     ##   If you are loading a serialized model (like pickle in Python, RDS in R) generated by
     ##   older XGBoost, please export the model by calling `Booster.save_model` from that version
     ##   first, then load it back in current version. See:
@@ -1364,7 +1234,7 @@ vip_plot <-
     ## 
     ##   for more details about differences between saving model and serializing.
     ## 
-    ## [16:19:47] WARNING: src/learner.cc:553: 
+    ## [13:45:57] WARNING: src/learner.cc:553: 
     ##   If you are loading a serialized model (like pickle in Python, RDS in R) generated by
     ##   older XGBoost, please export the model by calling `Booster.save_model` from that version
     ##   first, then load it back in current version. See:
@@ -1394,9 +1264,6 @@ phase_by_scenario <- met %>%
   summarize(n = n()) %>% 
   mutate(freq = n/sum(n) * 100)
 ```
-
-    ## `summarise()` has grouped output by 'source', 'scenario'. You can override
-    ## using the `.groups` argument.
 
 We had more snow (69.3%) than rain (30.7%) in the testing split of the
 crowdsourced data without mixed precipitation. When we included mixed

@@ -1051,3 +1051,167 @@ summary_all %>%
 
 Although we did not find that oversampling the data to correct class imbalances improved the machine learning predictions, such imbalances may partly explain performance differences between the two datasets. The synoptic dataset had a more evenly balanced set of snow (`r phase_by_scenario %>% filter(source == "nh" & scenario == "nomix_imbal" & phase == "snow") %>% pull(freq) %>% round(digits = 1)`%) than rain (`r phase_by_scenario %>% filter(source == "nh" & scenario == "nomix_imbal" & phase == "rain") %>% pull(freq) %>% round(digits = 1)`%) observations than the crowdsourced dataset. Another potential explanation is that there are three orders of magnitude more observations in the synoptic dataset than the crowdsourced dataset, meaning there are more data that the machine learning algorithms can use to determine relationships between near-surface meteorology and precipitation phase. The most likely explanation, however, is the difference in rain-snow air temperature distribution overlaps between the two datasets (Figure 7). Mountain Rain or Snow specifically targets mountain regions and storm events where accurate phase predictions are most difficult to produce, giving the crowdsourced rain and snow data a `r (cs_nomix_tair_snowrain_overlap * 100) %>% round(digits = 1)`% overlap by air temperature and the synoptic data a `r (nh_nomix_tair_snowrain_overlap * 100) %>% round(digits = 1)`% overlap. Given the strong relationship between overlap and accuracy (Figure 8), the lower overlap in the synoptic dataset likely explains the higher performance of the machine learning and benchmark methods.
 
+
+# Processing plot data for export
+
+## Manuscript figure 1
+
+```{r}
+fig01_data <- summary_bytemp %>% 
+  filter(scenario == "nomix_imbal") %>% 
+  filter(!ppm %in% c("xg", "rf", "nn")) %>% 
+  left_join(ppm_labels, by = "ppm") %>% 
+  mutate(source2 = ifelse(source == "cs", "Crowdsourced", "Synoptic"))
+```
+
+## Manuscript figure 2
+
+```{r}
+fig02_data <- ml_benchmark_diff_bytemp
+```
+
+## Manuscript figure 3
+
+```{r}
+fig03_data <-
+  bind_rows(
+    mixed_preds %>% filter(ppm == "xg") %>%
+      select(phase_pred_factor, phase_factor) %>%
+      table() %>%
+      prop.table(2) %>%
+      as.data.frame() %>%
+      mutate(ppm_lab = "XGBoost"),
+    mixed_preds %>% filter(ppm == "rf") %>%
+      select(phase_pred_factor, phase_factor) %>%
+      table() %>%
+      prop.table(2) %>%
+      as.data.frame() %>%
+      mutate(ppm_lab = "Random forest"),
+     mixed_preds %>% filter(ppm == "nn") %>%
+      select(phase_pred_factor, phase_factor) %>%
+      table() %>%
+      prop.table(2) %>%
+      as.data.frame() %>%
+      mutate(ppm_lab = "ANN")
+  )
+```
+
+## Manuscript figure 4
+
+```{r}
+fig04_data <- distros_combined %>% 
+  filter(temp_type == "Air Temp.")
+```
+
+## Manuscript figure 5
+
+```{r}
+fig05_data <- overlap_dens_tair_binned
+```
+
+## Other figures
+
+Figures 6 (map) and 7 (workflow infographic) are not summarized here. The data for the former are accessible via the source data links and the latter has no underlying data.
+
+## Supplementary figure 1
+
+```{r}
+figSUP01_data <- summary_bytemp %>% 
+  filter(scenario == "nomix_imbal") %>% 
+  filter(ppm %in% c("xg", "rf", "nn")) %>% 
+  left_join(ppm_labels, by = "ppm") %>% 
+  mutate(source2 = ifelse(source == "cs", "Crowdsourced", "Synoptic"))
+```
+
+## Supplementary figure 2
+
+```{r}
+figSUP02_data <- #frequency_data
+    bind_rows(
+    summary_bytemp %>% 
+      filter(scenario == "nomix_imbal" & tair_bin < 15 & tair_bin > -10) %>% 
+      group_by(tair_bin, source) %>% 
+      summarize(snow_pred_pct_min = min(snow_pred_pct),
+                snow_pred_pct_max = max(snow_pred_pct),
+                snow_pred_pct_avg = mean(snow_pred_pct), 
+                snow_obs_pct = mean(snow_obs_pct),
+                rain_pred_pct_min = min(rain_pred_pct),
+                rain_pred_pct_max = max(rain_pred_pct),
+                rain_pred_pct_avg = mean(rain_pred_pct), 
+                rain_obs_pct = mean(rain_obs_pct)) %>% 
+      mutate(snow_pred_diff = snow_pred_pct_max - snow_pred_pct_min,
+             rain_pred_diff = rain_pred_pct_max - rain_pred_pct_min),
+    summary_bytemp %>% 
+      filter(scenario == "nomix_imbal" & tair_bin < 15 & tair_bin > -10) %>% 
+      filter(ppm == "nn" & source == "cs" | ppm == "thresh_twet_1" & source == "cs" |
+               ppm == "rf" & source == "nh" | ppm == "thresh_twet_0.5" & source == "nh") %>% 
+      select(ppm, source, snow_pred_pct, rain_pred_pct, tair_bin) %>% 
+      mutate(type = ifelse(source == "cs",
+                           ifelse(ppm == "nn",
+                                  "Machine learning",
+                                  "Benchmark"),
+                           ifelse(ppm == "rf",
+                                  "Machine learning",
+                                  "Benchmark")))
+  ) %>% 
+  mutate(source_lab = ifelse(source == "cs",
+                             "Crowdsourced",
+                             "Synoptic"))
+
+```
+
+
+
+```{r}
+figSUP03_data <- 
+  bind_rows(
+    vip::vi(object =  ml_for_vip[[1]]) %>% 
+      mutate(ppm = "xg",
+             source = "Crowdsourced"),
+    vip::vi(object =  ml_for_vip[[2]]) %>% 
+      mutate(ppm = "rf",
+             source = "Crowdsourced"),
+    vip::vi(object =  ml_for_vip[[3]]) %>% 
+      mutate(ppm = "xg",
+             source = "Synoptic"),
+    vip::vi(object =  ml_for_vip[[4]]) %>% 
+      mutate(ppm = "rf",
+             source = "Synoptic")
+  )
+```
+
+## Combine into list and export
+
+```{r}
+# Save data to a list
+fig_data_all <-
+  list(
+    fig01_data,
+    fig02_data,
+    fig03_data,
+    fig04_data,
+    fig05_data,
+    figSUP01_data,
+    figSUP02_data,
+    figSUP03_data
+  )
+
+# Provide the sheet names
+sheetnames <- 
+  c(
+    "Figure 1",
+    "Figure 2",
+    "Figure 3",
+    "Figure 4",
+    "Figure 5",
+    "Supplementary Figure 1",
+    "Supplementary Figure 2",
+    "Supplementary Figure 3"
+
+  )
+
+openxlsx::write.xlsx(x = fig_data_all, 
+                     sheetName = sheetnames,
+                     file = paste0(data_pre, "source_data.xlsx"))
+```
+
